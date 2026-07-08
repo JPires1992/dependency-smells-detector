@@ -42,6 +42,13 @@ build/Release
 node_modules/
 jspm_packages/
 
+# Dirty-Waters local execution artefacts
+**/.dirty-waters-bin/
+**/results/
+
+# Cache directory
+**/cache/
+
 # Snowpack dependency directory (https://snowpack.dev/)
 web_modules/
 

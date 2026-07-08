@@ -1,0 +1,17 @@
+{
+  "name": "dependency-smells-detector",
+  "version": "0.1.0",
+  "description": "Analysis and Scoring Layer for software supply chain smells in React/npm projects.",
+  "type": "module",
+  "bin": {
+    "dependency-smells-detector": "./src/cli.js"
+  },
+  "scripts": {
+    "analyze": "node src/cli.js analyze",
+    "test": "node --test"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "license": "MIT"
+}
