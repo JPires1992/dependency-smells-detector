@@ -1,4 +1,4 @@
-import { commandSucceeds, runCommand } from "../../utils/childProcess.js";
+import { commandSucceeds, runCommand } from "../../utils/ChildProcess.js";
 
 /** Default upstream installation source for Dirty-Waters. */
 //const DEFAULT_INSTALL_SOURCE = "git+https://github.com/chains-project/dirty-waters.git";

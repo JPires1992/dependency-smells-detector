@@ -1,7 +1,7 @@
 import { mkdir, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import { runCommand } from "../../utils/childProcess.js";
+import { runCommand } from "../../utils/ChildProcess.js";
 
 /** Maps Dirty-Waters package manager names to the local executable it needs internally. */
 const PACKAGE_MANAGER_COMMANDS = Object.freeze({

@@ -1,8 +1,8 @@
 import { readFile } from "node:fs/promises";
 import path from "node:path";
-import { runCommand } from "../../utils/childProcess.js";
-import { findFilesByPredicate } from "../../utils/fileSearch.js";
-import { normalizeGithubRepository } from "../../utils/githubRepository.js";
+import { runCommand } from "../../utils/ChildProcess.js";
+import { findFilesByPredicate } from "../../utils/FileSearch.js";
+import { normalizeGithubRepository } from "../../utils/GithubRepository.js";
 import { DirtyWatersInstaller } from "./DirtyWatersInstaller.js";
 import { DirtyWatersOutputParser } from "./DirtyWatersOutputParser.js";
 import { PackageManagerPreflight } from "./PackageManagerPreflight.js";

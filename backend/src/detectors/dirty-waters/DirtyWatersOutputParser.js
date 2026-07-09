@@ -1,5 +1,5 @@
-import { SmellTypes } from "../../domain/smellCatalog.js";
-import { parsePackageIdentifier } from "../../domain/packageIdentifier.js";
+import { SmellTypes } from "../../domain/SmellCatalog.js";
+import { parsePackageIdentifier } from "../../domain/PackageIdentifier.js";
 
 /** Converts Dirty-Waters static JSON output into normalized smell findings. */
 export class DirtyWatersOutputParser {
