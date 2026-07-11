@@ -2,7 +2,7 @@
 import path from "node:path";
 import { AnalysisService } from "./analysis/AnalysisService.js";
 import { DetectorRegistry } from "./detectors/DetectorRegistry.js";
-import { DirtyWatersAdapter } from "./detectors/dirty-waters/DirtyWatersAdapter.js";
+import { DirtyWatersAdapter, parsePositiveInteger } from "./detectors/dirty-waters/DirtyWatersAdapter.js";
 import { CustomDetectorPlaceholder } from "./detectors/custom/CustomDetectorPlaceholder.js";
 
 /** Entry point that parses CLI arguments and runs the analysis command. */
@@ -28,7 +28,12 @@ async function main() {
   // Initialize the detector registry with the Dirty-Waters adapter and any custom detectors.
   const detectors = [];
   if (!args["skip-dirty-waters"]) {
-    detectors.push(new DirtyWatersAdapter({ required: Boolean(args["require-dirty-waters"]) }));
+    detectors.push(
+      new DirtyWatersAdapter({
+        required: Boolean(args["require-dirty-waters"]),
+        timeoutMs: parsePositiveInteger(args["dirty-waters-timeout-ms"], undefined)
+      })
+    );
   }
   detectors.push(new CustomDetectorPlaceholder());
 
@@ -93,12 +98,15 @@ Options:
   --package-manager <name>    npm, yarn-classic, yarn-berry, or pnpm.
   --github-repo <owner/repo>  GitHub path used by Dirty-Waters.
   --ref <git-ref>             Analysed ref passed to Dirty-Waters.
+  --dirty-waters-timeout-ms <ms>
+                              Dirty-Waters execution timeout. Defaults to 1800000.
   --skip-dirty-waters         Run the pipeline without the external adapter.
   --require-dirty-waters      Fail the analysis if Dirty-Waters fails.
 
 Environment:
   GITHUB_API_TOKEN            Required by Dirty-Waters for GitHub API access.
   GITHUB_REPOSITORY_PATH      Fallback owner/repo path for local project analysis.
+  DIRTY_WATERS_TIMEOUT_MS     Dirty-Waters timeout override in milliseconds.
   DIRTY_WATERS_AUTO_INSTALL   Set to false to disable automatic installation.
 `);
 }

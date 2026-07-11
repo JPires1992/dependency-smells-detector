@@ -18,6 +18,9 @@ const STATIC_CHECK_FLAGS = [
   "--check-aliased-packages"
 ];
 
+/** Default maximum duration for one Dirty-Waters execution. */
+const DEFAULT_TIMEOUT_MS = 30 * 60 * 1000;
+
 /** Detector adapter that invokes Dirty-Waters and converts its output to internal findings. */
 export class DirtyWatersAdapter {
   /** Configures installer, parser, failure behavior, and command timeout. */
@@ -26,7 +29,7 @@ export class DirtyWatersAdapter {
     parser = new DirtyWatersOutputParser(),
     packageManagerPreflight = new PackageManagerPreflight(),
     required = false,
-    timeoutMs = 30 * 60 * 1000
+    timeoutMs = readTimeoutFromEnvironment()
   } = {}) {
     this.name = "DirtyWatersAdapter";
     this.required = required;
@@ -132,6 +135,25 @@ export class DirtyWatersAdapter {
 /** Selects the newest generated artefact whose modification time matches the current run. */
 function newestSince(files, timestampMs) {
   return files.find((file) => file.mtimeMs >= timestampMs - 1000) ?? null;
+}
+
+/** Reads an optional Dirty-Waters timeout override from the process environment. */
+function readTimeoutFromEnvironment() {
+  return parsePositiveInteger(process.env.DIRTY_WATERS_TIMEOUT_MS, DEFAULT_TIMEOUT_MS);
+}
+
+/** Parses a positive integer option and falls back when the value is absent or invalid. */
+export function parsePositiveInteger(value, fallback) {
+  if (value === undefined || value === null || value === "") {
+    return fallback;
+  }
+
+  const parsed = Number(value);
+  if (!Number.isInteger(parsed) || parsed <= 0) {
+    return fallback;
+  }
+
+  return parsed;
 }
 
 /** Builds a concise failure message and highlights common dependency extraction failures. */
