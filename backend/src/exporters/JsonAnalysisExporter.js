@@ -56,7 +56,7 @@ function buildSummary(graph, smells) {
   }
 
   return {
-    dependenciesAnalysed: Math.max(0, graph.nodes.length - 1),
+    dependenciesAnalysed: graph.nodes.filter((node) => node.id !== "root").length,
     smellsDetected: smells.length,
     severityCounts
   };

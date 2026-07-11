@@ -69,7 +69,7 @@ export class PackageLockGraphExtractor {
     for (const depName of rootDevDeps) {
       const targetPath = findDependencyPackagePath("", depName, packages);
       if (targetPath && nodesByPath.has(targetPath)) {
-        edges.push({ source: rootNode.id, target: nodesByPath.get(targetPath).id, relationship: "development" });
+        edges.push({ source: rootNode.id, target: nodesByPath.get(targetPath).id, relationship: "direct" });
       }
     }
 
@@ -181,7 +181,7 @@ function countPackageDepth(lockPath) {
   return (lockPath.match(/node_modules/g) ?? []).length || 1;
 }
 
-/** Infers production, development, or optional dependency type from lockfile metadata. */
+/** Infers whether a package belongs to the production or development dependency scope. */
 function inferDependencyType(packageName, packageInfo, rootProductionDeps, rootDevDeps) {
   if (rootProductionDeps.has(packageName)) {
     return "production";
@@ -189,10 +189,6 @@ function inferDependencyType(packageName, packageInfo, rootProductionDeps, rootD
 
   if (rootDevDeps.has(packageName) || packageInfo.dev) {
     return "development";
-  }
-
-  if (packageInfo.optional) {
-    return "optional";
   }
 
   return "production";

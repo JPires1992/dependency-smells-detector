@@ -2,45 +2,65 @@ import { access, readFile } from "node:fs/promises";
 import path from "node:path";
 import { constants } from "node:fs";
 import { PackageLockGraphExtractor, createRootOnlyGraph } from "./PackageLockGraphExtractor.js";
+import { GitHubPackageJsonFetcher } from "./GitHubPackageJsonFetcher.js";
 import { isGithubRepositoryIdentifier, normalizeGithubRepository } from "../utils/GithubRepository.js";
 
 /** Inspects the target project/repository and builds metadata plus dependency graph context. */
 export class ProjectInspector {
   /** Allows dependency graph extraction to be replaced in tests or future package managers. */
-  constructor({ graphExtractor = new PackageLockGraphExtractor() } = {}) {
+  constructor({
+    graphExtractor = new PackageLockGraphExtractor(),
+    githubPackageJsonFetcher = new GitHubPackageJsonFetcher()
+  } = {}) {
     this.graphExtractor = graphExtractor;
+    this.githubPackageJsonFetcher = githubPackageJsonFetcher;
   }
 
   /** Detects whether the target is local or remote and returns analysis input context. */
-  async inspect({ target, packageManager = null, githubRepository = null } = {}) {
+  async inspect({ target, packageManager = null, githubRepository = null, analysedRef = null, githubToken = null } = {}) {
     if (!target) {
       throw new Error("A target repository identifier or local project path is required.");
     }
 
     if (isGithubRepositoryIdentifier(target)) {
-      return this.#inspectRepositoryIdentifier({ target, packageManager, githubRepository });
+      return this.#inspectRepositoryIdentifier({ target, packageManager, githubRepository, analysedRef, githubToken });
     }
 
     return this.#inspectLocalProject({ target, packageManager, githubRepository });
   }
 
   /** Builds minimal project context for a GitHub repository identifier. */
-  async #inspectRepositoryIdentifier({ target, packageManager, githubRepository }) {
+  async #inspectRepositoryIdentifier({ target, packageManager, githubRepository, analysedRef, githubToken }) {
     const repository = githubRepository || normalizeGithubRepository(target);
     const name = repository?.split("/")[1] ?? target;
+    const warnings = packageManager
+      ? []
+      : ["Package manager could not be inferred from a remote identifier; defaulting to npm."];
+    let packageJson = { name };
+
+    try {
+      packageJson = await this.githubPackageJsonFetcher.fetch({
+        repository,
+        ref: analysedRef,
+        token: githubToken
+      });
+    } catch (error) {
+      warnings.push(`Could not fetch remote package.json from GitHub: ${error.message}`);
+    }
 
     return {
       project: {
-        name,
+        name: packageJson.name || name,
         repository,
         packageManager: packageManager || "npm",
-        analysedRef: null,
+        analysedRef,
         target
       },
-      graph: createRootOnlyGraph({ name }),
-      warnings: packageManager
-        ? []
-        : ["Package manager could not be inferred from a remote identifier; defaulting to npm."]
+      graph: {
+        ...createRootOnlyGraph(packageJson),
+        rootDependencyTypesByName: buildRootDependencyTypesByName(packageJson)
+      },
+      warnings
     };
   }
 
@@ -64,6 +84,7 @@ export class ProjectInspector {
       graph = createRootOnlyGraph(packageJson);
       warnings.push(`Dependency graph extraction is currently implemented for npm package-lock.json; got ${detectedPackageManager}.`);
     }
+    graph.rootDependencyTypesByName = buildRootDependencyTypesByName(packageJson);
 
     return {
       project: {
@@ -77,6 +98,25 @@ export class ProjectInspector {
       warnings
     };
   }
+}
+
+/** Builds a root dependency type map from package.json dependency sections. */
+export function buildRootDependencyTypesByName(packageJson = {}) {
+  const dependencyTypes = {};
+
+  for (const dependencyName of Object.keys(packageJson.devDependencies ?? {})) {
+    dependencyTypes[dependencyName] = "development";
+  }
+
+  for (const dependencyName of [
+    ...Object.keys(packageJson.dependencies ?? {}),
+    ...Object.keys(packageJson.optionalDependencies ?? {}),
+    ...Object.keys(packageJson.peerDependencies ?? {})
+  ]) {
+    dependencyTypes[dependencyName] = "production";
+  }
+
+  return dependencyTypes;
 }
 
 /** Detects the JavaScript package manager from lockfile artefacts. */

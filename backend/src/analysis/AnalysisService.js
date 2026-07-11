@@ -38,7 +38,7 @@ export class AnalysisService {
     githubToken = process.env.GITHUB_API_TOKEN,
     workspaceDirectory = process.cwd()
   }) {
-    const inspected = await this.inspector.inspect({ target, packageManager, githubRepository });
+    const inspected = await this.inspector.inspect({ target, packageManager, githubRepository, analysedRef, githubToken });
     const project = {
       ...inspected.project,
       analysedRef
