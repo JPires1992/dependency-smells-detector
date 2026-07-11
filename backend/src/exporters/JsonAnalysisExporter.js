@@ -28,7 +28,7 @@ export class JsonAnalysisExporter {
       },
       graph: smellGraph,
       smells,
-      summary: buildSummary(smellGraph, smells)
+      summary: buildSummary(graph, smells)
     };
   }
 
@@ -42,8 +42,8 @@ export class JsonAnalysisExporter {
   }
 }
 
-/** Computes aggregate result counts required by the JSON contract summary section. */
-function buildSummary(graph, smells) {
+/** Computes aggregate result counts from the full analysed graph and detected smell list. */
+function buildSummary(sourceGraph, smells) {
   const severityCounts = {
     Low: 0,
     Medium: 0,
@@ -56,7 +56,7 @@ function buildSummary(graph, smells) {
   }
 
   return {
-    dependenciesAnalysed: graph.nodes.filter((node) => node.id !== "root").length,
+    dependenciesAnalysed: (sourceGraph.nodes ?? []).filter((node) => node.id !== "root").length,
     smellsDetected: smells.length,
     severityCounts
   };

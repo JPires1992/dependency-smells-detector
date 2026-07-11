@@ -37,6 +37,7 @@ export class ProjectInspector {
       ? []
       : ["Package manager could not be inferred from a remote identifier; defaulting to npm."];
     let packageJson = { name };
+    let packageLock = null;
 
     try {
       packageJson = await this.githubPackageJsonFetcher.fetch({
@@ -48,6 +49,24 @@ export class ProjectInspector {
       warnings.push(`Could not fetch remote package.json from GitHub: ${error.message}`);
     }
 
+    if ((packageManager || "npm") === "npm") {
+      try {
+        packageLock = await this.githubPackageJsonFetcher.fetchJsonFile({
+          repository,
+          filePath: "package-lock.json",
+          ref: analysedRef,
+          token: githubToken
+        });
+      } catch (error) {
+        warnings.push(`Could not fetch remote package-lock.json from GitHub: ${error.message}`);
+      }
+    }
+
+    const graph = packageLock
+      ? this.graphExtractor.extractLockfile(packageLock, packageJson)
+      : createRootOnlyGraph(packageJson);
+    graph.rootDependencyTypesByName = buildRootDependencyTypesByName(packageJson);
+
     return {
       project: {
         name: packageJson.name || name,
@@ -56,10 +75,7 @@ export class ProjectInspector {
         analysedRef,
         target
       },
-      graph: {
-        ...createRootOnlyGraph(packageJson),
-        rootDependencyTypesByName: buildRootDependencyTypesByName(packageJson)
-      },
+      graph,
       warnings
     };
   }

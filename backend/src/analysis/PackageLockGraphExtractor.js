@@ -8,7 +8,11 @@ export class PackageLockGraphExtractor {
   async extract(projectDirectory, packageJson = {}) {
     const lockfilePath = path.join(projectDirectory, "package-lock.json");
     const lockfile = JSON.parse(await readFile(lockfilePath, "utf8"));
+    return this.extractLockfile(lockfile, packageJson);
+  }
 
+  /** Converts a parsed package-lock.json document into normalized graph nodes and edges. */
+  extractLockfile(lockfile, packageJson = {}) {
     if (lockfile.packages && typeof lockfile.packages === "object") {
       return this.#extractFromPackagesObject(lockfile, packageJson);
     }

@@ -4,14 +4,20 @@ import https from "node:https";
 export class GitHubPackageJsonFetcher {
   /** Loads and parses package.json from the GitHub contents API. */
   async fetch({ repository, ref = null, token = null }) {
-    const url = new URL(`https://api.github.com/repos/${repository}/contents/package.json`);
+    return this.fetchJsonFile({ repository, filePath: "package.json", ref, token });
+  }
+
+  /** Loads and parses any JSON file from the GitHub contents API. */
+  async fetchJsonFile({ repository, filePath, ref = null, token = null }) {
+    const encodedPath = filePath.split("/").map(encodeURIComponent).join("/");
+    const url = new URL(`https://api.github.com/repos/${repository}/contents/${encodedPath}`);
     if (ref) {
       url.searchParams.set("ref", ref);
     }
 
     const response = await requestJson(url, token);
     if (!response.content || response.encoding !== "base64") {
-      throw new Error(`GitHub package.json response for ${repository} did not contain base64 content.`);
+      throw new Error(`GitHub ${filePath} response for ${repository} did not contain base64 content.`);
     }
 
     return JSON.parse(Buffer.from(response.content, "base64").toString("utf8"));
