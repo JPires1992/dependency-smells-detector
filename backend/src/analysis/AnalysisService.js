@@ -41,7 +41,7 @@ export class AnalysisService {
     const inspected = await this.inspector.inspect({ target, packageManager, githubRepository, analysedRef, githubToken });
     const project = {
       ...inspected.project,
-      analysedRef
+      analysedRef: analysedRef ?? inspected.project.analysedRef
     };
 
     const detectionResult = await this.detectorRegistry.detect({

@@ -2,6 +2,14 @@ import https from "node:https";
 
 /** Fetches package.json from GitHub repositories, including private repos when a token is provided. */
 export class GitHubPackageJsonFetcher {
+  /** Loads repository metadata needed to resolve the default branch when no ref is provided. */
+  async fetchRepositoryMetadata({ repository, token = null }) {
+    const response = await requestJson(new URL(`https://api.github.com/repos/${repository}`), token);
+    return {
+      defaultBranch: response.default_branch || null
+    };
+  }
+
   /** Loads and parses package.json from the GitHub contents API. */
   async fetch({ repository, ref = null, token = null }) {
     return this.fetchJsonFile({ repository, filePath: "package.json", ref, token });

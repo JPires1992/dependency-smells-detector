@@ -36,13 +36,14 @@ export class ProjectInspector {
     const warnings = packageManager
       ? []
       : ["Package manager could not be inferred from a remote identifier; defaulting to npm."];
+    const effectiveRef = await this.#resolveRemoteRef({ repository, analysedRef, githubToken, warnings });
     let packageJson = { name };
     let packageLock = null;
 
     try {
       packageJson = await this.githubPackageJsonFetcher.fetch({
         repository,
-        ref: analysedRef,
+        ref: effectiveRef,
         token: githubToken
       });
     } catch (error) {
@@ -54,7 +55,7 @@ export class ProjectInspector {
         packageLock = await this.githubPackageJsonFetcher.fetchJsonFile({
           repository,
           filePath: "package-lock.json",
-          ref: analysedRef,
+          ref: effectiveRef,
           token: githubToken
         });
       } catch (error) {
@@ -72,12 +73,36 @@ export class ProjectInspector {
         name: packageJson.name || name,
         repository,
         packageManager: packageManager || "npm",
-        analysedRef,
+        analysedRef: effectiveRef,
         target
       },
       graph,
       warnings
     };
+  }
+
+  /** Resolves the explicit ref or GitHub default branch used by all remote analysis steps. */
+  async #resolveRemoteRef({ repository, analysedRef, githubToken, warnings }) {
+    if (analysedRef) {
+      return analysedRef;
+    }
+
+    try {
+      const metadata = await this.githubPackageJsonFetcher.fetchRepositoryMetadata({
+        repository,
+        token: githubToken
+      });
+
+      if (metadata.defaultBranch) {
+        return metadata.defaultBranch;
+      }
+
+      warnings.push("Could not resolve GitHub default branch; metadata response did not include default_branch.");
+    } catch (error) {
+      warnings.push(`Could not resolve GitHub default branch; analysis will use tool defaults: ${error.message}`);
+    }
+
+    return null;
   }
 
   /** Reads local package metadata and extracts the dependency graph when supported. */
