@@ -185,7 +185,7 @@ function ProjectSummary({ analysis }) {
 /** Counts detected smells by smell type for summary-level distribution display. */
 function countSmellsByType(smells) {
   const counts = new Map();
-  for (const smell of smells) {
+  for (const smell of smells ?? []) {
     counts.set(smell.type, (counts.get(smell.type) ?? 0) + 1);
   }
 

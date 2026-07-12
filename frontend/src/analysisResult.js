@@ -23,11 +23,13 @@ export function normalizeAnalysisResult(document) {
     throw new Error("The JSON file does not contain a smells array.");
   }
 
-  const smellsByPackageId = groupSmellsByPackageId(document.smells);
-  const nodes = document.graph.nodes.map((node) => ({
-    ...node,
-    smells: smellsByPackageId.get(node.id) ?? []
-  }));
+  const rootNode = document.graph.nodes.find((node) => node.id === "root") ?? buildRootNodeFromSmells(document);
+  const graphNodes =
+    rootNode && !document.graph.nodes.some((node) => node.id === "root")
+      ? [rootNode, ...document.graph.nodes]
+      : document.graph.nodes;
+  const smellsByPackageId = groupSmellsByPackageId(document.smells, rootNode);
+  const nodes = graphNodes.map((node) => enrichNodeWithSmells(node, smellsByPackageId.get(node.id) ?? []));
 
   return {
     metadata: document.metadata ?? {},
@@ -42,18 +44,78 @@ export function normalizeAnalysisResult(document) {
   };
 }
 
+/** Adds smell metadata to a graph node while preserving backend-provided values when present. */
+function enrichNodeWithSmells(node, smells) {
+  return {
+    ...node,
+    hasSmells: node.hasSmells || smells.length > 0,
+    highestSeverity: node.highestSeverity ?? highestSeverityFromSmells(smells),
+    smells
+  };
+}
+
+/** Builds a synthetic root node for older JSON outputs that omitted the analysed project node. */
+function buildRootNodeFromSmells(document) {
+  const projectName = document.project?.name;
+  if (!projectName) {
+    return null;
+  }
+
+  const rootSmells = document.smells.filter((smell) => smell.affectedPackage === projectName);
+  if (rootSmells.length === 0) {
+    return null;
+  }
+
+  return {
+    id: "root",
+    name: projectName,
+    version: rootSmells.find((smell) => smell.affectedVersion)?.affectedVersion ?? null,
+    dependencyType: "root",
+    depth: 0,
+    hasSmells: true,
+    highestSeverity: highestSeverityFromSmells(rootSmells)
+  };
+}
+
 /** Converts backend smells into a lookup keyed by the dependency graph node id. */
-function groupSmellsByPackageId(smells) {
+function groupSmellsByPackageId(smells, rootNode = null) {
   const grouped = new Map();
 
   for (const smell of smells) {
     const id = toPackageId(smell.affectedPackage, smell.affectedVersion);
-    const entries = grouped.get(id) ?? [];
-    entries.push(smell);
-    grouped.set(id, entries);
+    addGroupedSmell(grouped, id, smell);
+
+    if (isRootSmell(smell, rootNode)) {
+      addGroupedSmell(grouped, "root", smell);
+    }
   }
 
   return grouped;
+}
+
+/** Adds one smell to a grouped smell lookup without duplicating bucket logic. */
+function addGroupedSmell(grouped, id, smell) {
+  const entries = grouped.get(id) ?? [];
+  entries.push(smell);
+  grouped.set(id, entries);
+}
+
+/** Checks whether a finding targets the analysed project root package. */
+function isRootSmell(smell, rootNode) {
+  if (!rootNode || smell.affectedPackage !== rootNode.name) {
+    return false;
+  }
+
+  return !rootNode.version || !smell.affectedVersion || smell.affectedVersion === rootNode.version;
+}
+
+/** Selects the strongest final rating among a node's associated smells. */
+function highestSeverityFromSmells(smells) {
+  const rank = new Map(SEVERITIES.map((severity, index) => [severity, SEVERITIES.length - index]));
+  return smells
+    .map((smell) => smell.score?.finalRating)
+    .filter(Boolean)
+    .sort((left, right) => (rank.get(right) ?? 0) - (rank.get(left) ?? 0))[0] ?? null;
 }
 
 /** Creates the canonical package id used by the backend graph contract. */
