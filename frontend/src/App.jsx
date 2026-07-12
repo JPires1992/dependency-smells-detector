@@ -152,6 +152,10 @@ function ProjectSummary({ analysis }) {
           <strong>{analysis.project.repository || "Local JSON artefact"}</strong>
         </div>
         <div>
+          <span>Reference Branch</span>
+          <strong>{analysis.project.analysedRef || "Not specified"}</strong>
+        </div>
+        <div>
           <span>Analysis Date</span>
           <strong>{generatedAt}</strong>
         </div>
