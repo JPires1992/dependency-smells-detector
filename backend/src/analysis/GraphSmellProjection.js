@@ -85,17 +85,18 @@ function groupSmellsByPackageId(scoredSmells) {
 
 /** Adds or returns a package node from source graph metadata or smell evidence. */
 function upsertPackageNode(projectedNodes, sourceNodeById, sourceNodeByName, packageRef) {
-  const id = packageRef.id ?? toPackageNodeId(packageRef.name, packageRef.version);
+  const tentativeId = packageRef.id ?? toPackageNodeId(packageRef.name, packageRef.version);
+  const sourceNode = sourceNodeById.get(tentativeId) ?? sourceNodeByName.get(packageRef.name);
+  const id = sourceNode?.id === "root" ? "root" : tentativeId;
   const existing = projectedNodes.get(id);
   if (existing) {
     mergeNodeMetadata(existing, packageRef);
     return existing;
   }
 
-  const sourceNode = sourceNodeById.get(id) ?? sourceNodeByName.get(packageRef.name);
   const node = {
     id,
-    name: packageRef.name,
+    name: sourceNode?.name ?? packageRef.name,
     version: packageRef.version ?? sourceNode?.version ?? null,
     dependencyType: chooseDependencyType(sourceNode?.dependencyType, packageRef.dependencyType),
     depth: sourceNode?.depth ?? packageRef.depth ?? null,

@@ -37,8 +37,10 @@ export class PackageLockGraphExtractor {
     nodesByPath.set("", rootNode);
     nodes.push(rootNode);
 
-    const rootProductionDeps = new Set(Object.keys(rootPackage.dependencies ?? packageJson.dependencies ?? {}));
-    const rootDevDeps = new Set(Object.keys(rootPackage.devDependencies ?? packageJson.devDependencies ?? {}));
+    const rootProductionDeps = packageDependencyNames(rootPackage, packageJson, ["dependencies", "optionalDependencies", "peerDependencies"]);
+    const rootDevDeps = packageDependencyNames(rootPackage, packageJson, ["devDependencies"]);
+    const productionEntryIds = new Set();
+    const developmentEntryIds = new Set();
 
     for (const [packagePath, packageInfo] of Object.entries(packages)) {
       if (!packagePath) {
@@ -66,19 +68,23 @@ export class PackageLockGraphExtractor {
     for (const depName of rootProductionDeps) {
       const targetPath = findDependencyPackagePath("", depName, packages);
       if (targetPath && nodesByPath.has(targetPath)) {
-        edges.push({ source: rootNode.id, target: nodesByPath.get(targetPath).id, relationship: "direct" });
+        const targetId = nodesByPath.get(targetPath).id;
+        productionEntryIds.add(targetId);
+        edges.push({ source: rootNode.id, target: targetId, relationship: "direct" });
       }
     }
 
     for (const depName of rootDevDeps) {
       const targetPath = findDependencyPackagePath("", depName, packages);
       if (targetPath && nodesByPath.has(targetPath)) {
-        edges.push({ source: rootNode.id, target: nodesByPath.get(targetPath).id, relationship: "direct" });
+        const targetId = nodesByPath.get(targetPath).id;
+        developmentEntryIds.add(targetId);
+        edges.push({ source: rootNode.id, target: targetId, relationship: "direct" });
       }
     }
 
     for (const [packagePath, packageInfo] of Object.entries(packages)) {
-      if (!packagePath || !packageInfo.dependencies) {
+      if (!packagePath) {
         continue;
       }
 
@@ -87,7 +93,7 @@ export class PackageLockGraphExtractor {
         continue;
       }
 
-      for (const depName of Object.keys(packageInfo.dependencies)) {
+      for (const depName of dependencyNamesFromPackageInfo(packageInfo)) {
         const targetPath = findDependencyPackagePath(packagePath, depName, packages);
         if (!targetPath || !nodesByPath.has(targetPath)) {
           continue;
@@ -101,7 +107,11 @@ export class PackageLockGraphExtractor {
       }
     }
 
-    return deduplicateGraph({ nodes, edges });
+    return applyDependencyScopes(
+      applyGraphDepths(deduplicateGraph({ nodes, edges })),
+      productionEntryIds,
+      developmentEntryIds
+    );
   }
 
   /** Extracts graph data from legacy package-lock dependency trees. */
@@ -110,7 +120,7 @@ export class PackageLockGraphExtractor {
     const rootNode = createRootNode(rootName, packageJson.version || lockfile.version || null);
     const nodes = [rootNode];
     const edges = [];
-    const rootProductionDeps = new Set(Object.keys(packageJson.dependencies ?? {}));
+    const rootProductionDeps = packageDependencyNames({}, packageJson, ["dependencies", "optionalDependencies", "peerDependencies"]);
     const rootDevDeps = new Set(Object.keys(packageJson.devDependencies ?? {}));
 
     const visit = (deps, parentId, depth) => {
@@ -134,12 +144,12 @@ export class PackageLockGraphExtractor {
           relationship: depth === 1 && rootProductionDeps.has(name) ? "direct" : "transitive"
         });
 
-        visit(data.dependencies, id, depth + 1);
+        visit(mergeDependencyMaps(data, ["dependencies", "optionalDependencies", "peerDependencies"]), id, depth + 1);
       }
     };
 
-    visit(lockfile.dependencies, rootNode.id, 1);
-    return deduplicateGraph({ nodes, edges });
+    visit(mergeDependencyMaps(lockfile, ["dependencies", "optionalDependencies", "peerDependencies"]), rootNode.id, 1);
+    return applyGraphDepths(deduplicateGraph({ nodes, edges }));
   }
 }
 
@@ -183,6 +193,33 @@ function inferPackageNameFromLockPath(lockPath) {
 /** Counts nested node_modules segments to approximate dependency graph depth. */
 function countPackageDepth(lockPath) {
   return (lockPath.match(/node_modules/g) ?? []).length || 1;
+}
+
+/** Collects dependency names from package-lock/package.json dependency sections. */
+function packageDependencyNames(lockPackageInfo = {}, packageJson = {}, sections = ["dependencies"]) {
+  const names = new Set();
+
+  for (const section of sections) {
+    for (const name of Object.keys(lockPackageInfo[section] ?? {})) {
+      names.add(name);
+    }
+
+    for (const name of Object.keys(packageJson[section] ?? {})) {
+      names.add(name);
+    }
+  }
+
+  return names;
+}
+
+/** Collects dependency names declared by a package-lock package entry. */
+function dependencyNamesFromPackageInfo(packageInfo = {}) {
+  return packageDependencyNames(packageInfo, {}, ["dependencies", "optionalDependencies", "peerDependencies"]);
+}
+
+/** Merges legacy lockfile dependency maps from multiple dependency sections. */
+function mergeDependencyMaps(packageInfo = {}, sections = ["dependencies"]) {
+  return sections.reduce((merged, section) => ({ ...merged, ...(packageInfo[section] ?? {}) }), {});
 }
 
 /** Infers whether a package belongs to the production or development dependency scope. */
@@ -244,6 +281,99 @@ function deduplicateGraph(graph) {
     nodes: [...nodesById.values()],
     edges: [...edgesByKey.values()]
   };
+}
+
+/** Recomputes node depths as the shortest dependency distance from the root node. */
+function applyGraphDepths(graph) {
+  const nodeById = new Map(graph.nodes.map((node) => [node.id, node]));
+  const adjacency = new Map();
+
+  for (const edge of graph.edges) {
+    const targets = adjacency.get(edge.source) ?? [];
+    targets.push(edge.target);
+    adjacency.set(edge.source, targets);
+  }
+
+  const visitedDepthById = new Map([["root", 0]]);
+  const queue = [{ id: "root", depth: 0 }];
+
+  while (queue.length > 0) {
+    const current = queue.shift();
+    for (const target of adjacency.get(current.id) ?? []) {
+      const nextDepth = current.depth + 1;
+      if (visitedDepthById.has(target) && visitedDepthById.get(target) <= nextDepth) {
+        continue;
+      }
+
+      visitedDepthById.set(target, nextDepth);
+      queue.push({ id: target, depth: nextDepth });
+    }
+  }
+
+  for (const node of graph.nodes) {
+    if (visitedDepthById.has(node.id)) {
+      node.depth = visitedDepthById.get(node.id);
+    } else if (node.id === "root") {
+      node.depth = 0;
+    } else {
+      node.depth = null;
+    }
+  }
+
+  return {
+    nodes: [...nodeById.values()],
+    edges: graph.edges
+  };
+}
+
+/** Recomputes dependency scopes from direct production/dev entry points. */
+function applyDependencyScopes(graph, productionEntryIds, developmentEntryIds) {
+  const adjacency = buildAdjacency(graph.edges);
+  const productionReachable = collectReachableIds(productionEntryIds, adjacency);
+  const developmentReachable = collectReachableIds(developmentEntryIds, adjacency);
+
+  for (const node of graph.nodes) {
+    if (node.id === "root") {
+      node.dependencyType = "root";
+    } else if (productionReachable.has(node.id)) {
+      node.dependencyType = "production";
+    } else if (developmentReachable.has(node.id)) {
+      node.dependencyType = "development";
+    }
+  }
+
+  return graph;
+}
+
+/** Builds an adjacency list from directed dependency graph edges. */
+function buildAdjacency(edges) {
+  const adjacency = new Map();
+
+  for (const edge of edges) {
+    const targets = adjacency.get(edge.source) ?? [];
+    targets.push(edge.target);
+    adjacency.set(edge.source, targets);
+  }
+
+  return adjacency;
+}
+
+/** Collects all nodes reachable from a set of graph entry points. */
+function collectReachableIds(entryIds, adjacency) {
+  const visited = new Set();
+  const queue = [...entryIds];
+
+  while (queue.length > 0) {
+    const id = queue.shift();
+    if (visited.has(id)) {
+      continue;
+    }
+
+    visited.add(id);
+    queue.push(...(adjacency.get(id) ?? []));
+  }
+
+  return visited;
 }
 
 /** Finds the graph node matching a package name and optional version. */
