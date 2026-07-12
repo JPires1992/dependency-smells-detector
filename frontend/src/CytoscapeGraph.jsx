@@ -16,7 +16,7 @@ export function CytoscapeGraph({ graph, onNodeSelected }) {
     const cy = cytoscape({
       container: containerRef.current,
       elements,
-      layout: { name: "cose", animate: false, fit: true, padding: 48 },
+      layout: buildLayoutOptions(graph),
       minZoom: 0.12,
       maxZoom: 2.5,
       wheelSensitivity: 0.25,
@@ -40,6 +40,29 @@ export function CytoscapeGraph({ graph, onNodeSelected }) {
   }, [elements, onNodeSelected]);
 
   return <div className="graph-canvas" ref={containerRef} aria-label="Dependency graph visualisation" />;
+}
+
+/** Builds a less compact force layout to reduce node overlap in large dependency graphs. */
+function buildLayoutOptions(graph) {
+  const nodeCount = graph.nodes.length;
+  const densityFactor = nodeCount < 40 ? 0.75 : Math.min(Math.max(nodeCount / 120, 1), 2.2);
+
+  return {
+    name: "cose",
+    animate: false,
+    componentSpacing: 86 * densityFactor,
+    edgeElasticity: () => 80,
+    fit: true,
+    gravity: nodeCount < 40 ? 0.28 : 0.18,
+    idealEdgeLength: () => 86 * densityFactor,
+    initialTemp: 240,
+    minTemp: 1,
+    nodeOverlap: 12 * densityFactor,
+    nodeRepulsion: () => 6200 * densityFactor,
+    numIter: 1200,
+    padding: 42,
+    randomize: true
+  };
 }
 
 /** Converts backend graph nodes and edges into Cytoscape elements with semantic classes. */
