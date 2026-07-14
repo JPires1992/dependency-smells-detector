@@ -5,6 +5,9 @@ import { DetectorRegistry } from "./detectors/DetectorRegistry.js";
 import { DirtyWatersAdapter, parsePositiveInteger } from "./detectors/dirty-waters/DirtyWatersAdapter.js";
 import { CustomDetectorPlaceholder } from "./detectors/custom/CustomDetectorPlaceholder.js";
 
+const BOOLEAN_FLAGS = new Set(["help", "skip-dirty-waters", "require-dirty-waters"]);
+const VALUE_FLAGS = new Set(["target", "t", "output", "o", "github-repo", "ref", "dirty-waters-timeout-ms"]);
+
 /** Entry point that parses CLI arguments and runs the analysis command. */
 async function main() {
   const args = parseArgs(process.argv.slice(2));
@@ -44,7 +47,6 @@ async function main() {
   const result = await service.analyze({
     target,
     outputDirectory,
-    packageManager: args["package-manager"] ?? args.pm ?? null,
     githubRepository: args["github-repo"] ?? process.env.GITHUB_REPOSITORY_PATH ?? null,
     analysedRef: args.ref ?? null,
     githubToken: process.env.GITHUB_API_TOKEN,
@@ -71,9 +73,13 @@ function parseArgs(argv) {
     }
 
     const normalized = token.replace(/^-+/, "");
-    if (normalized === "help" || normalized === "skip-dirty-waters" || normalized === "require-dirty-waters") {
+    if (BOOLEAN_FLAGS.has(normalized)) {
       parsed[normalized] = true;
       continue;
+    }
+
+    if (!VALUE_FLAGS.has(normalized)) {
+      throw new Error(`Unknown option: --${normalized}.`);
     }
 
     const value = argv[index + 1];
@@ -95,7 +101,6 @@ function printHelp() {
 
 Options:
   --output <dir>              Output directory. Defaults to reports.
-  --package-manager <name>    npm, yarn-classic, yarn-berry, or pnpm.
   --github-repo <owner/repo>  GitHub path used by Dirty-Waters.
   --ref <git-ref>             Analysed ref passed to Dirty-Waters.
   --dirty-waters-timeout-ms <ms>

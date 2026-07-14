@@ -32,13 +32,12 @@ export class AnalysisService {
   async analyze({
     target,
     outputDirectory,
-    packageManager = null,
     githubRepository = null,
     analysedRef = null,
     githubToken = process.env.GITHUB_API_TOKEN,
     workspaceDirectory = process.cwd()
   }) {
-    const inspected = await this.inspector.inspect({ target, packageManager, githubRepository, analysedRef, githubToken });
+    const inspected = await this.inspector.inspect({ target, githubRepository, analysedRef, githubToken });
     const project = {
       ...inspected.project,
       analysedRef: analysedRef ?? inspected.project.analysedRef

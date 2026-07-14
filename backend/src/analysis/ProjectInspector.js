@@ -4,10 +4,11 @@ import { constants } from "node:fs";
 import { PackageLockGraphExtractor, createRootOnlyGraph } from "./PackageLockGraphExtractor.js";
 import { GitHubPackageJsonFetcher } from "./GitHubPackageJsonFetcher.js";
 import { isGithubRepositoryIdentifier, normalizeGithubRepository } from "../utils/GithubRepository.js";
+import { DEFAULT_PACKAGE_MANAGER } from "../domain/PackageManager.js";
 
 /** Inspects the target project/repository and builds metadata plus dependency graph context. */
 export class ProjectInspector {
-  /** Allows dependency graph extraction to be replaced in tests or future package managers. */
+  /** Allows dependency graph extraction to be replaced in tests. */
   constructor({
     graphExtractor = new PackageLockGraphExtractor(),
     githubPackageJsonFetcher = new GitHubPackageJsonFetcher()
@@ -17,25 +18,23 @@ export class ProjectInspector {
   }
 
   /** Detects whether the target is local or remote and returns analysis input context. */
-  async inspect({ target, packageManager = null, githubRepository = null, analysedRef = null, githubToken = null } = {}) {
+  async inspect({ target, githubRepository = null, analysedRef = null, githubToken = null } = {}) {
     if (!target) {
       throw new Error("A target repository identifier or local project path is required.");
     }
 
     if (isGithubRepositoryIdentifier(target)) {
-      return this.#inspectRepositoryIdentifier({ target, packageManager, githubRepository, analysedRef, githubToken });
+      return this.#inspectRepositoryIdentifier({ target, githubRepository, analysedRef, githubToken });
     }
 
-    return this.#inspectLocalProject({ target, packageManager, githubRepository });
+    return this.#inspectLocalProject({ target, githubRepository });
   }
 
   /** Builds minimal project context for a GitHub repository identifier. */
-  async #inspectRepositoryIdentifier({ target, packageManager, githubRepository, analysedRef, githubToken }) {
+  async #inspectRepositoryIdentifier({ target, githubRepository, analysedRef, githubToken }) {
     const repository = githubRepository || normalizeGithubRepository(target);
     const name = repository?.split("/")[1] ?? target;
-    const warnings = packageManager
-      ? []
-      : ["Package manager could not be inferred from a remote identifier; defaulting to npm."];
+    const warnings = [];
     const effectiveRef = await this.#resolveRemoteRef({ repository, analysedRef, githubToken, warnings });
     let packageJson = { name };
     let packageLock = null;
@@ -50,17 +49,15 @@ export class ProjectInspector {
       warnings.push(`Could not fetch remote package.json from GitHub: ${error.message}`);
     }
 
-    if ((packageManager || "npm") === "npm") {
-      try {
-        packageLock = await this.githubPackageJsonFetcher.fetchJsonFile({
-          repository,
-          filePath: "package-lock.json",
-          ref: effectiveRef,
-          token: githubToken
-        });
-      } catch (error) {
-        warnings.push(`Could not fetch remote package-lock.json from GitHub: ${error.message}`);
-      }
+    try {
+      packageLock = await this.githubPackageJsonFetcher.fetchJsonFile({
+        repository,
+        filePath: "package-lock.json",
+        ref: effectiveRef,
+        token: githubToken
+      });
+    } catch (error) {
+      warnings.push(`Could not fetch remote package-lock.json from GitHub: ${error.message}`);
     }
 
     const graph = packageLock
@@ -72,7 +69,7 @@ export class ProjectInspector {
       project: {
         name: packageJson.name || name,
         repository,
-        packageManager: packageManager || "npm",
+        packageManager: DEFAULT_PACKAGE_MANAGER,
         analysedRef: effectiveRef,
         target
       },
@@ -106,11 +103,10 @@ export class ProjectInspector {
   }
 
   /** Reads local package metadata and extracts the dependency graph when supported. */
-  async #inspectLocalProject({ target, packageManager, githubRepository }) {
+  async #inspectLocalProject({ target, githubRepository }) {
     const projectDirectory = path.resolve(target);
     const packageJsonPath = path.join(projectDirectory, "package.json");
     const packageJson = await readJsonFile(packageJsonPath);
-    const detectedPackageManager = packageManager || (await detectPackageManager(projectDirectory));
     const repository =
       githubRepository ||
       normalizeGithubRepository(packageJson.repository) ||
@@ -119,11 +115,11 @@ export class ProjectInspector {
 
     let graph;
     const warnings = [];
-    if (detectedPackageManager === "npm" && (await fileExists(path.join(projectDirectory, "package-lock.json")))) {
+    if (await fileExists(path.join(projectDirectory, "package-lock.json"))) {
       graph = await this.graphExtractor.extract(projectDirectory, packageJson);
     } else {
       graph = createRootOnlyGraph(packageJson);
-      warnings.push(`Dependency graph extraction is currently implemented for npm package-lock.json; got ${detectedPackageManager}.`);
+      warnings.push("Dependency graph extraction requires an npm package-lock.json file.");
     }
     graph.rootDependencyTypesByName = buildRootDependencyTypesByName(packageJson);
 
@@ -131,7 +127,7 @@ export class ProjectInspector {
       project: {
         name: packageJson.name || path.basename(projectDirectory),
         repository,
-        packageManager: detectedPackageManager,
+        packageManager: DEFAULT_PACKAGE_MANAGER,
         analysedRef: null,
         target: projectDirectory
       },
@@ -158,24 +154,6 @@ export function buildRootDependencyTypesByName(packageJson = {}) {
   }
 
   return dependencyTypes;
-}
-
-/** Detects the JavaScript package manager from lockfile artefacts. */
-async function detectPackageManager(projectDirectory) {
-  if (await fileExists(path.join(projectDirectory, "package-lock.json"))) {
-    return "npm";
-  }
-
-  if (await fileExists(path.join(projectDirectory, "pnpm-lock.yaml"))) {
-    return "pnpm";
-  }
-
-  if (await fileExists(path.join(projectDirectory, "yarn.lock"))) {
-    const yarnLock = await readFile(path.join(projectDirectory, "yarn.lock"), "utf8");
-    return yarnLock.includes("__metadata:") ? "yarn-berry" : "yarn-classic";
-  }
-
-  throw new Error("Could not identify an npm, yarn, or pnpm dependency artifact in the target project.");
 }
 
 /** Reads and parses a JSON file, wrapping parse and IO failures with path context. */

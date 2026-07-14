@@ -6,6 +6,7 @@ import { normalizeGithubRepository } from "../../utils/GithubRepository.js";
 import { DirtyWatersInstaller } from "./DirtyWatersInstaller.js";
 import { DirtyWatersOutputParser } from "./DirtyWatersOutputParser.js";
 import { PackageManagerPreflight } from "./PackageManagerPreflight.js";
+import { DEFAULT_PACKAGE_MANAGER } from "../../domain/PackageManager.js";
 
 /** Static Dirty-Waters checks required by the prototype smell subset. */
 const STATIC_CHECK_FLAGS = [
@@ -28,6 +29,7 @@ export class DirtyWatersAdapter {
     installer = new DirtyWatersInstaller(),
     parser = new DirtyWatersOutputParser(),
     packageManagerPreflight = new PackageManagerPreflight(),
+    commandRunner = runCommand,
     required = false,
     timeoutMs = readTimeoutFromEnvironment()
   } = {}) {
@@ -36,6 +38,7 @@ export class DirtyWatersAdapter {
     this.installer = installer;
     this.parser = parser;
     this.packageManagerPreflight = packageManagerPreflight;
+    this.commandRunner = commandRunner;
     this.timeoutMs = timeoutMs;
   }
 
@@ -62,8 +65,9 @@ export class DirtyWatersAdapter {
       GITHUB_API_TOKEN: githubToken
     };
     const workingDirectory = context.workspaceDirectory || process.cwd();
+    const packageManager = context.project.packageManager || DEFAULT_PACKAGE_MANAGER;
     const env = await this.packageManagerPreflight.prepareEnvironment({
-      packageManager: context.project.packageManager,
+      packageManager,
       env: baseEnv,
       cwd: workingDirectory
     });
@@ -73,7 +77,7 @@ export class DirtyWatersAdapter {
       "-p",
       repository,
       "-pm",
-      context.project.packageManager,
+      packageManager,
       "--gradual-report=false",
       ...STATIC_CHECK_FLAGS
     ];
@@ -82,14 +86,14 @@ export class DirtyWatersAdapter {
       args.push("-v", context.project.analysedRef);
     }
 
-    const result = await runCommand(executable, args, {
+    const result = await this.commandRunner(executable, args, {
       cwd: workingDirectory,
       env,
       timeoutMs: this.timeoutMs
     });
 
     if (result.exitCode !== 0) {
-      throw new Error(formatDirtyWatersFailure(result));
+      throw new Error(formatDirtyWatersFailure(result, packageManager));
     }
 
     const artifacts = await this.#findArtifacts(workingDirectory, startedAt);
@@ -157,11 +161,11 @@ export function parsePositiveInteger(value, fallback) {
 }
 
 /** Builds a concise failure message and highlights common dependency extraction failures. */
-function formatDirtyWatersFailure(result) {
+function formatDirtyWatersFailure(result, packageManager) {
   const output = `${result.stderr || ""}\n${result.stdout || ""}`.trim();
   const dependencyExtractionHint =
     output.includes("extract_deps_from_npm") || output.includes("WinError 2")
-      ? " Dirty-Waters could not extract package-manager dependencies; verify npm/yarn/pnpm is installed and reachable from PATH."
+      ? ` Dirty-Waters could not extract ${packageManager} dependencies; verify the required package-manager command is installed and reachable from PATH.`
       : "";
 
   return `Dirty-Waters failed with exit code ${result.exitCode}.${dependencyExtractionHint}\n${output}`;
