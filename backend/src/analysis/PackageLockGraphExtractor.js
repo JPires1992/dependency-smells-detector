@@ -107,11 +107,7 @@ export class PackageLockGraphExtractor {
       }
     }
 
-    return applyDependencyScopes(
-      applyGraphDepths(deduplicateGraph({ nodes, edges })),
-      productionEntryIds,
-      developmentEntryIds
-    );
+    return applyDependencyScopes(deduplicateGraph({ nodes, edges }), productionEntryIds, developmentEntryIds);
   }
 
   /** Extracts graph data from legacy package-lock dependency trees. */
@@ -326,19 +322,27 @@ function applyGraphDepths(graph) {
   };
 }
 
-/** Recomputes dependency scopes from direct production/dev entry points. */
+/** Recomputes dependency scopes and keeps depth aligned with the selected dependency scope. */
 function applyDependencyScopes(graph, productionEntryIds, developmentEntryIds) {
   const adjacency = buildAdjacency(graph.edges);
-  const productionReachable = collectReachableIds(productionEntryIds, adjacency);
-  const developmentReachable = collectReachableIds(developmentEntryIds, adjacency);
+  const productionDepthById = collectReachableDepths(productionEntryIds, adjacency);
+  const developmentDepthById = collectReachableDepths(developmentEntryIds, adjacency);
+  const fallbackDepthById = collectDepthsFromRoot(adjacency);
 
   for (const node of graph.nodes) {
     if (node.id === "root") {
       node.dependencyType = "root";
-    } else if (productionReachable.has(node.id)) {
+      node.depth = 0;
+    } else if (productionDepthById.has(node.id)) {
       node.dependencyType = "production";
-    } else if (developmentReachable.has(node.id)) {
+      node.depth = productionDepthById.get(node.id);
+    } else if (developmentDepthById.has(node.id)) {
       node.dependencyType = "development";
+      node.depth = developmentDepthById.get(node.id);
+    } else if (fallbackDepthById.has(node.id)) {
+      node.depth = fallbackDepthById.get(node.id);
+    } else {
+      node.depth = null;
     }
   }
 
@@ -358,22 +362,45 @@ function buildAdjacency(edges) {
   return adjacency;
 }
 
-/** Collects all nodes reachable from a set of graph entry points. */
-function collectReachableIds(entryIds, adjacency) {
-  const visited = new Set();
-  const queue = [...entryIds];
+/** Collects shortest scoped depths from direct root entry points. */
+function collectReachableDepths(entryIds, adjacency) {
+  const depthById = new Map();
+  const queue = [...entryIds].map((id) => ({ id, depth: 1 }));
 
   while (queue.length > 0) {
-    const id = queue.shift();
-    if (visited.has(id)) {
+    const current = queue.shift();
+    if (depthById.has(current.id) && depthById.get(current.id) <= current.depth) {
       continue;
     }
 
-    visited.add(id);
-    queue.push(...(adjacency.get(id) ?? []));
+    depthById.set(current.id, current.depth);
+    for (const target of adjacency.get(current.id) ?? []) {
+      queue.push({ id: target, depth: current.depth + 1 });
+    }
   }
 
-  return visited;
+  return depthById;
+}
+
+/** Collects shortest global depths from the root node as a fallback for unusual lockfile shapes. */
+function collectDepthsFromRoot(adjacency) {
+  const depthById = new Map([["root", 0]]);
+  const queue = [{ id: "root", depth: 0 }];
+
+  while (queue.length > 0) {
+    const current = queue.shift();
+    for (const target of adjacency.get(current.id) ?? []) {
+      const nextDepth = current.depth + 1;
+      if (depthById.has(target) && depthById.get(target) <= nextDepth) {
+        continue;
+      }
+
+      depthById.set(target, nextDepth);
+      queue.push({ id: target, depth: nextDepth });
+    }
+  }
+
+  return depthById;
 }
 
 /** Finds the graph node matching a package name and optional version. */
