@@ -108,3 +108,54 @@ test("PackageLockGraphExtractor resolves peer and optional dependency depths", a
     await rm(directory, { recursive: true, force: true });
   }
 });
+
+/** Verifies that production scope depth wins over a shorter development-only path for the same package. */
+test("PackageLockGraphExtractor keeps production depth when a package is also reachable through a shorter dev path", async () => {
+  const directory = await mkdtemp(path.join(os.tmpdir(), "dsmells-"));
+  try {
+    const packageJson = {
+      name: "sample-app",
+      version: "1.0.0",
+      dependencies: { "prod-parent": "^1.0.0" },
+      devDependencies: { "dev-parent": "^1.0.0" }
+    };
+    const packageLock = {
+      name: "sample-app",
+      version: "1.0.0",
+      lockfileVersion: 3,
+      packages: {
+        "": {
+          name: "sample-app",
+          version: "1.0.0",
+          dependencies: { "prod-parent": "^1.0.0" },
+          devDependencies: { "dev-parent": "^1.0.0" }
+        },
+        "node_modules/prod-parent": {
+          version: "1.0.0",
+          dependencies: { "prod-middle": "^1.0.0" }
+        },
+        "node_modules/prod-middle": {
+          version: "1.0.0",
+          dependencies: { debug: "^4.4.3" }
+        },
+        "node_modules/dev-parent": {
+          version: "1.0.0",
+          dev: true,
+          dependencies: { debug: "^4.4.3" }
+        },
+        "node_modules/debug": {
+          version: "4.4.3"
+        }
+      }
+    };
+
+    await writeFile(path.join(directory, "package-lock.json"), JSON.stringify(packageLock), "utf8");
+    const graph = await new PackageLockGraphExtractor().extract(directory, packageJson);
+    const debugNode = graph.nodes.find((node) => node.id === "debug@4.4.3");
+
+    assert.equal(debugNode.dependencyType, "production");
+    assert.equal(debugNode.depth, 3);
+  } finally {
+    await rm(directory, { recursive: true, force: true });
+  }
+});

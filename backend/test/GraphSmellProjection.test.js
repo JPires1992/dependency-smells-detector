@@ -209,3 +209,39 @@ test("projectSmellsOntoGraph enriches existing parent edges with Dirty-Waters me
   assert.equal(projected.nodes.find((node) => node.id === "parent@2.0.0").depth, 1);
   assert.equal(projected.edges[0].relationship, "transitive");
 });
+
+/** Verifies that production Dirty-Waters evidence wins over a shorter development path for the same smelled package. */
+test("projectSmellsOntoGraph keeps production evidence depth when development evidence is shorter", () => {
+  const graph = {
+    nodes: [{ id: "root", name: "sample-app", version: "1.0.0", dependencyType: "root", depth: 0 }],
+    edges: [],
+    rootDependencyTypesByName: {
+      "dev-parent": "development",
+      "prod-parent": "production"
+    }
+  };
+  const smells = [
+    {
+      id: "SMELL-004",
+      affectedPackage: "debug",
+      affectedVersion: "4.4.3",
+      score: { finalRating: "Medium" },
+      evidenceData: {
+        parent:
+          "[sample-app@1.0.0](https://npmjs.com/package/sample-app/v/1.0.0)<br>" +
+          "    [dev-parent@1.0.0](https://npmjs.com/package/dev-parent/v/1.0.0)<br>" +
+          "        [debug@4.4.3](https://npmjs.com/package/debug/v/4.4.3)<br>" +
+          "[sample-app@1.0.0](https://npmjs.com/package/sample-app/v/1.0.0)<br>" +
+          "    [prod-parent@1.0.0](https://npmjs.com/package/prod-parent/v/1.0.0)<br>" +
+          "        [prod-middle@1.0.0](https://npmjs.com/package/prod-middle/v/1.0.0)<br>" +
+          "            [debug@4.4.3](https://npmjs.com/package/debug/v/4.4.3)"
+      }
+    }
+  ];
+
+  const projected = projectSmellsOntoGraph(graph, smells);
+  const debugNode = projected.nodes.find((node) => node.id === "debug@4.4.3");
+
+  assert.equal(debugNode.dependencyType, "production");
+  assert.equal(debugNode.depth, 3);
+});
