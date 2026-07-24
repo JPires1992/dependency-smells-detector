@@ -1,6 +1,3 @@
-import { access, readFile } from "node:fs/promises";
-import path from "node:path";
-import { constants } from "node:fs";
 import { PackageLockGraphExtractor, createRootOnlyGraph } from "./PackageLockGraphExtractor.js";
 import { GitHubPackageJsonFetcher } from "./GitHubPackageJsonFetcher.js";
 import { isGithubRepositoryIdentifier, normalizeGithubRepository } from "../utils/GithubRepository.js";
@@ -17,22 +14,22 @@ export class ProjectInspector {
     this.githubPackageJsonFetcher = githubPackageJsonFetcher;
   }
 
-  /** Detects whether the target is local or remote and returns analysis input context. */
-  async inspect({ target, githubRepository = null, analysedRef = null, githubToken = null } = {}) {
+  /** Validates and inspects a GitHub repository target, returning analysis input context. */
+  async inspect({ target, analysedRef = null, githubToken = null } = {}) {
     if (!target) {
-      throw new Error("A target repository identifier or local project path is required.");
+      throw new Error("A GitHub repository target in owner/repo format is required.");
     }
 
-    if (isGithubRepositoryIdentifier(target)) {
-      return this.#inspectRepositoryIdentifier({ target, githubRepository, analysedRef, githubToken });
+    if (!isGithubRepositoryIdentifier(target)) {
+      throw new Error("Local project paths are not supported. Use --target <owner/repo> and optionally --ref <branch-or-sha>.");
     }
 
-    return this.#inspectLocalProject({ target, githubRepository });
+    return this.#inspectRepositoryIdentifier({ target, analysedRef, githubToken });
   }
 
   /** Builds minimal project context for a GitHub repository identifier. */
-  async #inspectRepositoryIdentifier({ target, githubRepository, analysedRef, githubToken }) {
-    const repository = githubRepository || normalizeGithubRepository(target);
+  async #inspectRepositoryIdentifier({ target, analysedRef, githubToken }) {
+    const repository = normalizeGithubRepository(target);
     const name = repository?.split("/")[1] ?? target;
     const warnings = [];
     const effectiveRef = await this.#resolveRemoteRef({ repository, analysedRef, githubToken, warnings });
@@ -101,40 +98,6 @@ export class ProjectInspector {
 
     return null;
   }
-
-  /** Reads local package metadata and extracts the dependency graph when supported. */
-  async #inspectLocalProject({ target, githubRepository }) {
-    const projectDirectory = path.resolve(target);
-    const packageJsonPath = path.join(projectDirectory, "package.json");
-    const packageJson = await readJsonFile(packageJsonPath);
-    const repository =
-      githubRepository ||
-      normalizeGithubRepository(packageJson.repository) ||
-      normalizeGithubRepository(packageJson.homepage) ||
-      normalizeGithubRepository(process.env.GITHUB_REPOSITORY_PATH);
-
-    let graph;
-    const warnings = [];
-    if (await fileExists(path.join(projectDirectory, "package-lock.json"))) {
-      graph = await this.graphExtractor.extract(projectDirectory, packageJson);
-    } else {
-      graph = createRootOnlyGraph(packageJson);
-      warnings.push("Dependency graph extraction requires an npm package-lock.json file.");
-    }
-    graph.rootDependencyTypesByName = buildRootDependencyTypesByName(packageJson);
-
-    return {
-      project: {
-        name: packageJson.name || path.basename(projectDirectory),
-        repository,
-        packageManager: DEFAULT_PACKAGE_MANAGER,
-        analysedRef: null,
-        target: projectDirectory
-      },
-      graph,
-      warnings
-    };
-  }
 }
 
 /** Builds a root dependency type map from package.json dependency sections. */
@@ -154,23 +117,4 @@ export function buildRootDependencyTypesByName(packageJson = {}) {
   }
 
   return dependencyTypes;
-}
-
-/** Reads and parses a JSON file, wrapping parse and IO failures with path context. */
-async function readJsonFile(filePath) {
-  try {
-    return JSON.parse(await readFile(filePath, "utf8"));
-  } catch (error) {
-    throw new Error(`Failed to read ${filePath}: ${error.message}`);
-  }
-}
-
-/** Checks whether a filesystem path exists without leaking access errors. */
-async function fileExists(filePath) {
-  try {
-    await access(filePath, constants.F_OK);
-    return true;
-  } catch {
-    return false;
-  }
 }

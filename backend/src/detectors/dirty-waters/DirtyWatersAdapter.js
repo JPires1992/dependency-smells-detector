@@ -44,9 +44,7 @@ export class DirtyWatersAdapter {
 
   /** Runs Dirty-Waters for a GitHub project and parses generated static analysis artefacts. */
   async detect(context) {
-    const repository = normalizeGithubRepository(
-      context.project.repository || context.githubRepository || process.env.GITHUB_REPOSITORY_PATH
-    );
+    const repository = normalizeGithubRepository(context.project.repository);
 
     if (!repository) {
       return {

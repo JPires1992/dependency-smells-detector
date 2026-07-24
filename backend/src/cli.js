@@ -6,7 +6,7 @@ import { DirtyWatersAdapter, parsePositiveInteger } from "./detectors/dirty-wate
 import { CustomDetectorPlaceholder } from "./detectors/custom/CustomDetectorPlaceholder.js";
 
 const BOOLEAN_FLAGS = new Set(["help", "skip-dirty-waters", "require-dirty-waters"]);
-const VALUE_FLAGS = new Set(["target", "t", "output", "o", "github-repo", "ref", "dirty-waters-timeout-ms"]);
+const VALUE_FLAGS = new Set(["target", "t", "output", "o", "ref", "dirty-waters-timeout-ms"]);
 
 /** Entry point that parses CLI arguments and runs the analysis command. */
 async function main() {
@@ -23,7 +23,7 @@ async function main() {
 
   const target = args.target ?? args.t;
   if (!target) {
-    throw new Error("Missing required --target <path-or-owner/repo>.");
+    throw new Error("Missing required --target <owner/repo>.");
   }
 
   const outputDirectory = path.resolve(args.output ?? args.o ?? "reports");
@@ -47,7 +47,6 @@ async function main() {
   const result = await service.analyze({
     target,
     outputDirectory,
-    githubRepository: args["github-repo"] ?? process.env.GITHUB_REPOSITORY_PATH ?? null,
     analysedRef: args.ref ?? null,
     githubToken: process.env.GITHUB_API_TOKEN,
     workspaceDirectory: process.cwd()
@@ -97,11 +96,10 @@ function parseArgs(argv) {
 /** Prints supported CLI commands, options, and required environment variables. */
 function printHelp() {
   console.log(`Usage:
-  node src/cli.js analyze --target <path-or-owner/repo> [options]
+  node src/cli.js analyze --target <owner/repo> [options]
 
 Options:
   --output <dir>              Output directory. Defaults to reports.
-  --github-repo <owner/repo>  GitHub path used by Dirty-Waters.
   --ref <git-ref>             Analysed ref passed to Dirty-Waters.
   --dirty-waters-timeout-ms <ms>
                               Dirty-Waters execution timeout. Defaults to 1800000.
@@ -110,7 +108,6 @@ Options:
 
 Environment:
   GITHUB_API_TOKEN            Required by Dirty-Waters for GitHub API access.
-  GITHUB_REPOSITORY_PATH      Fallback owner/repo path for local project analysis.
   DIRTY_WATERS_TIMEOUT_MS     Dirty-Waters timeout override in milliseconds.
   DIRTY_WATERS_AUTO_INSTALL   Set to false to disable automatic installation.
 `);

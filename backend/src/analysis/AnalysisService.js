@@ -32,12 +32,11 @@ export class AnalysisService {
   async analyze({
     target,
     outputDirectory,
-    githubRepository = null,
     analysedRef = null,
     githubToken = process.env.GITHUB_API_TOKEN,
     workspaceDirectory = process.cwd()
   }) {
-    const inspected = await this.inspector.inspect({ target, githubRepository, analysedRef, githubToken });
+    const inspected = await this.inspector.inspect({ target, analysedRef, githubToken });
     const project = {
       ...inspected.project,
       analysedRef: analysedRef ?? inspected.project.analysedRef
@@ -46,7 +45,6 @@ export class AnalysisService {
     const detectionResult = await this.detectorRegistry.detect({
       project,
       graph: inspected.graph,
-      githubRepository,
       githubToken,
       workspaceDirectory
     });
