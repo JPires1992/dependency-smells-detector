@@ -166,3 +166,13 @@ test("ProjectInspector warns and falls back to tool defaults when default branch
   assert.equal(inspected.project.analysedRef, null);
   assert.match(inspected.warnings[0], /Could not resolve GitHub default branch/);
 });
+
+/** Verifies that local paths are rejected to keep graph extraction and Dirty-Waters analysis aligned. */
+test("ProjectInspector rejects local project paths", async () => {
+  const inspector = new ProjectInspector();
+
+  await assert.rejects(
+    () => inspector.inspect({ target: "C:\\Projects\\local-app" }),
+    /Local project paths are not supported/
+  );
+});
