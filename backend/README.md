@@ -14,7 +14,9 @@ The backend follows the prototype design described in the dissertation:
 
 The current backend runtime supports npm only, and the CLI does not expose package-manager selection. npm is defined as the prototype default package manager in `src/domain/PackageManager.js`. Future package-manager support should be added by introducing focused modules for lockfile inspection and detector preparation, then wiring them at the orchestration boundary without changing the exported JSON contract.
 
-For local project paths, the backend reads `package-lock.json` directly to build dependency context. For remote `owner/repo` targets, the backend does not clone the repository; Dirty-Waters reads the remote npm artefacts internally, and the exported JSON graph is projected from the parent paths returned in Dirty-Waters evidence. To keep large projects usable in the frontend, this graph intentionally contains only packages with smells and their immediate parents.
+The backend accepts GitHub repository targets in `owner/repo` format. Local project paths are intentionally not supported, because Dirty-Waters analyses GitHub repositories and mixing local dependency graphs with remote Dirty-Waters evidence can produce inconsistent versions, depths, and edges.
+
+For remote `owner/repo` targets, the backend does not clone the repository. It fetches `package.json` and `package-lock.json` from GitHub for graph extraction, while Dirty-Waters analyses the same repository/ref. To keep large projects usable in the frontend, the exported JSON graph intentionally contains only packages with smells and their immediate parents.
 
 ## Dirty-Waters Integration
 
@@ -36,12 +38,6 @@ Required environment:
 $env:GITHUB_API_TOKEN = "<github-api-token>"
 ```
 
-For local project analysis, Dirty-Waters still needs a GitHub repository path in `owner/repo` format. Provide it through either CLI or environment:
-
-```powershell
-$env:GITHUB_REPOSITORY_PATH = "owner/react-project"
-```
-
 Optional environment:
 
 ```powershell
@@ -60,21 +56,7 @@ Run commands from this folder:
 cd backend
 ```
 
-Run a local React/npm project and generate both outputs.
-
-Using the npm script:
-
-```powershell
-npm.cmd run analyze -- --target C:\path\to\project --github-repo owner/react-project --output reports
-```
-
-Using Node directly:
-
-```powershell
-node src/cli.js analyze --target C:\path\to\project --github-repo owner/react-project --output reports
-```
-
-Run against a GitHub repository identifier.
+Run against a GitHub repository identifier and generate both outputs.
 
 Using the npm script:
 
@@ -114,10 +96,10 @@ The equivalent direct Node command is:
 node src/cli.js analyze --target owner/react-project --output reports --dirty-waters-timeout-ms 3600000
 ```
 
-Run the pipeline without Dirty-Waters, useful for validating local graph/export behavior:
+Run the pipeline without Dirty-Waters, useful for validating GitHub package metadata, graph extraction, and exporters:
 
 ```powershell
-node src/cli.js analyze --target C:\path\to\project --skip-dirty-waters --output reports
+node src/cli.js analyze --target owner/react-project --skip-dirty-waters --output reports
 ```
 
 Generated files:
