@@ -1,4 +1,4 @@
-import { BaselineSeverity, BASELINE_SEVERITY_BY_SMELL, SmellTypes } from "../domain/smellCatalog.js";
+import { BaselineSeverity, BASELINE_SEVERITY_BY_SMELL, SmellTypes } from "../domain/SmellCatalog.js";
 
 /** Dimension weights from the dissertation SSSS formula. */
 export const SSSS_WEIGHTS = Object.freeze({

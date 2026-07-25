@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { SsssScorer } from "../src/scoring/SsssScorer.js";
-import { SmellTypes } from "../src/domain/smellCatalog.js";
+import { SmellTypes } from "../src/domain/SmellCatalog.js";
 
 /** Verifies that the implementation matches the SSSS example from the dissertation. */
 test("SsssScorer reproduces the deprecated production dependency example", () => {

@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { DirtyWatersOutputParser } from "../src/detectors/dirty-waters/DirtyWatersOutputParser.js";
-import { SmellTypes } from "../src/domain/smellCatalog.js";
+import { SmellTypes } from "../src/domain/SmellCatalog.js";
 
 /** Verifies translation from Dirty-Waters JSON fields to normalized smell findings. */
 test("DirtyWatersOutputParser maps static result fields to smell findings", () => {
