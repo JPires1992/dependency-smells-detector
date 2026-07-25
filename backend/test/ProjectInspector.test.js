@@ -75,6 +75,8 @@ test("ProjectInspector builds a full npm graph for remote repositories with pack
   assert.deepEqual(requestedRefs, ["main", "main"]);
   assert.equal(inspected.project.repository, "owner/remote-app");
   assert.equal(inspected.project.analysedRef, "main");
+  assert.equal(inspected.manifests.packageJson.name, "remote-app");
+  assert.equal(inspected.manifests.packageLock.lockfileVersion, 3);
   assert.equal(inspected.graph.nodes.filter((node) => node.id !== "root").length, 1);
   assert.ok(inspected.graph.nodes.find((node) => node.id === "react@18.2.0" && node.dependencyType === "production"));
   assert.ok(inspected.graph.edges.find((edge) => edge.source === "root" && edge.target === "react@18.2.0"));
