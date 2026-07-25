@@ -6,5 +6,7 @@ export { DirtyWatersAdapter } from "./detectors/dirty-waters/DirtyWatersAdapter.
 export { DirtyWatersOutputParser } from "./detectors/dirty-waters/DirtyWatersOutputParser.js";
 export { DEFAULT_PACKAGE_MANAGER } from "./domain/PackageManager.js";
 export { SsssScorer } from "./scoring/SsssScorer.js";
+export { VulnerabilityAnalyzerRegistry } from "./vulnerabilities/VulnerabilityAnalyzerRegistry.js";
+export { NpmAuditVulnerabilityAnalyzer } from "./vulnerabilities/NpmAuditVulnerabilityAnalyzer.js";
 export { JsonAnalysisExporter } from "./exporters/JsonAnalysisExporter.js";
 export { MarkdownReportExporter } from "./exporters/MarkdownReportExporter.js";

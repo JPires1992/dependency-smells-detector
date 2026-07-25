@@ -71,6 +71,10 @@ export class ProjectInspector {
         target
       },
       graph,
+      manifests: {
+        packageJson,
+        packageLock
+      },
       warnings
     };
   }

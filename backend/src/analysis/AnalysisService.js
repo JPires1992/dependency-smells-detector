@@ -5,6 +5,9 @@ import { CustomDetectorPlaceholder } from "../detectors/custom/CustomDetectorPla
 import { SsssScorer } from "../scoring/SsssScorer.js";
 import { JsonAnalysisExporter } from "../exporters/JsonAnalysisExporter.js";
 import { MarkdownReportExporter } from "../exporters/MarkdownReportExporter.js";
+import { VulnerabilityAnalyzerRegistry } from "../vulnerabilities/VulnerabilityAnalyzerRegistry.js";
+import { NpmAuditVulnerabilityAnalyzer } from "../vulnerabilities/NpmAuditVulnerabilityAnalyzer.js";
+import { enrichFindingsWithVulnerabilities } from "../vulnerabilities/FindingVulnerabilityEnricher.js";
 
 /** Coordinates project inspection, smell detection, SSSS scoring, and output generation. */
 export class AnalysisService {
@@ -12,6 +15,7 @@ export class AnalysisService {
   constructor({
     inspector = new ProjectInspector(),
     detectorRegistry = null,
+    vulnerabilityAnalyzerRegistry = null,
     scorer = new SsssScorer(),
     jsonExporter = new JsonAnalysisExporter(),
     markdownExporter = new MarkdownReportExporter()
@@ -22,6 +26,11 @@ export class AnalysisService {
       new DetectorRegistry([
         new DirtyWatersAdapter(),
         new CustomDetectorPlaceholder()
+      ]);
+    this.vulnerabilityAnalyzerRegistry =
+      vulnerabilityAnalyzerRegistry ??
+      new VulnerabilityAnalyzerRegistry([
+        new NpmAuditVulnerabilityAnalyzer()
       ]);
     this.scorer = scorer;
     this.jsonExporter = jsonExporter;
@@ -42,14 +51,30 @@ export class AnalysisService {
       analysedRef: analysedRef ?? inspected.project.analysedRef
     };
 
-    const detectionResult = await this.detectorRegistry.detect({
-      project,
-      graph: inspected.graph,
-      githubToken,
-      workspaceDirectory
-    });
-    const warnings = [...inspected.warnings, ...detectionResult.warnings];
-    const smells = this.scorer.scoreFindings(detectionResult.findings, inspected.graph);
+    const [detectionResult, vulnerabilityResult] = await Promise.all([
+      this.detectorRegistry.detect({
+        project,
+        graph: inspected.graph,
+        githubToken,
+        workspaceDirectory
+      }),
+      this.vulnerabilityAnalyzerRegistry.analyze({
+        project,
+        graph: inspected.graph,
+        manifests: inspected.manifests,
+        workspaceDirectory
+      })
+    ]);
+    const warnings = [
+      ...(inspected.warnings ?? []),
+      ...(detectionResult.warnings ?? []),
+      ...(vulnerabilityResult.warnings ?? [])
+    ];
+    const enrichedFindings = enrichFindingsWithVulnerabilities(
+      detectionResult.findings,
+      vulnerabilityResult
+    );
+    const smells = this.scorer.scoreFindings(enrichedFindings, inspected.graph);
 
     const jsonResult = await this.jsonExporter.export({
       outputDirectory,
