@@ -77,6 +77,8 @@ test("ProjectInspector builds a full npm graph for remote repositories with pack
   assert.equal(inspected.project.analysedRef, "main");
   assert.equal(inspected.manifests.packageJson.name, "remote-app");
   assert.equal(inspected.manifests.packageLock.lockfileVersion, 3);
+  assert.equal(inspected.manifests.lockfileStatus, "present");
+  assert.equal(inspected.manifests.lockfilePath, "package-lock.json");
   assert.equal(inspected.graph.nodes.filter((node) => node.id !== "root").length, 1);
   assert.ok(inspected.graph.nodes.find((node) => node.id === "react@18.2.0" && node.dependencyType === "production"));
   assert.ok(inspected.graph.edges.find((edge) => edge.source === "root" && edge.target === "react@18.2.0"));
@@ -177,4 +179,121 @@ test("ProjectInspector rejects local project paths", async () => {
     () => inspector.inspect({ target: "C:\\Projects\\local-app" }),
     /Local project paths are not supported/
   );
+});
+
+/** Verifies confirmed lockfile absence and direct manifest graph fallback for custom analysis. */
+test("ProjectInspector confirms a missing npm lockfile without discarding direct dependencies", async () => {
+  const fetcher = {
+    async fetchRepositoryMetadata() {
+      return { defaultBranch: "main" };
+    },
+    async fetch() {
+      return {
+        name: "remote-app",
+        version: "1.0.0",
+        dependencies: { react: "^18.2.0" },
+        devDependencies: { vite: "^5.0.0" }
+      };
+    },
+    async fetchJsonFile() {
+      const error = new Error("Not Found");
+      error.statusCode = 404;
+      throw error;
+    }
+  };
+  const inspector = new ProjectInspector({ githubPackageJsonFetcher: fetcher });
+
+  const inspected = await inspector.inspect({
+    target: "owner/remote-app",
+    githubToken: "token"
+  });
+
+  assert.equal(inspected.manifests.lockfileStatus, "missing");
+  assert.equal(inspected.manifests.packageLock, null);
+  assert.equal(inspected.graph.nodes.length, 3);
+  assert.ok(inspected.graph.nodes.find((node) => node.id === "react" && node.depth === 1));
+  assert.ok(inspected.graph.nodes.find((node) => node.id === "vite" && node.dependencyType === "development"));
+  assert.equal(inspected.graph.edges.length, 2);
+});
+
+/** Verifies npm-shrinkwrap is accepted as an npm lockfile and used for graph extraction. */
+test("ProjectInspector falls back to npm-shrinkwrap.json", async () => {
+  const requestedFiles = [];
+  const fetcher = {
+    async fetchRepositoryMetadata() {
+      return { defaultBranch: "main" };
+    },
+    async fetch() {
+      return {
+        name: "remote-app",
+        version: "1.0.0",
+        dependencies: { react: "^18.2.0" }
+      };
+    },
+    async fetchJsonFile({ filePath }) {
+      requestedFiles.push(filePath);
+      if (filePath === "package-lock.json") {
+        const error = new Error("Not Found");
+        error.statusCode = 404;
+        throw error;
+      }
+
+      return {
+        name: "remote-app",
+        version: "1.0.0",
+        lockfileVersion: 3,
+        packages: {
+          "": {
+            name: "remote-app",
+            version: "1.0.0",
+            dependencies: { react: "^18.2.0" }
+          },
+          "node_modules/react": {
+            version: "18.2.0"
+          }
+        }
+      };
+    }
+  };
+  const inspector = new ProjectInspector({ githubPackageJsonFetcher: fetcher });
+
+  const inspected = await inspector.inspect({
+    target: "owner/remote-app",
+    githubToken: "token"
+  });
+
+  assert.deepEqual(requestedFiles, ["package-lock.json", "npm-shrinkwrap.json"]);
+  assert.equal(inspected.manifests.lockfileStatus, "present");
+  assert.equal(inspected.manifests.lockfilePath, "npm-shrinkwrap.json");
+  assert.ok(inspected.graph.nodes.find((node) => node.id === "react@18.2.0"));
+});
+
+/** Verifies API failures remain inconclusive instead of being reported as missing lockfiles. */
+test("ProjectInspector preserves unavailable npm lockfile status on GitHub failures", async () => {
+  const fetcher = {
+    async fetchRepositoryMetadata() {
+      return { defaultBranch: "main" };
+    },
+    async fetch() {
+      return {
+        name: "remote-app",
+        version: "1.0.0",
+        dependencies: { react: "^18.2.0" }
+      };
+    },
+    async fetchJsonFile() {
+      const error = new Error("GitHub unavailable");
+      error.statusCode = 503;
+      throw error;
+    }
+  };
+  const inspector = new ProjectInspector({ githubPackageJsonFetcher: fetcher });
+
+  const inspected = await inspector.inspect({
+    target: "owner/remote-app",
+    githubToken: "token"
+  });
+
+  assert.equal(inspected.manifests.lockfileStatus, "unavailable");
+  assert.match(inspected.warnings.at(-1), /Could not fetch a remote npm lockfile/);
 });
