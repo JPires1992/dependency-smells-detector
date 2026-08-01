@@ -1,4 +1,4 @@
-import { PackageLockGraphExtractor, createRootOnlyGraph } from "./PackageLockGraphExtractor.js";
+import { PackageLockGraphExtractor, createManifestGraph } from "./PackageLockGraphExtractor.js";
 import { GitHubPackageJsonFetcher } from "./GitHubPackageJsonFetcher.js";
 import { isGithubRepositoryIdentifier, normalizeGithubRepository } from "../utils/GithubRepository.js";
 import { DEFAULT_PACKAGE_MANAGER } from "../domain/PackageManager.js";
@@ -34,7 +34,7 @@ export class ProjectInspector {
     const warnings = [];
     const effectiveRef = await this.#resolveRemoteRef({ repository, analysedRef, githubToken, warnings });
     let packageJson = { name };
-    let packageLock = null;
+    let packageJsonStatus = "unavailable";
 
     try {
       packageJson = await this.githubPackageJsonFetcher.fetch({
@@ -42,24 +42,26 @@ export class ProjectInspector {
         ref: effectiveRef,
         token: githubToken
       });
+      packageJsonStatus = "present";
     } catch (error) {
       warnings.push(`Could not fetch remote package.json from GitHub: ${error.message}`);
     }
 
-    try {
-      packageLock = await this.githubPackageJsonFetcher.fetchJsonFile({
-        repository,
-        filePath: "package-lock.json",
-        ref: effectiveRef,
-        token: githubToken
-      });
-    } catch (error) {
-      warnings.push(`Could not fetch remote package-lock.json from GitHub: ${error.message}`);
+    const lockfileResult = await this.#fetchNpmLockfile({
+      repository,
+      effectiveRef,
+      githubToken
+    });
+    if (lockfileResult.status === "unavailable") {
+      warnings.push(`Could not fetch a remote npm lockfile from GitHub: ${lockfileResult.error.message}`);
+    } else if (lockfileResult.status === "missing" && packageJsonStatus !== "present") {
+      lockfileResult.status = "unavailable";
+      warnings.push("Could not confirm whether an npm lockfile exists because package.json was unavailable.");
     }
 
-    const graph = packageLock
-      ? this.graphExtractor.extractLockfile(packageLock, packageJson)
-      : createRootOnlyGraph(packageJson);
+    const graph = lockfileResult.document
+      ? this.graphExtractor.extractLockfile(lockfileResult.document, packageJson)
+      : createManifestGraph(packageJson);
     graph.rootDependencyTypesByName = buildRootDependencyTypesByName(packageJson);
 
     return {
@@ -73,10 +75,35 @@ export class ProjectInspector {
       graph,
       manifests: {
         packageJson,
-        packageLock
+        packageJsonStatus,
+        packageLock: lockfileResult.document,
+        lockfileStatus: lockfileResult.status,
+        lockfilePath: lockfileResult.path,
+        checkedLockfilePaths: ["package-lock.json", "npm-shrinkwrap.json"]
       },
       warnings
     };
+  }
+
+  /** Fetches the first npm lockfile supported by the current backend without hiding API failures. */
+  async #fetchNpmLockfile({ repository, effectiveRef, githubToken }) {
+    for (const filePath of ["package-lock.json", "npm-shrinkwrap.json"]) {
+      try {
+        const document = await this.githubPackageJsonFetcher.fetchJsonFile({
+          repository,
+          filePath,
+          ref: effectiveRef,
+          token: githubToken
+        });
+        return { status: "present", path: filePath, document, error: null };
+      } catch (error) {
+        if (error.statusCode !== 404) {
+          return { status: "unavailable", path: null, document: null, error };
+        }
+      }
+    }
+
+    return { status: "missing", path: null, document: null, error: null };
   }
 
   /** Resolves the explicit ref or GitHub default branch used by all remote analysis steps. */

@@ -1,5 +1,15 @@
 import https from "node:https";
 
+/** Error returned for non-successful GitHub API responses with a machine-readable status code. */
+export class GitHubApiError extends Error {
+  /** Creates an API error while preserving the HTTP status for caller decisions. */
+  constructor(statusCode, body) {
+    super(`GitHub API returned ${statusCode}: ${body}`);
+    this.name = "GitHubApiError";
+    this.statusCode = statusCode;
+  }
+}
+
 /** Fetches package.json from GitHub repositories, including private repos when a token is provided. */
 export class GitHubPackageJsonFetcher {
   /** Loads repository metadata needed to resolve the default branch when no ref is provided. */
@@ -52,7 +62,7 @@ function requestJson(url, token) {
         });
         response.on("end", () => {
           if (response.statusCode < 200 || response.statusCode >= 300) {
-            reject(new Error(`GitHub API returned ${response.statusCode}: ${body}`));
+            reject(new GitHubApiError(response.statusCode, body));
             return;
           }
 

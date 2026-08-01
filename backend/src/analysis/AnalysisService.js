@@ -1,7 +1,7 @@
 import { ProjectInspector } from "./ProjectInspector.js";
 import { DetectorRegistry } from "../detectors/DetectorRegistry.js";
 import { DirtyWatersAdapter } from "../detectors/dirty-waters/DirtyWatersAdapter.js";
-import { CustomDetectorPlaceholder } from "../detectors/custom/CustomDetectorPlaceholder.js";
+import { CustomSmellDetector } from "../detectors/custom/CustomSmellDetector.js";
 import { SsssScorer } from "../scoring/SsssScorer.js";
 import { JsonAnalysisExporter } from "../exporters/JsonAnalysisExporter.js";
 import { MarkdownReportExporter } from "../exporters/MarkdownReportExporter.js";
@@ -25,7 +25,7 @@ export class AnalysisService {
       detectorRegistry ??
       new DetectorRegistry([
         new DirtyWatersAdapter(),
-        new CustomDetectorPlaceholder()
+        new CustomSmellDetector()
       ]);
     this.vulnerabilityAnalyzerRegistry =
       vulnerabilityAnalyzerRegistry ??
@@ -55,6 +55,7 @@ export class AnalysisService {
       this.detectorRegistry.detect({
         project,
         graph: inspected.graph,
+        manifests: inspected.manifests,
         githubToken,
         workspaceDirectory
       }),

@@ -3,7 +3,7 @@ import path from "node:path";
 import { AnalysisService } from "./analysis/AnalysisService.js";
 import { DetectorRegistry } from "./detectors/DetectorRegistry.js";
 import { DirtyWatersAdapter, parsePositiveInteger } from "./detectors/dirty-waters/DirtyWatersAdapter.js";
-import { CustomDetectorPlaceholder } from "./detectors/custom/CustomDetectorPlaceholder.js";
+import { CustomSmellDetector } from "./detectors/custom/CustomSmellDetector.js";
 
 const BOOLEAN_FLAGS = new Set(["help", "skip-dirty-waters", "require-dirty-waters"]);
 const VALUE_FLAGS = new Set(["target", "t", "output", "o", "ref", "dirty-waters-timeout-ms"]);
@@ -28,7 +28,7 @@ async function main() {
 
   const outputDirectory = path.resolve(args.output ?? args.o ?? "reports");
   
-  // Initialize the detector registry with the Dirty-Waters adapter and any custom detectors.
+  // Compose enabled detector modules while keeping CLI options outside detector implementations.
   const detectors = [];
   if (!args["skip-dirty-waters"]) {
     detectors.push(
@@ -38,7 +38,7 @@ async function main() {
       })
     );
   }
-  detectors.push(new CustomDetectorPlaceholder());
+  detectors.push(new CustomSmellDetector());
 
   const service = new AnalysisService({
     detectorRegistry: new DetectorRegistry(detectors)

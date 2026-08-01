@@ -158,6 +158,45 @@ export function createRootOnlyGraph(packageJson = {}) {
   };
 }
 
+/** Creates a direct-dependency graph from package.json when no resolved npm lockfile is available. */
+export function createManifestGraph(packageJson = {}) {
+  const graph = createRootOnlyGraph(packageJson);
+  const rootNode = graph.nodes[0];
+  const dependencies = new Map();
+
+  for (const dependencyName of Object.keys(packageJson.devDependencies ?? {})) {
+    dependencies.set(dependencyName, "development");
+  }
+
+  for (const dependencyName of [
+    ...Object.keys(packageJson.dependencies ?? {}),
+    ...Object.keys(packageJson.optionalDependencies ?? {}),
+    ...Object.keys(packageJson.peerDependencies ?? {})
+  ]) {
+    dependencies.set(dependencyName, "production");
+  }
+
+  for (const [dependencyName, dependencyType] of dependencies) {
+    const node = {
+      id: toPackageNodeId(dependencyName, null),
+      name: dependencyName,
+      version: null,
+      dependencyType,
+      depth: 1,
+      hasSmells: false,
+      highestSeverity: null
+    };
+    graph.nodes.push(node);
+    graph.edges.push({
+      source: rootNode.id,
+      target: node.id,
+      relationship: "direct"
+    });
+  }
+
+  return graph;
+}
+
 /** Creates the canonical root node consumed by the frontend contract. */
 function createRootNode(name, version) {
   return {
