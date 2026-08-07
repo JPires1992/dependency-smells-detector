@@ -245,3 +245,47 @@ test("projectSmellsOntoGraph keeps production evidence depth when development ev
   assert.equal(debugNode.dependencyType, "production");
   assert.equal(debugNode.depth, 3);
 });
+
+/** Verifies undeclared imports become synthetic direct nodes even when a transitive package exists. */
+test("projectSmellsOntoGraph projects missing dependencies from explicit graph context", () => {
+  const graph = {
+    nodes: [
+      { id: "root", name: "app", version: "1.0.0", dependencyType: "root", depth: 0 },
+      { id: "missing@0.5.0", name: "missing", version: "0.5.0", dependencyType: "production", depth: 3 }
+    ],
+    edges: []
+  };
+  const smells = [{
+    id: "SMELL-005",
+    affectedPackage: "missing",
+    affectedVersion: null,
+    score: { finalRating: "Medium" },
+    evidenceData: {
+      graphContext: {
+        synthetic: true,
+        depth: 1,
+        dependencyType: "unknown",
+        parentNodeIds: ["root"]
+      }
+    }
+  }];
+
+  const projected = projectSmellsOntoGraph(graph, smells);
+
+  assert.deepEqual(projected.nodes.find((node) => node.id === "missing"), {
+    id: "missing",
+    name: "missing",
+    version: null,
+    dependencyType: "unknown",
+    depth: 1,
+    hasSmells: true,
+    highestSeverity: "Medium"
+  });
+  assert.ok(projected.nodes.find((node) => node.id === "root"));
+  assert.deepEqual(projected.edges, [{
+    source: "root",
+    target: "missing",
+    relationship: "direct",
+    smellIds: ["SMELL-005"]
+  }]);
+});

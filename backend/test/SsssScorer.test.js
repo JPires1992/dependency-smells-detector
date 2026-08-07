@@ -33,3 +33,29 @@ test("SsssScorer reproduces the deprecated production dependency example", () =>
   assert.equal(scored.score.finalScore, 86.5);
   assert.equal(scored.score.finalRating, "High");
 });
+
+/** Verifies explicit detector reachability prevents accidental transitive-node scoring. */
+test("SsssScorer honors explicit reachability evidence for missing dependencies", () => {
+  const graph = {
+    nodes: [{
+      id: "missing@1.0.0",
+      name: "missing",
+      version: "1.0.0",
+      dependencyType: "production",
+      depth: 3
+    }],
+    edges: []
+  };
+  const finding = {
+    type: SmellTypes.MISSING_DEPENDENCY,
+    affectedPackage: "missing",
+    affectedVersion: null,
+    detectionSource: "KnipAdapter",
+    evidence: "Missing.",
+    evidenceData: { productionReachabilityValue: 0.5 }
+  };
+
+  const [scored] = new SsssScorer().scoreFindings([finding], graph);
+
+  assert.equal(scored.score.P, 0.5);
+});
