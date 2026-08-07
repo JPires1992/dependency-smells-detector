@@ -146,6 +146,16 @@ export function productionReachabilityValueForNode(node) {
   return 0.5;
 }
 
+/** Derives P from explicit detector evidence before consulting dependency graph metadata. */
+export function productionReachabilityValueForFinding(finding, node) {
+  const explicitValue = finding?.evidenceData?.productionReachabilityValue;
+  if (typeof explicitValue === "number") {
+    return clamp01(explicitValue);
+  }
+
+  return productionReachabilityValueForNode(node);
+}
+
 /** Keeps externally provided dimension values inside the SSSS 0-1 range. */
 function clamp01(value) {
   return Math.max(0, Math.min(1, value));

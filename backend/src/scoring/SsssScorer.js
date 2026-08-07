@@ -2,7 +2,7 @@ import { findNodeForPackage } from "../analysis/PackageLockGraphExtractor.js";
 import {
   baselineSeverityForSmell,
   baselineValueForSmell,
-  productionReachabilityValueForNode,
+  productionReachabilityValueForFinding,
   ratingForScore,
   responsivenessValueForFinding,
   SSSS_WEIGHTS,
@@ -20,7 +20,7 @@ export class SsssScorer {
   scoreFinding(finding, graph, index = 0) {
     const node = findNodeForPackage(graph, finding.affectedPackage, finding.affectedVersion);
     const S = roundDimension(baselineValueForSmell(finding.type));
-    const P = roundDimension(productionReachabilityValueForNode(node));
+    const P = roundDimension(productionReachabilityValueForFinding(finding, node));
     const V = roundDimension(vulnerabilityValueForFinding(finding));
     const R = roundDimension(responsivenessValueForFinding(finding));
     const finalScore = roundScore(100 * (SSSS_WEIGHTS.S * S + SSSS_WEIGHTS.P * P + SSSS_WEIGHTS.V * V + SSSS_WEIGHTS.R * R));

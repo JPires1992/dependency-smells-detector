@@ -27,7 +27,7 @@ export function projectSmellsOntoGraph(graph, scoredSmells) {
   const smellsByPackageId = groupSmellsByPackageId(scoredSmells);
 
   for (const smell of scoredSmells) {
-    const evidenceMetadata = getPackageEvidenceMetadata(smell.evidenceData?.parent, {
+    const evidenceMetadata = getPackageEvidenceMetadata(smell, {
       name: smell.affectedPackage,
       version: smell.affectedVersion
     }, rootDependencyTypesByName);
@@ -35,7 +35,8 @@ export function projectSmellsOntoGraph(graph, scoredSmells) {
       name: smell.affectedPackage,
       version: smell.affectedVersion,
       depth: evidenceMetadata.depth,
-      dependencyType: evidenceMetadata.dependencyType
+      dependencyType: evidenceMetadata.dependencyType,
+      synthetic: smell.evidenceData?.graphContext?.synthetic === true
     });
 
     markSmellOnNode(smelledNode, smell);
@@ -94,7 +95,9 @@ function groupSmellsByPackageId(scoredSmells) {
 /** Adds or returns a package node from source graph metadata or smell evidence. */
 function upsertPackageNode(projectedNodes, sourceNodeById, sourceNodeByName, packageRef) {
   const tentativeId = packageRef.id ?? toPackageNodeId(packageRef.name, packageRef.version);
-  const sourceNode = sourceNodeById.get(tentativeId) ?? sourceNodeByName.get(packageRef.name);
+  const sourceNode = packageRef.synthetic
+    ? null
+    : sourceNodeById.get(tentativeId) ?? sourceNodeByName.get(packageRef.name);
   const id = sourceNode?.id === "root" ? "root" : tentativeId;
   const existing = projectedNodes.get(id);
   if (existing) {
@@ -151,6 +154,11 @@ function markSmellOnNode(node, smell) {
 
 /** Finds immediate parent packages from graph edges first, then Dirty-Waters parent evidence. */
 function findImmediateParents(smell, graph, rootDependencyTypesByName) {
+  const explicitParents = findGraphContextParents(smell.evidenceData?.graphContext, graph);
+  if (smell.evidenceData?.graphContext?.synthetic === true) {
+    return explicitParents;
+  }
+
   const smelledId = toPackageNodeId(smell.affectedPackage, smell.affectedVersion);
   const graphParents = findGraphParents(smelledId, graph);
   const evidenceParents = parseDirtyWatersImmediateParents(smell.evidenceData?.parent, {
@@ -161,7 +169,23 @@ function findImmediateParents(smell, graph, rootDependencyTypesByName) {
     return mergeParentMetadata(graphParents, evidenceParents);
   }
 
-  return evidenceParents;
+  return evidenceParents.length > 0 ? evidenceParents : explicitParents;
+}
+
+/** Resolves generic detector-provided parent node ids against the source graph. */
+function findGraphContextParents(graphContext, graph) {
+  const nodeById = new Map((graph?.nodes ?? []).map((node) => [node.id, node]));
+
+  return (graphContext?.parentNodeIds ?? [])
+    .map((nodeId) => nodeById.get(nodeId))
+    .filter(Boolean)
+    .map((node) => ({
+      id: node.id,
+      name: node.name,
+      version: node.version,
+      depth: node.depth,
+      dependencyType: node.dependencyType
+    }));
 }
 
 /** Merges source graph parents with richer Dirty-Waters evidence metadata when available. */
@@ -250,8 +274,19 @@ export function parseDirtyWatersPackageRefs(parentEvidence, rootDependencyTypesB
 }
 
 /** Finds the best depth/type metadata for a package from Dirty-Waters evidence. */
-function getPackageEvidenceMetadata(parentEvidence, affectedPackage, rootDependencyTypesByName) {
-  const packageRefs = parseDirtyWatersPackageRefs(parentEvidence, rootDependencyTypesByName);
+function getPackageEvidenceMetadata(smell, affectedPackage, rootDependencyTypesByName) {
+  const graphContext = smell.evidenceData?.graphContext;
+  if (graphContext) {
+    return {
+      depth: graphContext.depth ?? null,
+      dependencyType: graphContext.dependencyType ?? "unknown"
+    };
+  }
+
+  const packageRefs = parseDirtyWatersPackageRefs(
+    smell.evidenceData?.parent,
+    rootDependencyTypesByName
+  );
   const matches = packageRefs.filter((packageRef) => {
     if (packageRef.name !== affectedPackage.name) {
       return false;

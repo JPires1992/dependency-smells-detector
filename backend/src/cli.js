@@ -4,9 +4,25 @@ import { AnalysisService } from "./analysis/AnalysisService.js";
 import { DetectorRegistry } from "./detectors/DetectorRegistry.js";
 import { DirtyWatersAdapter, parsePositiveInteger } from "./detectors/dirty-waters/DirtyWatersAdapter.js";
 import { CustomSmellDetector } from "./detectors/custom/CustomSmellDetector.js";
+import { KnipAdapter } from "./detectors/source-usage/KnipAdapter.js";
+import { SourceUsageSmellDetector } from "./detectors/source-usage/SourceUsageSmellDetector.js";
 
-const BOOLEAN_FLAGS = new Set(["help", "skip-dirty-waters", "require-dirty-waters"]);
-const VALUE_FLAGS = new Set(["target", "t", "output", "o", "ref", "dirty-waters-timeout-ms"]);
+const BOOLEAN_FLAGS = new Set([
+  "help",
+  "skip-dirty-waters",
+  "require-dirty-waters",
+  "skip-source-usage",
+  "require-source-usage"
+]);
+const VALUE_FLAGS = new Set([
+  "target",
+  "t",
+  "output",
+  "o",
+  "ref",
+  "dirty-waters-timeout-ms",
+  "source-usage-timeout-ms"
+]);
 
 /** Entry point that parses CLI arguments and runs the analysis command. */
 async function main() {
@@ -39,6 +55,16 @@ async function main() {
     );
   }
   detectors.push(new CustomSmellDetector());
+  if (!args["skip-source-usage"]) {
+    detectors.push(
+      new SourceUsageSmellDetector({
+        required: Boolean(args["require-source-usage"]),
+        analyzer: new KnipAdapter({
+          timeoutMs: parsePositiveInteger(args["source-usage-timeout-ms"], undefined)
+        })
+      })
+    );
+  }
 
   const service = new AnalysisService({
     detectorRegistry: new DetectorRegistry(detectors)
@@ -105,11 +131,22 @@ Options:
                               Dirty-Waters execution timeout. Defaults to 1800000.
   --skip-dirty-waters         Run the pipeline without the external adapter.
   --require-dirty-waters      Fail the analysis if Dirty-Waters fails.
+  --source-usage-timeout-ms <ms>
+                              Knip source analysis timeout. Defaults to 300000.
+  --skip-source-usage         Skip unused and missing dependency detection.
+  --require-source-usage      Fail the analysis if source-usage detection fails.
 
 Environment:
   GITHUB_API_TOKEN            Required by Dirty-Waters for GitHub API access.
   DIRTY_WATERS_TIMEOUT_MS     Dirty-Waters timeout override in milliseconds.
   DIRTY_WATERS_AUTO_INSTALL   Set to false to disable automatic installation.
+  SOURCE_USAGE_TIMEOUT_MS     Knip source analysis timeout override in milliseconds.
+  SOURCE_USAGE_DOWNLOAD_TIMEOUT_MS
+                              GitHub source archive download timeout. Defaults to 120000.
+  SOURCE_USAGE_MAX_ARCHIVE_BYTES
+                              Maximum compressed repository archive size.
+  SOURCE_USAGE_MAX_EXTRACTED_BYTES
+                              Maximum extracted repository size.
 `);
 }
 
