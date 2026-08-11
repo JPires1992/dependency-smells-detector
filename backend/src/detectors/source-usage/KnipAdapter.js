@@ -72,7 +72,7 @@ export class KnipAdapter {
         ],
         {
           cwd: projectDirectory,
-          env: { ...env, NO_COLOR: "1" },
+          env: createKnipEnvironment(env),
           timeoutMs: this.timeoutMs
         }
       );
@@ -93,6 +93,13 @@ export class KnipAdapter {
       await rm(configPath, { force: true });
     }
   }
+}
+
+/** Builds a color-neutral child environment without mutating the caller's variables. */
+function createKnipEnvironment(env) {
+  const childEnvironment = { ...env, NO_COLOR: "1" };
+  delete childEnvironment.FORCE_COLOR;
+  return childEnvironment;
 }
 
 /** Rejects reports produced after Knip encountered an internal or configuration error. */
