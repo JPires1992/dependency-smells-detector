@@ -6,11 +6,15 @@ import { DirtyWatersAdapter, parsePositiveInteger } from "./detectors/dirty-wate
 import { CustomSmellDetector } from "./detectors/custom/CustomSmellDetector.js";
 import { KnipAdapter } from "./detectors/source-usage/KnipAdapter.js";
 import { SourceUsageSmellDetector } from "./detectors/source-usage/SourceUsageSmellDetector.js";
+import { NpmRegistryMetadataProvider } from "./detectors/peer-spin/NpmRegistryMetadataProvider.js";
+import { PeerSpinDetector } from "./detectors/peer-spin/PeerSpinDetector.js";
 
 const BOOLEAN_FLAGS = new Set([
   "help",
   "skip-dirty-waters",
   "require-dirty-waters",
+  "skip-peer-spin",
+  "require-peer-spin",
   "skip-source-usage",
   "require-source-usage"
 ]);
@@ -21,6 +25,9 @@ const VALUE_FLAGS = new Set([
   "o",
   "ref",
   "dirty-waters-timeout-ms",
+  "peer-spin-registry-timeout-ms",
+  "peer-spin-registry-concurrency",
+  "peer-spin-max-conflicts",
   "source-usage-timeout-ms"
 ]);
 
@@ -55,6 +62,24 @@ async function main() {
     );
   }
   detectors.push(new CustomSmellDetector());
+  if (!args["skip-peer-spin"]) {
+    detectors.push(
+      new PeerSpinDetector({
+        required: Boolean(args["require-peer-spin"]),
+        maxConflicts: parsePositiveInteger(args["peer-spin-max-conflicts"], undefined),
+        verificationConcurrency: parsePositiveInteger(
+          args["peer-spin-registry-concurrency"],
+          undefined
+        ),
+        metadataProvider: new NpmRegistryMetadataProvider({
+          timeoutMs: parsePositiveInteger(
+            args["peer-spin-registry-timeout-ms"],
+            undefined
+          )
+        })
+      })
+    );
+  }
   if (!args["skip-source-usage"]) {
     detectors.push(
       new SourceUsageSmellDetector({
@@ -131,6 +156,14 @@ Options:
                               Dirty-Waters execution timeout. Defaults to 1800000.
   --skip-dirty-waters         Run the pipeline without the external adapter.
   --require-dirty-waters      Fail the analysis if Dirty-Waters fails.
+  --peer-spin-registry-timeout-ms <ms>
+                              Timeout for each npm registry verification. Defaults to 30000.
+  --peer-spin-max-conflicts <count>
+                              Maximum PeerSpin candidates verified per analysis. Defaults to 100.
+  --peer-spin-registry-concurrency <count>
+                              Concurrent registry verifications. Defaults to 4.
+  --skip-peer-spin            Skip PeerSpin dependency-resolution detection.
+  --require-peer-spin         Fail the analysis if PeerSpin detection fails.
   --source-usage-timeout-ms <ms>
                               Knip source analysis timeout. Defaults to 300000.
   --skip-source-usage         Skip unused and missing dependency detection.
@@ -140,6 +173,13 @@ Environment:
   GITHUB_API_TOKEN            Required by Dirty-Waters for GitHub API access.
   DIRTY_WATERS_TIMEOUT_MS     Dirty-Waters timeout override in milliseconds.
   DIRTY_WATERS_AUTO_INSTALL   Set to false to disable automatic installation.
+  NPM_REGISTRY_URL            Registry used for exact PeerSpin manifest verification.
+  NPM_REGISTRY_TOKEN          Optional bearer token for private registry packages.
+  PEER_SPIN_REGISTRY_TIMEOUT_MS
+                              Registry verification timeout. Defaults to 30000.
+  PEER_SPIN_MAX_CONFLICTS     Maximum conflicts verified per analysis. Defaults to 100.
+  PEER_SPIN_REGISTRY_CONCURRENCY
+                              Concurrent registry verifications. Defaults to 4.
   SOURCE_USAGE_TIMEOUT_MS     Knip source analysis timeout override in milliseconds.
   SOURCE_USAGE_DOWNLOAD_TIMEOUT_MS
                               GitHub source archive download timeout. Defaults to 120000.

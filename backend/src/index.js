@@ -9,6 +9,10 @@ export { NpmDependencySpecifierParser } from "./detectors/custom/NpmDependencySp
 export { SourceUsageSmellDetector } from "./detectors/source-usage/SourceUsageSmellDetector.js";
 export { KnipAdapter } from "./detectors/source-usage/KnipAdapter.js";
 export { KnipOutputParser } from "./detectors/source-usage/KnipOutputParser.js";
+export { PeerSpinDetector } from "./detectors/peer-spin/PeerSpinDetector.js";
+export { PeerDependencyModelBuilder } from "./detectors/peer-spin/PeerDependencyModelBuilder.js";
+export { NodeReplacementConflictDetector } from "./detectors/peer-spin/NodeReplacementConflictDetector.js";
+export { NpmRegistryMetadataProvider } from "./detectors/peer-spin/NpmRegistryMetadataProvider.js";
 export { DEFAULT_PACKAGE_MANAGER } from "./domain/PackageManager.js";
 export { SsssScorer } from "./scoring/SsssScorer.js";
 export { VulnerabilityAnalyzerRegistry } from "./vulnerabilities/VulnerabilityAnalyzerRegistry.js";
