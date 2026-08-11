@@ -85,6 +85,8 @@ test("KnipAdapter executes dependency-only analysis with a static temporary conf
         "--no-exit-code"
       ]);
       assert.equal(options.cwd, projectDirectory);
+      assert.equal(options.env.NO_COLOR, "1");
+      assert.equal(options.env.FORCE_COLOR, undefined);
       await access(configPath);
       assert.deepEqual(JSON.parse(await readFile(configPath, "utf8")), {
         vite: {
@@ -96,7 +98,10 @@ test("KnipAdapter executes dependency-only analysis with a static temporary conf
     }
   });
 
-  const result = await adapter.analyze({ projectDirectory });
+  const result = await adapter.analyze({
+    projectDirectory,
+    env: { PATH: process.env.PATH, FORCE_COLOR: "3" }
+  });
 
   assert.deepEqual(result, { report: { issues: [] }, warnings: [] });
   await assert.rejects(() => access(configPath));
