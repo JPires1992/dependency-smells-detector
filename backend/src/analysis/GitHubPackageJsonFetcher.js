@@ -12,11 +12,14 @@ export class GitHubApiError extends Error {
 
 /** Fetches package.json from GitHub repositories, including private repos when a token is provided. */
 export class GitHubPackageJsonFetcher {
-  /** Loads repository metadata needed to resolve the default branch when no ref is provided. */
+  /** Loads repository identity and activity metadata used by ref resolution and root scoring. */
   async fetchRepositoryMetadata({ repository, token = null }) {
     const response = await requestJson(new URL(`https://api.github.com/repos/${repository}`), token);
     return {
-      defaultBranch: response.default_branch || null
+      defaultBranch: response.default_branch || null,
+      archived: typeof response.archived === "boolean" ? response.archived : null,
+      pushedAt: response.pushed_at || null,
+      metadataSource: "GitHub Repository"
     };
   }
 

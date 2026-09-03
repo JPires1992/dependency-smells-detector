@@ -14,12 +14,14 @@ export class DetectorRegistry {
   async detect(context) {
     const findings = [];
     const warnings = [];
+    const packageMetadata = {};
 
     for (const detector of this.detectors) {
       try {
         const result = await detector.detect(context);
         findings.push(...(result.findings ?? []));
         warnings.push(...(result.warnings ?? []));
+        mergePackageMetadata(packageMetadata, result.packageMetadata);
       } catch (error) {
         if (detector.required) {
           throw error;
@@ -29,6 +31,16 @@ export class DetectorRegistry {
       }
     }
 
-    return { findings, warnings };
+    return { findings, warnings, packageMetadata };
+  }
+}
+
+/** Merges detector observations by exact package id without discarding earlier fields. */
+function mergePackageMetadata(target, incoming = {}) {
+  for (const [packageId, metadata] of Object.entries(incoming ?? {})) {
+    target[packageId] = {
+      ...(target[packageId] ?? {}),
+      ...metadata
+    };
   }
 }

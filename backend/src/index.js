@@ -17,6 +17,11 @@ export { PackageGovernanceDetector } from "./detectors/package-governance/Packag
 export { GovernanceThresholdPolicy } from "./detectors/package-governance/GovernanceThresholdPolicy.js";
 export { DomainRegistrationVerifier } from "./detectors/package-governance/DomainRegistrationVerifier.js";
 export { NpmRegistryClient } from "./registry/npm/NpmRegistryClient.js";
+export { ResponsivenessAnalyzerRegistry } from "./responsiveness/ResponsivenessAnalyzerRegistry.js";
+export { NpmResponsivenessAnalyzer } from "./responsiveness/NpmResponsivenessAnalyzer.js";
+export { NpmPackageActivityProvider } from "./responsiveness/NpmPackageActivityProvider.js";
+export { ResponsivenessPolicy } from "./responsiveness/ResponsivenessPolicy.js";
+export { enrichFindingsWithResponsiveness } from "./responsiveness/FindingResponsivenessEnricher.js";
 export { DEFAULT_PACKAGE_MANAGER } from "./domain/PackageManager.js";
 export { SsssScorer } from "./scoring/SsssScorer.js";
 export { VulnerabilityAnalyzerRegistry } from "./vulnerabilities/VulnerabilityAnalyzerRegistry.js";

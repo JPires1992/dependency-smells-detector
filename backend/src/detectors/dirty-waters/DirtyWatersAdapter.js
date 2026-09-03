@@ -107,11 +107,13 @@ export class DirtyWatersAdapter {
       rawResultPath: artifacts.staticResultsPath,
       markdownReportPath: artifacts.markdownReportPath
     });
+    const packageMetadata = this.parser.parsePackageMetadata(staticResults);
 
     return {
       findings,
       warnings: [],
-      artifacts
+      artifacts,
+      packageMetadata
     };
   }
 

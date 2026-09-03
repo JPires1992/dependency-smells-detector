@@ -46,6 +46,12 @@ export class NpmRegistryClient {
     );
   }
 
+  /** Returns the complete package document including release timestamps and versions. */
+  async getPackageDocument(packageName) {
+    validatePackageName(packageName);
+    return this.#getCachedPackageDocument(packageName);
+  }
+
   /** Reuses in-flight and completed manifest requests within one analysis process. */
   #getCachedManifest(cacheKey, packageName, versionSelector, expectedVersion) {
     if (!this.manifestPromises.has(cacheKey)) {
@@ -53,6 +59,16 @@ export class NpmRegistryClient {
         cacheKey,
         this.#fetchManifest(packageName, versionSelector, expectedVersion)
       );
+    }
+
+    return this.manifestPromises.get(cacheKey);
+  }
+
+  /** Reuses complete package documents across package versions and responsiveness findings. */
+  #getCachedPackageDocument(packageName) {
+    const cacheKey = `document:${packageName}`;
+    if (!this.manifestPromises.has(cacheKey)) {
+      this.manifestPromises.set(cacheKey, this.#fetchPackageDocument(packageName));
     }
 
     return this.manifestPromises.get(cacheKey);
@@ -89,6 +105,30 @@ export class NpmRegistryClient {
     }
 
     return Object.freeze(manifest);
+  }
+
+  /** Fetches a full npm package document required for release-history analysis. */
+  async #fetchPackageDocument(packageName) {
+    const packagePath = encodeURIComponent(packageName);
+    const response = await this.fetchImpl(`${this.registryUrl}/${packagePath}`, {
+      headers: {
+        Accept: "application/json",
+        "User-Agent": "dependency-smells-detector",
+        ...(this.token ? { Authorization: `Bearer ${this.token}` } : {})
+      },
+      signal: AbortSignal.timeout(this.timeoutMs)
+    });
+
+    if (!response.ok) {
+      throw new Error(`npm registry returned HTTP ${response.status} for ${packageName}.`);
+    }
+
+    const document = await response.json();
+    if (!document || document.name !== packageName) {
+      throw new Error(`npm registry returned a mismatched package document for ${packageName}.`);
+    }
+
+    return Object.freeze(document);
   }
 }
 

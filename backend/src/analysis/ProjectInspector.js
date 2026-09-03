@@ -32,7 +32,13 @@ export class ProjectInspector {
     const repository = normalizeGithubRepository(target);
     const name = repository?.split("/")[1] ?? target;
     const warnings = [];
-    const effectiveRef = await this.#resolveRemoteRef({ repository, analysedRef, githubToken, warnings });
+    const repositoryMetadata = await this.#fetchRepositoryMetadata({
+      repository,
+      analysedRef,
+      githubToken,
+      warnings
+    });
+    const effectiveRef = this.#resolveRemoteRef({ analysedRef, repositoryMetadata, warnings });
     let packageJson = { name };
     let packageJsonStatus = "unavailable";
 
@@ -70,6 +76,7 @@ export class ProjectInspector {
         repository,
         packageManager: DEFAULT_PACKAGE_MANAGER,
         analysedRef: effectiveRef,
+        repositoryMetadata,
         target
       },
       graph,
@@ -106,25 +113,33 @@ export class ProjectInspector {
     return { status: "missing", path: null, document: null, error: null };
   }
 
+  /** Retrieves repository metadata once for branch resolution and project-root scoring. */
+  async #fetchRepositoryMetadata({ repository, analysedRef, githubToken, warnings }) {
+    try {
+      return await this.githubPackageJsonFetcher.fetchRepositoryMetadata({
+        repository,
+        token: githubToken
+      });
+    } catch (error) {
+      warnings.push(analysedRef
+        ? `Could not fetch GitHub repository metadata for root responsiveness: ${error.message}`
+        : `Could not resolve GitHub default branch; analysis will use tool defaults: ${error.message}`);
+      return null;
+    }
+  }
+
   /** Resolves the explicit ref or GitHub default branch used by all remote analysis steps. */
-  async #resolveRemoteRef({ repository, analysedRef, githubToken, warnings }) {
+  #resolveRemoteRef({ analysedRef, repositoryMetadata, warnings }) {
     if (analysedRef) {
       return analysedRef;
     }
 
-    try {
-      const metadata = await this.githubPackageJsonFetcher.fetchRepositoryMetadata({
-        repository,
-        token: githubToken
-      });
+    if (repositoryMetadata?.defaultBranch) {
+      return repositoryMetadata.defaultBranch;
+    }
 
-      if (metadata.defaultBranch) {
-        return metadata.defaultBranch;
-      }
-
+    if (repositoryMetadata) {
       warnings.push("Could not resolve GitHub default branch; metadata response did not include default_branch.");
-    } catch (error) {
-      warnings.push(`Could not resolve GitHub default branch; analysis will use tool defaults: ${error.message}`);
     }
 
     return null;

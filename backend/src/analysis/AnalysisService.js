@@ -11,6 +11,9 @@ import { MarkdownReportExporter } from "../exporters/MarkdownReportExporter.js";
 import { VulnerabilityAnalyzerRegistry } from "../vulnerabilities/VulnerabilityAnalyzerRegistry.js";
 import { NpmAuditVulnerabilityAnalyzer } from "../vulnerabilities/NpmAuditVulnerabilityAnalyzer.js";
 import { enrichFindingsWithVulnerabilities } from "../vulnerabilities/FindingVulnerabilityEnricher.js";
+import { ResponsivenessAnalyzerRegistry } from "../responsiveness/ResponsivenessAnalyzerRegistry.js";
+import { NpmResponsivenessAnalyzer } from "../responsiveness/NpmResponsivenessAnalyzer.js";
+import { enrichFindingsWithResponsiveness } from "../responsiveness/FindingResponsivenessEnricher.js";
 
 /** Coordinates project inspection, smell detection, SSSS scoring, and output generation. */
 export class AnalysisService {
@@ -19,6 +22,7 @@ export class AnalysisService {
     inspector = new ProjectInspector(),
     detectorRegistry = null,
     vulnerabilityAnalyzerRegistry = null,
+    responsivenessAnalyzerRegistry = null,
     scorer = new SsssScorer(),
     jsonExporter = new JsonAnalysisExporter(),
     markdownExporter = new MarkdownReportExporter()
@@ -37,6 +41,11 @@ export class AnalysisService {
       vulnerabilityAnalyzerRegistry ??
       new VulnerabilityAnalyzerRegistry([
         new NpmAuditVulnerabilityAnalyzer()
+      ]);
+    this.responsivenessAnalyzerRegistry =
+      responsivenessAnalyzerRegistry ??
+      new ResponsivenessAnalyzerRegistry([
+        new NpmResponsivenessAnalyzer()
       ]);
     this.scorer = scorer;
     this.jsonExporter = jsonExporter;
@@ -72,14 +81,27 @@ export class AnalysisService {
         workspaceDirectory
       })
     ]);
+    const vulnerabilityFindings = enrichFindingsWithVulnerabilities(
+      detectionResult.findings,
+      vulnerabilityResult
+    );
+    const responsivenessResult = await this.responsivenessAnalyzerRegistry.analyze({
+      project,
+      graph: inspected.graph,
+      manifests: inspected.manifests,
+      findings: vulnerabilityFindings,
+      packageMetadata: detectionResult.packageMetadata ?? {},
+      workspaceDirectory
+    });
     const warnings = [
       ...(inspected.warnings ?? []),
       ...(detectionResult.warnings ?? []),
-      ...(vulnerabilityResult.warnings ?? [])
+      ...(vulnerabilityResult.warnings ?? []),
+      ...(responsivenessResult.warnings ?? [])
     ];
-    const enrichedFindings = enrichFindingsWithVulnerabilities(
-      detectionResult.findings,
-      vulnerabilityResult
+    const enrichedFindings = enrichFindingsWithResponsiveness(
+      vulnerabilityFindings,
+      responsivenessResult
     );
     const smells = this.scorer.scoreFindings(enrichedFindings, inspected.graph);
 

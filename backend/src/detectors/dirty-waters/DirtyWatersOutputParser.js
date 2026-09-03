@@ -1,5 +1,5 @@
 import { SmellTypes } from "../../domain/SmellCatalog.js";
-import { parsePackageIdentifier } from "../../domain/PackageIdentifier.js";
+import { parsePackageIdentifier, toPackageNodeId } from "../../domain/PackageIdentifier.js";
 
 /** Converts Dirty-Waters static JSON output into normalized smell findings. */
 export class DirtyWatersOutputParser {
@@ -26,6 +26,30 @@ export class DirtyWatersOutputParser {
     }
 
     return findings;
+  }
+
+  /** Extracts package-level maintenance observations independently from smell findings. */
+  parsePackageMetadata(staticResults) {
+    const packageMetadata = {};
+
+    for (const [packageIdentifier, packageData] of Object.entries(staticResults ?? {})) {
+      const { name, version } = parsePackageIdentifier(packageIdentifier);
+      const sourceCode = packageData?.source_code ?? {};
+      const packageInfo = packageData?.package_info ?? {};
+
+      packageMetadata[toPackageNodeId(name, version)] = removeUndefinedValues({
+        packageName: name,
+        packageVersion: version,
+        archived: normalizeBoolean(sourceCode.archived),
+        deprecated: normalizeBoolean(packageInfo.deprecated_in_version),
+        allDeprecated: normalizeBoolean(packageInfo.all_deprecated),
+        repositoryAvailable: normalizeBoolean(sourceCode.github_exists),
+        repositoryUrl: sourceCode.github_url,
+        metadataSource: "Dirty-Waters"
+      });
+    }
+
+    return packageMetadata;
   }
 
   /** Maps missing or inaccessible source repository evidence to source-code smells. */
@@ -175,4 +199,9 @@ function createFinding(common, smellType, evidence, evidenceData) {
 /** Removes undefined values before evidence is exported to JSON and Markdown. */
 function removeUndefinedValues(value) {
   return Object.fromEntries(Object.entries(value).filter(([, entryValue]) => entryValue !== undefined));
+}
+
+/** Preserves conclusive booleans while omitting absent or malformed external values. */
+function normalizeBoolean(value) {
+  return typeof value === "boolean" ? value : undefined;
 }

@@ -9,6 +9,8 @@ import { SourceUsageSmellDetector } from "./detectors/source-usage/SourceUsageSm
 import { NpmRegistryMetadataProvider } from "./detectors/peer-spin/NpmRegistryMetadataProvider.js";
 import { PeerSpinDetector } from "./detectors/peer-spin/PeerSpinDetector.js";
 import { PackageGovernanceDetector } from "./detectors/package-governance/PackageGovernanceDetector.js";
+import { ResponsivenessAnalyzerRegistry } from "./responsiveness/ResponsivenessAnalyzerRegistry.js";
+import { NpmResponsivenessAnalyzer } from "./responsiveness/NpmResponsivenessAnalyzer.js";
 
 const BOOLEAN_FLAGS = new Set([
   "help",
@@ -16,6 +18,7 @@ const BOOLEAN_FLAGS = new Set([
   "require-dirty-waters",
   "skip-package-governance",
   "require-package-governance",
+  "require-responsiveness",
   "skip-peer-spin",
   "require-peer-spin",
   "skip-source-usage",
@@ -29,6 +32,7 @@ const VALUE_FLAGS = new Set([
   "ref",
   "dirty-waters-timeout-ms",
   "package-governance-concurrency",
+  "responsiveness-concurrency",
   "peer-spin-registry-timeout-ms",
   "peer-spin-registry-concurrency",
   "peer-spin-max-conflicts",
@@ -107,7 +111,13 @@ async function main() {
   }
 
   const service = new AnalysisService({
-    detectorRegistry: new DetectorRegistry(detectors)
+    detectorRegistry: new DetectorRegistry(detectors),
+    responsivenessAnalyzerRegistry: new ResponsivenessAnalyzerRegistry([
+      new NpmResponsivenessAnalyzer({
+        required: Boolean(args["require-responsiveness"]),
+        concurrency: parsePositiveInteger(args["responsiveness-concurrency"], undefined)
+      })
+    ])
   });
 
   const result = await service.analyze({
@@ -176,6 +186,9 @@ Options:
   --skip-package-governance   Skip npm package governance metadata detection.
   --require-package-governance
                               Fail the analysis if package metadata cannot be retrieved.
+  --responsiveness-concurrency <count>
+                              Concurrent npm release-history lookups. Defaults to 4.
+  --require-responsiveness    Fail when npm responsiveness evidence cannot be retrieved.
   --peer-spin-registry-timeout-ms <ms>
                               Timeout for each npm registry verification. Defaults to 30000.
   --peer-spin-max-conflicts <count>
@@ -198,6 +211,7 @@ Environment:
   NPM_REGISTRY_TIMEOUT_MS     Package governance registry timeout. Defaults to 30000.
   PACKAGE_GOVERNANCE_CONCURRENCY
                               Concurrent package governance analyses. Defaults to 4.
+  RESPONSIVENESS_CONCURRENCY  Concurrent npm release-history lookups. Defaults to 4.
   DOMAIN_LOOKUP_TIMEOUT_MS    Timeout for each DNS and RDAP lookup. Defaults to 10000/15000.
   PEER_SPIN_REGISTRY_TIMEOUT_MS
                               Registry verification timeout. Defaults to 30000.
