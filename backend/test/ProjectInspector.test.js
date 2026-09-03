@@ -35,7 +35,12 @@ test("ProjectInspector builds a full npm graph for remote repositories with pack
   const requestedRefs = [];
   const fetcher = {
     async fetchRepositoryMetadata() {
-      throw new Error("default branch lookup should not run when analysedRef is explicit");
+      return {
+        defaultBranch: "trunk",
+        archived: false,
+        pushedAt: "2026-01-15T12:00:00.000Z",
+        metadataSource: "GitHub Repository"
+      };
     },
     async fetch({ ref }) {
       requestedRefs.push(ref);
@@ -75,6 +80,7 @@ test("ProjectInspector builds a full npm graph for remote repositories with pack
   assert.deepEqual(requestedRefs, ["main", "main"]);
   assert.equal(inspected.project.repository, "owner/remote-app");
   assert.equal(inspected.project.analysedRef, "main");
+  assert.equal(inspected.project.repositoryMetadata.pushedAt, "2026-01-15T12:00:00.000Z");
   assert.equal(inspected.manifests.packageJson.name, "remote-app");
   assert.equal(inspected.manifests.packageLock.lockfileVersion, 3);
   assert.equal(inspected.manifests.lockfileStatus, "present");

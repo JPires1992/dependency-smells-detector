@@ -6,11 +6,12 @@ import { SmellTypes } from "../src/domain/SmellCatalog.js";
 /** Verifies translation from Dirty-Waters JSON fields to normalized smell findings. */
 test("DirtyWatersOutputParser maps static result fields to smell findings", () => {
   const parser = new DirtyWatersOutputParser();
-  const findings = parser.parseStaticResults({
+  const staticResults = {
     "example-package@1.0.0": {
       source_code: {
         github_url: "https://github.com/example/missing",
         github_exists: false,
+        archived: true,
         source_code_version: {
           exists: false
         }
@@ -24,7 +25,9 @@ test("DirtyWatersOutputParser maps static result fields to smell findings", () =
         signature_valid: false
       }
     }
-  });
+  };
+  const findings = parser.parseStaticResults(staticResults);
+  const packageMetadata = parser.parsePackageMetadata(staticResults);
 
   assert.deepEqual(
     findings.map((finding) => finding.type),
@@ -37,4 +40,13 @@ test("DirtyWatersOutputParser maps static result fields to smell findings", () =
   );
   assert.equal(findings[0].affectedPackage, "example-package");
   assert.equal(findings[0].affectedVersion, "1.0.0");
+  assert.deepEqual(packageMetadata["example-package@1.0.0"], {
+    packageName: "example-package",
+    packageVersion: "1.0.0",
+    archived: true,
+    deprecated: true,
+    repositoryAvailable: false,
+    repositoryUrl: "https://github.com/example/missing",
+    metadataSource: "Dirty-Waters"
+  });
 });

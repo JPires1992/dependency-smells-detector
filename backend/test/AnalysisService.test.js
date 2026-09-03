@@ -132,6 +132,21 @@ test("AnalysisService applies npm audit evidence before SSSS scoring", async () 
         };
       }
     },
+    responsivenessAnalyzerRegistry: {
+      async analyze(context) {
+        assert.equal(context.findings[0].evidenceData.vulnerabilitySeverity, "high");
+        return {
+          status: "complete",
+          packages: {
+            "example-package@2.0.0": {
+              responsivenessValue: 0.25,
+              responsivenessClassification: "recent-active-release"
+            }
+          },
+          warnings: []
+        };
+      }
+    },
     jsonExporter: {
       async export({ smells }) {
         exportedSmells = smells;
@@ -158,4 +173,5 @@ test("AnalysisService applies npm audit evidence before SSSS scoring", async () 
 
   assert.equal(exportedSmells[0].evidenceData.vulnerabilitySeverity, "high");
   assert.equal(exportedSmells[0].score.V, 0.8);
+  assert.equal(exportedSmells[0].score.R, 0.25);
 });

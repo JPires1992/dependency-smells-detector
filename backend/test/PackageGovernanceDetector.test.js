@@ -165,14 +165,21 @@ test("NpmRegistryClient caches latest and exact manifest requests", async () => 
     client.getLatestManifest("@scope/sample"),
     client.getLatestManifest("@scope/sample"),
     client.getVersionManifest("@scope/sample", "1.0.0"),
-    client.getVersionManifest("@scope/sample", "1.0.0")
+    client.getVersionManifest("@scope/sample", "1.0.0"),
+    client.getPackageDocument("@scope/sample"),
+    client.getPackageDocument("@scope/sample")
   ]);
 
   assert.deepEqual(requests.sort(), [
+    "https://registry.example.test/%40scope%2Fsample",
     "https://registry.example.test/%40scope%2Fsample/1.0.0",
     "https://registry.example.test/%40scope%2Fsample/latest"
   ]);
-  assert.deepEqual(acceptHeaders, ["application/json", "application/json"]);
+  assert.deepEqual(acceptHeaders, [
+    "application/json",
+    "application/json",
+    "application/json"
+  ]);
 });
 
 /** Verifies all four smells through the detector's complete normalized finding contract. */
