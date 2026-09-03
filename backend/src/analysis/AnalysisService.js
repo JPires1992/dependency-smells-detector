@@ -4,6 +4,7 @@ import { DirtyWatersAdapter } from "../detectors/dirty-waters/DirtyWatersAdapter
 import { CustomSmellDetector } from "../detectors/custom/CustomSmellDetector.js";
 import { SourceUsageSmellDetector } from "../detectors/source-usage/SourceUsageSmellDetector.js";
 import { PeerSpinDetector } from "../detectors/peer-spin/PeerSpinDetector.js";
+import { PackageGovernanceDetector } from "../detectors/package-governance/PackageGovernanceDetector.js";
 import { SsssScorer } from "../scoring/SsssScorer.js";
 import { JsonAnalysisExporter } from "../exporters/JsonAnalysisExporter.js";
 import { MarkdownReportExporter } from "../exporters/MarkdownReportExporter.js";
@@ -28,6 +29,7 @@ export class AnalysisService {
       new DetectorRegistry([
         new DirtyWatersAdapter(),
         new CustomSmellDetector(),
+        new PackageGovernanceDetector(),
         new PeerSpinDetector(),
         new SourceUsageSmellDetector()
       ]);

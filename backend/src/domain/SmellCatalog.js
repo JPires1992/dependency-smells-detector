@@ -78,7 +78,7 @@ export const DETECTION_SOURCE_BY_SMELL = Object.freeze({
   [SmellTypes.NO_PROVENANCE]: "Dirty-Waters",
   [SmellTypes.ALIASED]: "Dirty-Waters",
   [SmellTypes.EXPIRED_MAINTAINER_DOMAIN]: "Package Registry",
-  [SmellTypes.INSTALL_SCRIPT_EXECUTION]: "Code Repository",
+  [SmellTypes.INSTALL_SCRIPT_EXECUTION]: "Package Registry",
   [SmellTypes.TOO_MANY_MAINTAINERS]: "Package Registry",
   [SmellTypes.TOO_MANY_CONTRIBUTORS]: "Package Registry",
   [SmellTypes.OVERLOADED_MAINTAINER]: "Package Registry"

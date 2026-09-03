@@ -3,6 +3,7 @@ import { NodeReplacementConflictDetector } from "./NodeReplacementConflictDetect
 import { PeerDependencyModelBuilder } from "./PeerDependencyModelBuilder.js";
 import { PeerSpinFindingMapper } from "./PeerSpinFindingMapper.js";
 import { PeerSpinRegistryVerifier } from "./PeerSpinRegistryVerifier.js";
+import { mapWithConcurrency } from "../../utils/AsyncPool.js";
 
 /** Default maximum number of registry-verified PeerSpin conflicts emitted per analysis. */
 const DEFAULT_MAX_CONFLICTS = 100;
@@ -110,25 +111,6 @@ export class PeerSpinDetector {
 
     return { findings: [], warnings: [message] };
   }
-}
-
-/** Maps asynchronous verification work with a fixed number of concurrent workers. */
-async function mapWithConcurrency(items, concurrency, mapper) {
-  const results = new Array(items.length);
-  let nextIndex = 0;
-
-  /** Claims and processes items until the shared queue is exhausted. */
-  const worker = async () => {
-    while (nextIndex < items.length) {
-      const currentIndex = nextIndex;
-      nextIndex += 1;
-      results[currentIndex] = await mapper(items[currentIndex], currentIndex);
-    }
-  };
-
-  const workerCount = Math.min(concurrency, items.length);
-  await Promise.all(Array.from({ length: workerCount }, () => worker()));
-  return results;
 }
 
 /** Reads a positive integer detector limit while preserving a deterministic fallback. */
