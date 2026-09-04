@@ -2,6 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { AnalysisService } from "../src/analysis/AnalysisService.js";
 import { SmellTypes } from "../src/domain/SmellCatalog.js";
+import { SsssScorer } from "../src/scoring/SsssScorer.js";
 
 /** Verifies that inspector-resolved refs are preserved by the orchestration service. */
 test("AnalysisService preserves inspector-resolved analysed refs", async () => {
@@ -34,6 +35,16 @@ test("AnalysisService preserves inspector-resolved analysed refs", async () => {
     vulnerabilityAnalyzerRegistry: {
       async analyze() {
         return { status: "complete", packages: {}, warnings: [] };
+      }
+    },
+    responsivenessAnalyzerRegistry: {
+      async analyze() {
+        return { status: "complete", packages: {}, warnings: [] };
+      }
+    },
+    scorer: {
+      scoreFindings() {
+        return [];
       }
     },
     jsonExporter: {
@@ -147,6 +158,7 @@ test("AnalysisService applies npm audit evidence before SSSS scoring", async () 
         };
       }
     },
+    scorer: new SsssScorer(),
     jsonExporter: {
       async export({ smells }) {
         exportedSmells = smells;
