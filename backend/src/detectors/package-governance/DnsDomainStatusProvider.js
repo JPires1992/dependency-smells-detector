@@ -1,4 +1,5 @@
 import { resolveNs } from "node:dns/promises";
+import { parsePositiveInteger } from "../../utils/PositiveInteger.js";
 
 const DEFAULT_TIMEOUT_MS = 10 * 1000;
 
@@ -7,7 +8,7 @@ export class DnsDomainStatusProvider {
   /** Configures an injectable DNS resolver and bounded lookup duration. */
   constructor({
     resolveNameservers = resolveNs,
-    timeoutMs = readPositiveInteger(
+    timeoutMs = parsePositiveInteger(
       process.env.DOMAIN_LOOKUP_TIMEOUT_MS,
       DEFAULT_TIMEOUT_MS
     )
@@ -50,10 +51,4 @@ async function withTimeout(promise, timeoutMs, message) {
   } finally {
     clearTimeout(timeoutHandle);
   }
-}
-
-/** Reads a positive integer timeout while retaining a stable fallback. */
-function readPositiveInteger(value, fallback) {
-  const parsed = Number(value);
-  return Number.isInteger(parsed) && parsed > 0 ? parsed : fallback;
 }

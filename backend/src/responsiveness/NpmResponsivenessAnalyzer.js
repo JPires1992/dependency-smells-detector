@@ -1,9 +1,9 @@
+import { PackageGraphIndex } from "../analysis/PackageGraphIndex.js";
 import { collectManifestDependencies } from "../detectors/custom/ManifestDependencyCollector.js";
 import { NpmDependencySpecifierParser } from "../detectors/custom/NpmDependencySpecifierParser.js";
 import { toPackageNodeId } from "../domain/PackageIdentifier.js";
-import { NpmRegistryClient } from "../registry/npm/NpmRegistryClient.js";
 import { mapWithConcurrency } from "../utils/AsyncPool.js";
-import { NpmPackageActivityProvider } from "./NpmPackageActivityProvider.js";
+import { parsePositiveInteger } from "../utils/PositiveInteger.js";
 import { ResponsivenessPolicy } from "./ResponsivenessPolicy.js";
 
 const DEFAULT_CONCURRENCY = 4;
@@ -13,18 +13,20 @@ const MAX_WARNING_EXAMPLES = 10;
 export class NpmResponsivenessAnalyzer {
   /** Configures replaceable metadata providers, policy, parser, and bounded concurrency. */
   constructor({
-    activityProvider = new NpmPackageActivityProvider({
-      registryClient: new NpmRegistryClient()
-    }),
+    activityProvider,
     policy = new ResponsivenessPolicy(),
     specifierParser = new NpmDependencySpecifierParser(),
-    concurrency = readPositiveInteger(
+    concurrency = parsePositiveInteger(
       process.env.RESPONSIVENESS_CONCURRENCY,
       DEFAULT_CONCURRENCY
     ),
     required = false,
     clock = () => new Date()
   } = {}) {
+    if (typeof activityProvider?.getActivity !== "function") {
+      throw new Error("NpmResponsivenessAnalyzer requires a package activity provider.");
+    }
+
     this.name = "NpmResponsivenessAnalyzer";
     this.activityProvider = activityProvider;
     this.policy = policy;
@@ -126,23 +128,15 @@ export class NpmResponsivenessAnalyzer {
   /** Parses direct project constraints once for package-level update-strategy evidence. */
   #buildUpdateStrategies(packageJson = {}, graph = {}) {
     const strategies = new Map();
-    const nodesById = new Map((graph.nodes ?? []).map((node) => [node.id, node]));
-    const directNodeIdsByName = new Map();
-
-    for (const edge of graph.edges ?? []) {
-      const node = edge.source === "root" ? nodesById.get(edge.target) : null;
-      if (node?.name && !directNodeIdsByName.has(node.name)) {
-        directNodeIdsByName.set(node.name, node.id);
-      }
-    }
+    const graphIndex = new PackageGraphIndex(graph);
 
     for (const dependency of collectManifestDependencies(packageJson)) {
-      const packageId = directNodeIdsByName.get(dependency.name);
-      if (!packageId) {
+      const node = graphIndex.resolveDirectDependency(dependency.name);
+      if (!node) {
         continue;
       }
       const specifier = this.specifierParser.parse(dependency.name, dependency.constraint);
-      strategies.set(packageId, {
+      strategies.set(node.id, {
         constraintKind: specifier.constraintKind,
         declaredConstraint: dependency.constraint,
         normalizedRange: specifier.normalizedRange
@@ -156,20 +150,18 @@ export class NpmResponsivenessAnalyzer {
 /** Deduplicates findings by exact package id while retaining one representative finding. */
 function collectFindingTargets(findings, graph = {}) {
   const targets = new Map();
-  const rootNode = (graph.nodes ?? []).find((node) => node.id === "root") ?? null;
-  const rootPackageId = rootNode
-    ? toPackageNodeId(rootNode.name, rootNode.version)
-    : null;
+  const graphIndex = new PackageGraphIndex(graph);
 
   for (const finding of findings) {
-    const packageId = toPackageNodeId(finding.affectedPackage, finding.affectedVersion);
+    const packageId = graphIndex.resolveFinding(finding)?.id
+      ?? toPackageNodeId(finding.affectedPackage, finding.affectedVersion);
     if (!targets.has(packageId)) {
       targets.set(packageId, {
         packageId,
         packageName: finding.affectedPackage,
         packageVersion: finding.affectedVersion,
         finding,
-        isProjectRoot: packageId === rootPackageId
+        isProjectRoot: packageId === "root"
       });
     } else if (finding.type === "Deprecated") {
       targets.get(packageId).finding = finding;
@@ -239,10 +231,4 @@ function summarizeWarnings(warnings, targetCount) {
       ? [`${warnings.length - examples.length} additional responsiveness warnings were omitted.`]
       : [])
   ];
-}
-
-/** Reads a positive integer concurrency value while preserving a stable default. */
-function readPositiveInteger(value, fallback) {
-  const parsed = Number(value);
-  return Number.isInteger(parsed) && parsed > 0 ? parsed : fallback;
 }

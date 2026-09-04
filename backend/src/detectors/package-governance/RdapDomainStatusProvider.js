@@ -8,7 +8,7 @@ export class RdapDomainStatusProvider {
   constructor({
     fetchImpl = globalThis.fetch,
     bootstrapUrl = DEFAULT_BOOTSTRAP_URL,
-    timeoutMs = readPositiveInteger(
+    timeoutMs = parsePositiveInteger(
       process.env.DOMAIN_LOOKUP_TIMEOUT_MS,
       DEFAULT_TIMEOUT_MS
     )
@@ -122,8 +122,4 @@ function ensureTrailingSlash(value) {
   return value.endsWith("/") ? value : `${value}/`;
 }
 
-/** Reads a positive integer timeout while retaining a stable fallback. */
-function readPositiveInteger(value, fallback) {
-  const parsed = Number(value);
-  return Number.isInteger(parsed) && parsed > 0 ? parsed : fallback;
-}
+import { parsePositiveInteger } from "../../utils/PositiveInteger.js";

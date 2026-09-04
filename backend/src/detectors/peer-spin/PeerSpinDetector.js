@@ -1,9 +1,9 @@
-import { NpmRegistryMetadataProvider } from "./NpmRegistryMetadataProvider.js";
 import { NodeReplacementConflictDetector } from "./NodeReplacementConflictDetector.js";
 import { PeerDependencyModelBuilder } from "./PeerDependencyModelBuilder.js";
 import { PeerSpinFindingMapper } from "./PeerSpinFindingMapper.js";
 import { PeerSpinRegistryVerifier } from "./PeerSpinRegistryVerifier.js";
 import { mapWithConcurrency } from "../../utils/AsyncPool.js";
+import { parsePositiveInteger } from "../../utils/PositiveInteger.js";
 
 /** Default maximum number of registry-verified PeerSpin conflicts emitted per analysis. */
 const DEFAULT_MAX_CONFLICTS = 100;
@@ -15,19 +15,23 @@ export class PeerSpinDetector {
   constructor({
     modelBuilder = new PeerDependencyModelBuilder(),
     conflictDetector = new NodeReplacementConflictDetector(),
-    metadataProvider = new NpmRegistryMetadataProvider(),
+    metadataProvider = null,
     registryVerifier = null,
     findingMapper = new PeerSpinFindingMapper(),
-    maxConflicts = readPositiveInteger(
+    maxConflicts = parsePositiveInteger(
       process.env.PEER_SPIN_MAX_CONFLICTS,
       DEFAULT_MAX_CONFLICTS
     ),
-    verificationConcurrency = readPositiveInteger(
+    verificationConcurrency = parsePositiveInteger(
       process.env.PEER_SPIN_REGISTRY_CONCURRENCY,
       DEFAULT_VERIFICATION_CONCURRENCY
     ),
     required = false
   } = {}) {
+    if (!registryVerifier && !metadataProvider) {
+      throw new Error("PeerSpinDetector requires an npm metadata provider or registry verifier.");
+    }
+
     this.name = "PeerSpinDetector";
     this.modelBuilder = modelBuilder;
     this.conflictDetector = conflictDetector;
@@ -111,10 +115,4 @@ export class PeerSpinDetector {
 
     return { findings: [], warnings: [message] };
   }
-}
-
-/** Reads a positive integer detector limit while preserving a deterministic fallback. */
-function readPositiveInteger(value, fallback) {
-  const parsed = Number(value);
-  return Number.isInteger(parsed) && parsed > 0 ? parsed : fallback;
 }

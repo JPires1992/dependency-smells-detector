@@ -5,6 +5,7 @@ import path from "node:path";
 import { pipeline } from "node:stream/promises";
 import { Readable, Transform } from "node:stream";
 import { x as extractTar } from "tar";
+import { parsePositiveInteger } from "../utils/PositiveInteger.js";
 
 /** Default limits for downloading and extracting untrusted repository snapshots. */
 const DEFAULT_DOWNLOAD_TIMEOUT_MS = 2 * 60 * 1000;
@@ -32,15 +33,15 @@ export class GitHubRepositoryWorkspaceProvider {
     fetchImpl = globalThis.fetch,
     archiveExtractor = extractRepositoryArchive,
     temporaryRootDirectory = os.tmpdir(),
-    downloadTimeoutMs = readPositiveInteger(
+    downloadTimeoutMs = parsePositiveInteger(
       process.env.SOURCE_USAGE_DOWNLOAD_TIMEOUT_MS,
       DEFAULT_DOWNLOAD_TIMEOUT_MS
     ),
-    maxArchiveBytes = readPositiveInteger(
+    maxArchiveBytes = parsePositiveInteger(
       process.env.SOURCE_USAGE_MAX_ARCHIVE_BYTES,
       DEFAULT_MAX_ARCHIVE_BYTES
     ),
-    maxExtractedBytes = readPositiveInteger(
+    maxExtractedBytes = parsePositiveInteger(
       process.env.SOURCE_USAGE_MAX_EXTRACTED_BYTES,
       DEFAULT_MAX_EXTRACTED_BYTES
     )
@@ -175,10 +176,4 @@ async function extractRepositoryArchive({ archivePath, destinationDirectory, max
       return true;
     }
   });
-}
-
-/** Reads a positive integer setting and returns a stable default for invalid values. */
-function readPositiveInteger(value, fallback) {
-  const parsed = Number(value);
-  return Number.isInteger(parsed) && parsed > 0 ? parsed : fallback;
 }

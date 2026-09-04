@@ -1,5 +1,5 @@
-import { NpmRegistryClient } from "../../registry/npm/NpmRegistryClient.js";
 import { mapWithConcurrency } from "../../utils/AsyncPool.js";
+import { parsePositiveInteger } from "../../utils/PositiveInteger.js";
 import { DomainRegistrationVerifier } from "./DomainRegistrationVerifier.js";
 import { GovernanceThresholdPolicy } from "./GovernanceThresholdPolicy.js";
 import { MaintainerDomainParser } from "./MaintainerDomainParser.js";
@@ -19,18 +19,25 @@ const MAX_DIAGNOSTIC_WARNINGS = 20;
 export class PackageGovernanceDetector {
   /** Configures replaceable providers, rules, thresholds, and resource limits. */
   constructor({
-    metadataProvider = new NpmRegistryClient(),
+    metadataProvider,
     domainVerifier = new DomainRegistrationVerifier(),
     domainParser = new MaintainerDomainParser(),
     thresholdPolicy = new GovernanceThresholdPolicy(),
     installScriptRule = new InstallScriptExecutionRule(),
     governanceRules = null,
-    concurrency = readPositiveInteger(
+    concurrency = parsePositiveInteger(
       process.env.PACKAGE_GOVERNANCE_CONCURRENCY,
       DEFAULT_CONCURRENCY
     ),
     required = false
   } = {}) {
+    if (
+      typeof metadataProvider?.getLatestManifest !== "function"
+      || typeof metadataProvider?.getVersionManifest !== "function"
+    ) {
+      throw new Error("PackageGovernanceDetector requires an npm metadata provider.");
+    }
+
     this.name = "PackageGovernanceDetector";
     this.metadataProvider = metadataProvider;
     this.installScriptRule = installScriptRule;
@@ -194,10 +201,4 @@ function limitWarnings(warnings, maximum) {
     ...uniqueWarnings.slice(0, maximum),
     `${uniqueWarnings.length - maximum} additional package governance warnings were omitted.`
   ];
-}
-
-/** Reads a positive integer worker count while preserving a deterministic fallback. */
-function readPositiveInteger(value, fallback) {
-  const parsed = Number(value);
-  return Number.isInteger(parsed) && parsed > 0 ? parsed : fallback;
 }

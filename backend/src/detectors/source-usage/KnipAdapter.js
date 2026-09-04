@@ -4,6 +4,7 @@ import { fileURLToPath } from "node:url";
 import os from "node:os";
 import path from "node:path";
 import { runCommand } from "../../utils/ChildProcess.js";
+import { parsePositiveInteger } from "../../utils/PositiveInteger.js";
 
 /** Default maximum duration for source-usage analysis. */
 const DEFAULT_TIMEOUT_MS = 5 * 60 * 1000;
@@ -142,6 +143,5 @@ function normalizeDiagnosticWarnings(stderr) {
 
 /** Reads an optional source-usage timeout from the process environment. */
 function readTimeoutFromEnvironment() {
-  const value = Number(process.env.SOURCE_USAGE_TIMEOUT_MS);
-  return Number.isInteger(value) && value > 0 ? value : DEFAULT_TIMEOUT_MS;
+  return parsePositiveInteger(process.env.SOURCE_USAGE_TIMEOUT_MS, DEFAULT_TIMEOUT_MS);
 }

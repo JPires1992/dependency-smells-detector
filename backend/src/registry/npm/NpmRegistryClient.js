@@ -1,6 +1,10 @@
 /** Default npm registry endpoint used for package metadata requests. */
 const DEFAULT_REGISTRY_URL = "https://registry.npmjs.org";
 const DEFAULT_TIMEOUT_MS = 30 * 1000;
+const DEFAULT_MAX_ATTEMPTS = 3;
+const DEFAULT_RETRY_DELAY_MS = 250;
+const MAX_RETRY_DELAY_MS = 30 * 1000;
+const RETRYABLE_STATUS_CODES = new Set([408, 425, 429, 500, 502, 503, 504]);
 
 /** Fetches and caches npm manifests without coupling consumers to HTTP details. */
 export class NpmRegistryClient {
@@ -9,10 +13,19 @@ export class NpmRegistryClient {
     fetchImpl = globalThis.fetch,
     registryUrl = process.env.NPM_REGISTRY_URL || DEFAULT_REGISTRY_URL,
     token = process.env.NPM_REGISTRY_TOKEN || process.env.NODE_AUTH_TOKEN || null,
-    timeoutMs = readPositiveInteger(
+    timeoutMs = parsePositiveInteger(
       process.env.NPM_REGISTRY_TIMEOUT_MS,
       DEFAULT_TIMEOUT_MS
-    )
+    ),
+    maxAttempts = parsePositiveInteger(
+      process.env.NPM_REGISTRY_MAX_ATTEMPTS,
+      DEFAULT_MAX_ATTEMPTS
+    ),
+    retryDelayMs = parsePositiveInteger(
+      process.env.NPM_REGISTRY_RETRY_DELAY_MS,
+      DEFAULT_RETRY_DELAY_MS
+    ),
+    sleep = wait
   } = {}) {
     if (typeof fetchImpl !== "function") {
       throw new Error("NpmRegistryClient requires a fetch implementation.");
@@ -22,6 +35,9 @@ export class NpmRegistryClient {
     this.registryUrl = registryUrl.replace(/\/+$/, "");
     this.token = token;
     this.timeoutMs = timeoutMs;
+    this.maxAttempts = maxAttempts;
+    this.retryDelayMs = retryDelayMs;
+    this.sleep = sleep;
     this.manifestPromises = new Map();
   }
 
@@ -55,7 +71,7 @@ export class NpmRegistryClient {
   /** Reuses in-flight and completed manifest requests within one analysis process. */
   #getCachedManifest(cacheKey, packageName, versionSelector, expectedVersion) {
     if (!this.manifestPromises.has(cacheKey)) {
-      this.manifestPromises.set(
+      this.#cacheRequest(
         cacheKey,
         this.#fetchManifest(packageName, versionSelector, expectedVersion)
       );
@@ -68,35 +84,30 @@ export class NpmRegistryClient {
   #getCachedPackageDocument(packageName) {
     const cacheKey = `document:${packageName}`;
     if (!this.manifestPromises.has(cacheKey)) {
-      this.manifestPromises.set(cacheKey, this.#fetchPackageDocument(packageName));
+      this.#cacheRequest(cacheKey, this.#fetchPackageDocument(packageName));
     }
 
     return this.manifestPromises.get(cacheKey);
+  }
+
+  /** Caches one request and evicts rejected promises so later consumers can retry. */
+  #cacheRequest(cacheKey, request) {
+    this.manifestPromises.set(cacheKey, request);
+    request.catch(() => {
+      if (this.manifestPromises.get(cacheKey) === request) {
+        this.manifestPromises.delete(cacheKey);
+      }
+    });
   }
 
   /** Performs one authenticated request against an npm package-version endpoint. */
   async #fetchManifest(packageName, versionSelector, expectedVersion) {
     const packagePath = encodeURIComponent(packageName);
     const selectorPath = encodeURIComponent(versionSelector);
-    const response = await this.fetchImpl(
+    const manifest = await this.#fetchJsonWithRetry(
       `${this.registryUrl}/${packagePath}/${selectorPath}`,
-      {
-        headers: {
-          Accept: "application/json",
-          "User-Agent": "dependency-smells-detector",
-          ...(this.token ? { Authorization: `Bearer ${this.token}` } : {})
-        },
-        signal: AbortSignal.timeout(this.timeoutMs)
-      }
+      `${packageName}@${versionSelector}`
     );
-
-    if (!response.ok) {
-      throw new Error(
-        `npm registry returned HTTP ${response.status} for ${packageName}@${versionSelector}.`
-      );
-    }
-
-    const manifest = await response.json();
     if (!manifest || manifest.name !== packageName) {
       throw new Error(`npm registry returned mismatched metadata for ${packageName}.`);
     }
@@ -110,26 +121,77 @@ export class NpmRegistryClient {
   /** Fetches a full npm package document required for release-history analysis. */
   async #fetchPackageDocument(packageName) {
     const packagePath = encodeURIComponent(packageName);
-    const response = await this.fetchImpl(`${this.registryUrl}/${packagePath}`, {
-      headers: {
-        Accept: "application/json",
-        "User-Agent": "dependency-smells-detector",
-        ...(this.token ? { Authorization: `Bearer ${this.token}` } : {})
-      },
-      signal: AbortSignal.timeout(this.timeoutMs)
-    });
-
-    if (!response.ok) {
-      throw new Error(`npm registry returned HTTP ${response.status} for ${packageName}.`);
-    }
-
-    const document = await response.json();
+    const document = await this.#fetchJsonWithRetry(
+      `${this.registryUrl}/${packagePath}`,
+      packageName
+    );
     if (!document || document.name !== packageName) {
       throw new Error(`npm registry returned a mismatched package document for ${packageName}.`);
     }
 
     return Object.freeze(document);
   }
+
+  /** Retries idempotent registry reads after bounded transport and transient HTTP failures. */
+  async #fetchJsonWithRetry(url, requestTarget) {
+    for (let attempt = 1; attempt <= this.maxAttempts; attempt += 1) {
+      let response;
+      try {
+        response = await this.fetchImpl(url, {
+          headers: {
+            Accept: "application/json",
+            "User-Agent": "dependency-smells-detector",
+            ...(this.token ? { Authorization: `Bearer ${this.token}` } : {})
+          },
+          signal: AbortSignal.timeout(this.timeoutMs)
+        });
+      } catch (error) {
+        if (attempt === this.maxAttempts) {
+          throw error;
+        }
+        await this.sleep(retryDelayForAttempt(attempt, this.retryDelayMs));
+        continue;
+      }
+
+      if (response.ok) {
+        return response.json();
+      }
+
+      const error = new Error(
+        `npm registry returned HTTP ${response.status} for ${requestTarget}.`
+      );
+      if (attempt === this.maxAttempts || !RETRYABLE_STATUS_CODES.has(response.status)) {
+        throw error;
+      }
+
+      await this.sleep(retryDelayFromResponse(response, attempt, this.retryDelayMs));
+    }
+
+    throw new Error(`npm registry request failed for ${requestTarget}.`);
+  }
+}
+
+/** Resolves Retry-After or exponential backoff while capping external delay input. */
+function retryDelayFromResponse(response, attempt, baseDelayMs) {
+  const retryAfter = response.headers?.get?.("retry-after");
+  if (retryAfter) {
+    const seconds = Number(retryAfter);
+    if (Number.isFinite(seconds) && seconds >= 0) {
+      return Math.min(seconds * 1000, MAX_RETRY_DELAY_MS);
+    }
+  }
+
+  return retryDelayForAttempt(attempt, baseDelayMs);
+}
+
+/** Calculates capped exponential backoff for a one-based failed attempt. */
+function retryDelayForAttempt(attempt, baseDelayMs) {
+  return Math.min(baseDelayMs * (2 ** (attempt - 1)), MAX_RETRY_DELAY_MS);
+}
+
+/** Waits for a retry delay without blocking the Node.js event loop. */
+function wait(delayMs) {
+  return new Promise((resolve) => setTimeout(resolve, delayMs));
 }
 
 /** Rejects empty package identifiers before constructing a registry request. */
@@ -139,8 +201,4 @@ function validatePackageName(packageName) {
   }
 }
 
-/** Reads a positive integer setting while preserving a deterministic fallback. */
-function readPositiveInteger(value, fallback) {
-  const parsed = Number(value);
-  return Number.isInteger(parsed) && parsed > 0 ? parsed : fallback;
-}
+import { parsePositiveInteger } from "../../utils/PositiveInteger.js";

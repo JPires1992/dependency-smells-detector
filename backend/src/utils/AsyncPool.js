@@ -19,5 +19,6 @@ export async function mapWithConcurrency(items, concurrency, mapper) {
 
 /** Prevents invalid configuration from producing an empty or unbounded worker pool. */
 function normalizeConcurrency(value) {
-  return Number.isInteger(value) && value > 0 ? value : 1;
+  return parsePositiveInteger(value, 1);
 }
+import { parsePositiveInteger } from "./PositiveInteger.js";
