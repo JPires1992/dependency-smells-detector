@@ -8,6 +8,9 @@ test("DirtyWatersOutputParser maps static result fields to smell findings", () =
   const parser = new DirtyWatersOutputParser();
   const staticResults = {
     "example-package@1.0.0": {
+      parent:
+        "[example-app@1.0.0](https://npmjs.com/package/example-app/v/1.0.0)<br>" +
+        "    [example-package@1.0.0](https://npmjs.com/package/example-package/v/1.0.0)",
       source_code: {
         github_url: "https://github.com/example/missing",
         github_exists: false,
@@ -26,7 +29,9 @@ test("DirtyWatersOutputParser maps static result fields to smell findings", () =
       }
     }
   };
-  const findings = parser.parseStaticResults(staticResults);
+  const findings = parser.parseStaticResults(staticResults, {
+    rootDependencyTypesByName: { "example-package": "production" }
+  });
   const packageMetadata = parser.parsePackageMetadata(staticResults);
 
   assert.deepEqual(
@@ -40,6 +45,25 @@ test("DirtyWatersOutputParser maps static result fields to smell findings", () =
   );
   assert.equal(findings[0].affectedPackage, "example-package");
   assert.equal(findings[0].affectedVersion, "1.0.0");
+  assert.deepEqual(findings[0].graphContext, {
+    nodeId: "example-package@1.0.0",
+    depth: 1,
+    dependencyType: "production",
+    parentNodes: [{
+      id: "root",
+      name: "example-app",
+      version: "1.0.0",
+      depth: 0,
+      dependencyType: "root"
+    }]
+  });
+  assert.equal(findings[0].evidenceData.graphContext, undefined);
+  for (const finding of findings) {
+    assert.equal(Object.hasOwn(finding.evidenceData, "parent"), false);
+    assert.equal(Object.hasOwn(finding.evidenceData, "rawResultPath"), false);
+    assert.equal(Object.hasOwn(finding.evidenceData, "markdownReportPath"), false);
+    assert.equal(Object.hasOwn(finding.evidenceData, "rawPackageIdentifier"), false);
+  }
   assert.deepEqual(packageMetadata["example-package@1.0.0"], {
     packageName: "example-package",
     packageVersion: "1.0.0",
