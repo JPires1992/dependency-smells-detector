@@ -20,7 +20,8 @@ test("SsssScorer reproduces the deprecated production dependency example", () =>
     detectionSource: "Dirty-Waters",
     evidence: "Package is marked as deprecated.",
     evidenceData: {
-      vulnerabilitySeverity: "high"
+      vulnerabilitySeverity: "high",
+      responsivenessValue: 1
     }
   };
 
@@ -52,10 +53,58 @@ test("SsssScorer honors explicit reachability evidence for missing dependencies"
     affectedVersion: null,
     detectionSource: "KnipAdapter",
     evidence: "Missing.",
-    evidenceData: { productionReachabilityValue: 0.5 }
+    evidenceData: {
+      productionReachabilityValue: 0.5,
+      responsivenessValue: 0.5
+    }
   };
 
   const [scored] = new SsssScorer().scoreFindings([finding], graph);
 
   assert.equal(scored.score.P, 0.5);
+});
+
+/** Verifies a missing exact version cannot inherit reachability from another package version. */
+test("SsssScorer does not resolve an unavailable version by package name", () => {
+  const graph = {
+    nodes: [{
+      id: "sample@1.0.0",
+      name: "sample",
+      version: "1.0.0",
+      dependencyType: "production",
+      depth: 1
+    }],
+    edges: []
+  };
+  const finding = {
+    type: SmellTypes.NO_PROVENANCE,
+    affectedPackage: "sample",
+    affectedVersion: "2.0.0",
+    detectionSource: "test",
+    evidence: "Exact version is absent from the graph.",
+    evidenceData: {
+      vulnerabilityLookupStatus: "clean",
+      responsivenessValue: 0.5
+    }
+  };
+
+  const [scored] = new SsssScorer().scoreFindings([finding], graph);
+
+  assert.equal(scored.score.P, 0.5);
+});
+
+/** Verifies scoring cannot silently replace missing responsiveness analysis with a fallback. */
+test("SsssScorer rejects findings without explicit responsiveness evidence", () => {
+  const finding = {
+    type: SmellTypes.NO_PROVENANCE,
+    affectedPackage: "example-package",
+    affectedVersion: "1.0.0",
+    detectionSource: "test",
+    evidence: "Missing responsiveness evidence."
+  };
+
+  assert.throws(
+    () => new SsssScorer().scoreFindings([finding], { nodes: [], edges: [] }),
+    /missing or invalid explicit responsiveness evidence/i
+  );
 });

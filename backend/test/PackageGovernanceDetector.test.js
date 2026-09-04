@@ -182,6 +182,56 @@ test("NpmRegistryClient caches latest and exact manifest requests", async () => 
   ]);
 });
 
+/** Verifies transient registry failures are retried before consumers lose metadata coverage. */
+test("NpmRegistryClient retries transient HTTP failures", async () => {
+  let requestCount = 0;
+  const delays = [];
+  const client = new NpmRegistryClient({
+    maxAttempts: 2,
+    retryDelayMs: 10,
+    sleep: async (delayMs) => delays.push(delayMs),
+    fetchImpl: async () => {
+      requestCount += 1;
+      if (requestCount === 1) {
+        return new Response(null, { status: 504 });
+      }
+      return new Response(JSON.stringify({ name: "sample", version: "1.0.0" }), {
+        status: 200,
+        headers: { "Content-Type": "application/json" }
+      });
+    }
+  });
+
+  const manifest = await client.getLatestManifest("sample");
+
+  assert.equal(manifest.version, "1.0.0");
+  assert.equal(requestCount, 2);
+  assert.deepEqual(delays, [10]);
+});
+
+/** Verifies failed cache entries do not permanently poison later registry consumers. */
+test("NpmRegistryClient evicts rejected requests", async () => {
+  let requestCount = 0;
+  const client = new NpmRegistryClient({
+    maxAttempts: 1,
+    fetchImpl: async () => {
+      requestCount += 1;
+      return requestCount === 1
+        ? new Response(null, { status: 504 })
+        : new Response(JSON.stringify({ name: "sample", version: "1.0.0" }), {
+            status: 200,
+            headers: { "Content-Type": "application/json" }
+          });
+    }
+  });
+
+  await assert.rejects(() => client.getLatestManifest("sample"), /HTTP 504/);
+  const manifest = await client.getLatestManifest("sample");
+
+  assert.equal(manifest.version, "1.0.0");
+  assert.equal(requestCount, 2);
+});
+
 /** Verifies all four smells through the detector's complete normalized finding contract. */
 test("PackageGovernanceDetector emits registry and domain-confirmed findings", async () => {
   const maintainers = [
@@ -269,6 +319,9 @@ test("PackageGovernanceDetector does not infer absent contributor metadata", asy
           version: "1.0.0",
           maintainers: [{ name: "owner", email: "owner@example.com" }]
         };
+      },
+      async getVersionManifest() {
+        throw new Error("Exact metadata should not be requested by this test.");
       }
     },
     governanceRules: [
@@ -293,7 +346,17 @@ test("PackageGovernanceDetector does not infer absent contributor metadata", asy
 
 /** Verifies root install scripts are detected from the analysed repository manifest. */
 test("PackageGovernanceDetector detects root install lifecycle scripts", async () => {
-  const detector = new PackageGovernanceDetector({ governanceRules: [] });
+  const detector = new PackageGovernanceDetector({
+    governanceRules: [],
+    metadataProvider: {
+      async getLatestManifest() {
+        throw new Error("Dependency metadata should not be requested by this test.");
+      },
+      async getVersionManifest() {
+        throw new Error("Dependency metadata should not be requested by this test.");
+      }
+    }
+  });
   const result = await detector.detect({
     project: { packageManager: "npm" },
     graph: {

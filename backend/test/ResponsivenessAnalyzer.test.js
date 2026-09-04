@@ -157,7 +157,8 @@ test("NpmResponsivenessAnalyzer isolates project-root activity from npm registry
   const rootFinding = {
     ...createFinding(),
     affectedPackage: "frontend",
-    affectedVersion: "0.0.0"
+    affectedVersion: "0.0.0",
+    graphContext: { nodeId: "root" }
   };
   const result = await analyzer.analyze({
     findings: [rootFinding],
@@ -170,9 +171,10 @@ test("NpmResponsivenessAnalyzer isolates project-root activity from npm registry
     },
     graph: {
       nodes: [
-        { id: "root", name: "frontend", version: "0.0.0", dependencyType: "root", depth: 0 }
+        { id: "root", name: "frontend", version: "0.0.0", dependencyType: "root", depth: 0 },
+        { id: "frontend@0.0.0", name: "frontend", version: "0.0.0", dependencyType: "production", depth: 1 }
       ],
-      edges: []
+      edges: [{ source: "root", target: "frontend@0.0.0", relationship: "direct" }]
     },
     packageMetadata: {
       "frontend@0.0.0": {
@@ -182,7 +184,7 @@ test("NpmResponsivenessAnalyzer isolates project-root activity from npm registry
       }
     }
   });
-  const evidence = result.packages["frontend@0.0.0"];
+  const evidence = result.packages.root;
 
   assert.equal(activityRequests, 0);
   assert.equal(result.status, "complete");
@@ -191,6 +193,19 @@ test("NpmResponsivenessAnalyzer isolates project-root activity from npm registry
   assert.equal(evidence.daysSinceLatestRepositoryActivity, 11);
   assert.deepEqual(evidence.responsivenessSources, ["GitHub Repository"]);
   assert.equal(evidence.latestVersion, undefined);
+
+  const [enriched] = enrichFindingsWithResponsiveness(
+    [rootFinding],
+    result,
+    {
+      nodes: [
+        { id: "root", name: "frontend", version: "0.0.0" },
+        { id: "frontend@0.0.0", name: "frontend", version: "0.0.0" }
+      ],
+      edges: []
+    }
+  );
+  assert.equal(enriched.evidenceData.responsivenessValue, 0.25);
 });
 
 /** Verifies missing root activity is explicit and never triggers an npm package-name lookup. */
@@ -207,7 +222,8 @@ test("NpmResponsivenessAnalyzer records unavailable project-root activity explic
   const rootFinding = {
     ...createFinding(),
     affectedPackage: "frontend",
-    affectedVersion: "0.0.0"
+    affectedVersion: "0.0.0",
+    graphContext: { nodeId: "root" }
   };
   const result = await analyzer.analyze({
     findings: [rootFinding],
@@ -220,9 +236,9 @@ test("NpmResponsivenessAnalyzer records unavailable project-root activity explic
 
   assert.equal(activityRequests, 0);
   assert.equal(result.status, "partial");
-  assert.equal(result.packages["frontend@0.0.0"].responsivenessValue, 0.5);
+  assert.equal(result.packages.root.responsivenessValue, 0.5);
   assert.equal(
-    result.packages["frontend@0.0.0"].responsivenessClassification,
+    result.packages.root.responsivenessClassification,
     "metadata-unavailable"
   );
   assert.match(result.warnings[1], /GitHub repository activity metadata is unavailable/);

@@ -56,6 +56,7 @@ test("KnipOutputParser maps source-usage issues to smell findings", () => {
   assert.equal(result.findings[1].evidenceData.analyzerIssueType, "devDependencies");
   assert.equal(result.findings[2].affectedVersion, null);
   assert.equal(result.findings[2].evidenceData.usageLocations.length, 2);
-  assert.deepEqual(result.findings[2].evidenceData.graphContext.parentNodeIds, ["root"]);
+  assert.deepEqual(result.findings[2].graphContext.parentNodeIds, ["root"]);
+  assert.equal(result.findings[2].evidenceData.graphContext, undefined);
   assert.deepEqual(result.warnings, []);
 });

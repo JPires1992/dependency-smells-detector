@@ -1,51 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import {
-  parseDirtyWatersImmediateParents,
-  parseDirtyWatersPackageRefs,
-  projectSmellsOntoGraph
-} from "../src/analysis/GraphSmellProjection.js";
-
-/** Verifies that Dirty-Waters parent evidence yields immediate parents only. */
-test("parseDirtyWatersImmediateParents extracts direct parents from dependency paths", () => {
-  const parentEvidence =
-    "<details><summary>2 paths</summary><pre>" +
-    "[frontend@0.0.0](https://npmjs.com/package/frontend/v/0.0.0)<br>" +
-    "    [@vitejs/plugin-react@5.1.1](https://npmjs.com/package/@vitejs/plugin-react/v/5.1.1)<br>" +
-    "        [@babel/template@7.27.2](https://npmjs.com/package/@babel/template/v/7.27.2)<br>" +
-    "            [@babel/code-frame@7.27.1](https://npmjs.com/package/@babel/code-frame/v/7.27.1)<br>" +
-    "        [@babel/traverse@7.28.5](https://npmjs.com/package/@babel/traverse/v/7.28.5)<br>" +
-    "            [@babel/code-frame@7.27.1](https://npmjs.com/package/@babel/code-frame/v/7.27.1)" +
-    "</pre></details>";
-
-  const parents = parseDirtyWatersImmediateParents(
-    parentEvidence,
-    {
-      name: "@babel/code-frame",
-      version: "7.27.1"
-    },
-    { "@vitejs/plugin-react": "development" }
-  );
-
-  assert.deepEqual(parents, [
-    { name: "@babel/template", version: "7.27.2", depth: 2, dependencyType: "development" },
-    { name: "@babel/traverse", version: "7.28.5", depth: 2, dependencyType: "development" }
-  ]);
-});
-
-/** Verifies that Dirty-Waters tree indentation is converted into graph depth and dependency scope. */
-test("parseDirtyWatersPackageRefs infers depth and dependency type from the root dependency", () => {
-  const parentEvidence =
-    "[frontend@0.0.0](https://npmjs.com/package/frontend/v/0.0.0)<br>" +
-    "    [parent@2.0.0](https://npmjs.com/package/parent/v/2.0.0)<br>" +
-    "        [child@1.0.0](https://npmjs.com/package/child/v/1.0.0)";
-
-  assert.deepEqual(parseDirtyWatersPackageRefs(parentEvidence, { parent: "development" }), [
-    { id: "root", name: "frontend", version: "0.0.0", depth: 0, dependencyType: "root" },
-    { name: "parent", version: "2.0.0", depth: 1, dependencyType: "development" },
-    { name: "child", version: "1.0.0", depth: 2, dependencyType: "development" }
-  ]);
-});
+import { projectSmellsOntoGraph } from "../src/analysis/GraphSmellProjection.js";
 
 /** Verifies that projected graph contains only smelled packages and their immediate parents. */
 test("projectSmellsOntoGraph keeps only smell-to-parent relationships", () => {
@@ -60,11 +15,16 @@ test("projectSmellsOntoGraph keeps only smell-to-parent relationships", () => {
       affectedPackage: "child",
       affectedVersion: "1.0.0",
       score: { finalRating: "High" },
-      evidenceData: {
-        parent:
-          "[root-app@0.0.0](https://npmjs.com/package/root-app/v/0.0.0)<br>" +
-          "    [parent@2.0.0](https://npmjs.com/package/parent/v/2.0.0)<br>" +
-          "        [child@1.0.0](https://npmjs.com/package/child/v/1.0.0)"
+      graphContext: {
+        depth: 2,
+        dependencyType: "development",
+        parentNodes: [{
+          id: "parent@2.0.0",
+          name: "parent",
+          version: "2.0.0",
+          depth: 1,
+          dependencyType: "development"
+        }]
       }
     }
   ];
@@ -116,10 +76,16 @@ test("projectSmellsOntoGraph marks root-to-smell edges as direct", () => {
       affectedPackage: "child",
       affectedVersion: "1.0.0",
       score: { finalRating: "Medium" },
-      evidenceData: {
-        parent:
-          "[root-app@0.0.0](https://npmjs.com/package/root-app/v/0.0.0)<br>" +
-          "    [child@1.0.0](https://npmjs.com/package/child/v/1.0.0)"
+      graphContext: {
+        depth: 1,
+        dependencyType: "production",
+        parentNodes: [{
+          id: "root",
+          name: "root-app",
+          version: "0.0.0",
+          depth: 0,
+          dependencyType: "root"
+        }]
       }
     }
   ];
@@ -157,8 +123,11 @@ test("projectSmellsOntoGraph maps analysed package smells to the root node", () 
       affectedPackage: "frontend",
       affectedVersion: "0.0.0",
       score: { finalRating: "Medium" },
-      evidenceData: {
-        parent: "[frontend@0.0.0](https://npmjs.com/package/frontend/v/0.0.0)"
+      graphContext: {
+        nodeId: "root",
+        depth: 0,
+        dependencyType: "root",
+        parentNodes: []
       }
     }
   ];
@@ -178,8 +147,8 @@ test("projectSmellsOntoGraph maps analysed package smells to the root node", () 
   ]);
 });
 
-/** Verifies that reprojecting an older reduced graph enriches parent metadata from evidence. */
-test("projectSmellsOntoGraph enriches existing parent edges with Dirty-Waters metadata", () => {
+/** Verifies that a reduced graph is enriched from normalized detector metadata. */
+test("projectSmellsOntoGraph enriches existing parent edges with detector metadata", () => {
   const graph = {
     nodes: [
       { id: "child@1.0.0", name: "child", version: "1.0.0", dependencyType: "unknown" },
@@ -194,11 +163,16 @@ test("projectSmellsOntoGraph enriches existing parent edges with Dirty-Waters me
       affectedPackage: "child",
       affectedVersion: "1.0.0",
       score: { finalRating: "High" },
-      evidenceData: {
-        parent:
-          "[root-app@0.0.0](https://npmjs.com/package/root-app/v/0.0.0)<br>" +
-          "    [parent@2.0.0](https://npmjs.com/package/parent/v/2.0.0)<br>" +
-          "        [child@1.0.0](https://npmjs.com/package/child/v/1.0.0)"
+      graphContext: {
+        depth: 2,
+        dependencyType: "production",
+        parentNodes: [{
+          id: "parent@2.0.0",
+          name: "parent",
+          version: "2.0.0",
+          depth: 1,
+          dependencyType: "production"
+        }]
       }
     }
   ];
@@ -210,8 +184,8 @@ test("projectSmellsOntoGraph enriches existing parent edges with Dirty-Waters me
   assert.equal(projected.edges[0].relationship, "transitive");
 });
 
-/** Verifies that production Dirty-Waters evidence wins over a shorter development path for the same smelled package. */
-test("projectSmellsOntoGraph keeps production evidence depth when development evidence is shorter", () => {
+/** Verifies that normalized production context determines the projected package depth. */
+test("projectSmellsOntoGraph keeps normalized production evidence depth", () => {
   const graph = {
     nodes: [{ id: "root", name: "sample-app", version: "1.0.0", dependencyType: "root", depth: 0 }],
     edges: [],
@@ -226,15 +200,16 @@ test("projectSmellsOntoGraph keeps production evidence depth when development ev
       affectedPackage: "debug",
       affectedVersion: "4.4.3",
       score: { finalRating: "Medium" },
-      evidenceData: {
-        parent:
-          "[sample-app@1.0.0](https://npmjs.com/package/sample-app/v/1.0.0)<br>" +
-          "    [dev-parent@1.0.0](https://npmjs.com/package/dev-parent/v/1.0.0)<br>" +
-          "        [debug@4.4.3](https://npmjs.com/package/debug/v/4.4.3)<br>" +
-          "[sample-app@1.0.0](https://npmjs.com/package/sample-app/v/1.0.0)<br>" +
-          "    [prod-parent@1.0.0](https://npmjs.com/package/prod-parent/v/1.0.0)<br>" +
-          "        [prod-middle@1.0.0](https://npmjs.com/package/prod-middle/v/1.0.0)<br>" +
-          "            [debug@4.4.3](https://npmjs.com/package/debug/v/4.4.3)"
+      graphContext: {
+        depth: 3,
+        dependencyType: "production",
+        parentNodes: [{
+          id: "prod-middle@1.0.0",
+          name: "prod-middle",
+          version: "1.0.0",
+          depth: 2,
+          dependencyType: "production"
+        }]
       }
     }
   ];
@@ -260,13 +235,11 @@ test("projectSmellsOntoGraph projects missing dependencies from explicit graph c
     affectedPackage: "missing",
     affectedVersion: null,
     score: { finalRating: "Medium" },
-    evidenceData: {
-      graphContext: {
-        synthetic: true,
-        depth: 1,
-        dependencyType: "unknown",
-        parentNodeIds: ["root"]
-      }
+    graphContext: {
+      synthetic: true,
+      depth: 1,
+      dependencyType: "unknown",
+      parentNodeIds: ["root"]
     }
   }];
 

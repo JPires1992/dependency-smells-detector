@@ -31,6 +31,11 @@ test("JsonAnalysisExporter builds the documented JSON contract", () => {
         affectedVersion: "18.2.0",
         detectionSource: "Dirty-Waters",
         evidence: "test",
+        graphContext: {
+          depth: 1,
+          dependencyType: "production",
+          parentNodeIds: ["root"]
+        },
         score: {
           finalScore: 86.5,
           finalRating: "High"
@@ -55,4 +60,5 @@ test("JsonAnalysisExporter builds the documented JSON contract", () => {
   assert.equal(document.summary.dependenciesAnalysed, 2);
   assert.equal(document.summary.smellsDetected, 1);
   assert.equal(document.summary.severityCounts.High, 1);
+  assert.equal(document.smells[0].graphContext, undefined);
 });

@@ -1,21 +1,32 @@
 import { SmellTypes } from "../../domain/SmellCatalog.js";
 import { parsePackageIdentifier, toPackageNodeId } from "../../domain/PackageIdentifier.js";
+import { DirtyWatersDependencyPathParser } from "./DirtyWatersDependencyPathParser.js";
 
 /** Converts Dirty-Waters static JSON output into normalized smell findings. */
 export class DirtyWatersOutputParser {
+  /** Configures the adapter-owned parser used to normalize dependency-path markup. */
+  constructor({ dependencyPathParser = new DirtyWatersDependencyPathParser() } = {}) {
+    this.dependencyPathParser = dependencyPathParser;
+  }
+
   /** Parses all package entries from a Dirty-Waters static results file. */
-  parseStaticResults(staticResults, { rawResultPath = null, markdownReportPath = null } = {}) {
+  parseStaticResults(staticResults, {
+    rootDependencyTypesByName = {}
+  } = {}) {
     const findings = [];
 
     for (const [packageIdentifier, packageData] of Object.entries(staticResults ?? {})) {
       const { name, version } = parsePackageIdentifier(packageIdentifier);
+      const graphContext = this.dependencyPathParser.parse(
+        packageData?.parent,
+        { name, version },
+        rootDependencyTypesByName
+      );
       const common = {
         affectedPackage: name,
         affectedVersion: version,
         detectionSource: "Dirty-Waters",
-        rawResultPath,
-        markdownReportPath,
-        rawPackageIdentifier: packageIdentifier
+        graphContext
       };
 
       findings.push(...this.#findSourceCodeSmells(common, packageData));
@@ -61,14 +72,12 @@ export class DirtyWatersOutputParser {
     if (githubUrl === "No_repo_info_found" || githubUrl === null || githubUrl === undefined) {
       findings.push(createFinding(common, SmellTypes.NO_SOURCE_CODE_URL, "Package metadata does not expose a source code repository URL.", {
         githubUrl,
-        parent: packageData?.parent,
         command: packageData?.command
       }));
     } else if (sourceCode.github_exists === false) {
       findings.push(createFinding(common, SmellTypes.INVALID_SOURCE_CODE_URL, "Package source code repository URL is unavailable or returned a not-found response.", {
         githubUrl,
         githubExists: sourceCode.github_exists,
-        parent: packageData?.parent,
         command: packageData?.command
       }));
     }
@@ -88,7 +97,6 @@ export class DirtyWatersOutputParser {
           tagUrl: versionInfo.tag_url,
           shaUrl: versionInfo.sha_url,
           tagRelatedInfo: versionInfo.tag_related_info,
-          parent: packageData?.parent,
           command: packageData?.command
         })
       ];
@@ -106,8 +114,7 @@ export class DirtyWatersOutputParser {
     if (packageInfo.deprecated_in_version === true) {
       findings.push(createFinding(common, SmellTypes.DEPRECATED, "Package version is marked as deprecated in registry metadata.", {
         allDeprecated: packageInfo.all_deprecated,
-        deprecatedInVersion: packageInfo.deprecated_in_version,
-        parent: packageData?.parent
+        deprecatedInVersion: packageInfo.deprecated_in_version
       }));
     }
 
@@ -115,15 +122,13 @@ export class DirtyWatersOutputParser {
       findings.push(createFinding(common, SmellTypes.FORK, "Package source repository is detected as a fork.", {
         githubUrl: sourceCode.github_url,
         parentRepoLink: sourceCode.parent_repo_link,
-        parent: packageData?.parent,
         command: packageData?.command
       }));
     }
 
     if (packageInfo.provenance_in_version === false) {
       findings.push(createFinding(common, SmellTypes.NO_PROVENANCE, "Package version does not expose build provenance or attestation metadata.", {
-        provenanceInVersion: packageInfo.provenance_in_version,
-        parent: packageData?.parent
+        provenanceInVersion: packageInfo.provenance_in_version
       }));
     }
 
@@ -139,7 +144,6 @@ export class DirtyWatersOutputParser {
         createFinding(common, SmellTypes.NO_CODE_SIGNATURE, "Package does not expose a code signature.", {
           signaturePresent: codeSignature.signature_present,
           signatureValid: codeSignature.signature_valid,
-          parent: packageData?.parent,
           command: packageData?.command
         })
       ];
@@ -150,7 +154,6 @@ export class DirtyWatersOutputParser {
         createFinding(common, SmellTypes.INVALID_CODE_SIGNATURE, "Package exposes a code signature that Dirty-Waters reported as invalid.", {
           signaturePresent: codeSignature.signature_present,
           signatureValid: codeSignature.signature_valid,
-          parent: packageData?.parent,
           command: packageData?.command
         })
       ];
@@ -187,12 +190,8 @@ function createFinding(common, smellType, evidence, evidenceData) {
     affectedVersion: common.affectedVersion,
     detectionSource: common.detectionSource,
     evidence,
-    evidenceData: removeUndefinedValues({
-      ...evidenceData,
-      rawResultPath: common.rawResultPath,
-      markdownReportPath: common.markdownReportPath,
-      rawPackageIdentifier: common.rawPackageIdentifier
-    })
+    ...(common.graphContext ? { graphContext: common.graphContext } : {}),
+    evidenceData: removeUndefinedValues(evidenceData)
   };
 }
 
