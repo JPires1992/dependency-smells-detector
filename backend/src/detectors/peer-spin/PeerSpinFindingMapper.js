@@ -15,6 +15,7 @@ export class PeerSpinFindingMapper {
       affectedVersion: affectedNode.version,
       detectionSource: DETECTION_SOURCE,
       evidence: describeConflict(conflict, model),
+      graphContext: { nodeId: affectedNode.id },
       evidenceData: {
         pattern: conflict.pattern,
         detectionTechnique: "Node-Replacement-Conflict pattern analysis",

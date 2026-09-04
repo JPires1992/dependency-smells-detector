@@ -1,4 +1,4 @@
-import { findNodeForPackage } from "../../analysis/PackageLockGraphExtractor.js";
+import { PackageGraphIndex } from "../../analysis/PackageGraphIndex.js";
 import { SmellTypes } from "../../domain/SmellCatalog.js";
 import { collectManifestDependencies } from "../custom/ManifestDependencyCollector.js";
 
@@ -12,6 +12,7 @@ export class KnipOutputParser {
     const findings = [];
     const warnings = [];
     const packageJson = manifests?.packageJson ?? {};
+    const graphIndex = new PackageGraphIndex(graph);
     const declarations = new Map(
       collectManifestDependencies(packageJson).map((dependency) => [dependency.name, dependency])
     );
@@ -28,8 +29,8 @@ export class KnipOutputParser {
         continue;
       }
 
-      const node = findDirectDependencyNode(graph, packageName)
-        ?? findNodeForPackage(graph, packageName);
+      const node = graphIndex.resolveDirectDependency(packageName)
+        ?? graphIndex.resolve({ name: packageName });
       findings.push(createUnusedDependencyFinding(dependency, node, locations));
     }
 
@@ -49,6 +50,7 @@ function createUnusedDependencyFinding(dependency, node, locations) {
     affectedVersion: node?.version ?? null,
     detectionSource: DETECTION_SOURCE,
     evidence: `Dependency '${dependency.name}' is declared in ${dependency.section} but Knip found no usage.`,
+    ...(node ? { graphContext: { nodeId: node.id } } : {}),
     evidenceData: {
       sourceAnalyzer: "Knip",
       manifestPath: "package.json",
@@ -71,20 +73,20 @@ function createMissingDependencyFinding(packageName, project, locations) {
     affectedVersion: null,
     detectionSource: DETECTION_SOURCE,
     evidence: `Package '${packageName}' is referenced by source code but is not declared in package.json.`,
+    graphContext: {
+      synthetic: true,
+      depth: 1,
+      dependencyType: "unknown",
+      parentNodeIds: ["root"],
+      projectName: project?.name ?? "root"
+    },
     evidenceData: {
       sourceAnalyzer: "Knip",
       analyzerIssueType: "unlisted",
       manifestPath: "package.json",
       dependencyType: "unknown",
       usageLocations: locations,
-      productionReachabilityValue: 0.5,
-      graphContext: {
-        synthetic: true,
-        depth: 1,
-        dependencyType: "unknown",
-        parentNodeIds: ["root"],
-        projectName: project?.name ?? "root"
-      }
+      productionReachabilityValue: 0.5
     }
   };
 }
@@ -123,14 +125,4 @@ function normalizeIssueLocation(file, issue) {
     line: typeof issue?.line === "number" ? issue.line : null,
     column: typeof issue?.col === "number" ? issue.col : null
   };
-}
-
-/** Resolves a package node connected directly to the root before transitive fallbacks. */
-function findDirectDependencyNode(graph, packageName) {
-  const nodeById = new Map((graph?.nodes ?? []).map((node) => [node.id, node]));
-
-  return (graph?.edges ?? [])
-    .filter((edge) => edge.source === "root")
-    .map((edge) => nodeById.get(edge.target))
-    .find((node) => node?.name === packageName) ?? null;
 }

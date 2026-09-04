@@ -1,4 +1,4 @@
-import { findNodeForPackage } from "../analysis/PackageLockGraphExtractor.js";
+import { PackageGraphIndex } from "../analysis/PackageGraphIndex.js";
 import {
   baselineSeverityForSmell,
   baselineValueForSmell,
@@ -13,12 +13,16 @@ import {
 export class SsssScorer {
   /** Scores a list of findings and assigns stable smell identifiers. */
   scoreFindings(findings, graph) {
-    return findings.map((finding, index) => this.scoreFinding(finding, graph, index));
+    const graphIndex = new PackageGraphIndex(graph);
+    return findings.map((finding, index) => this.scoreFinding(finding, graphIndex, index));
   }
 
   /** Scores one finding with S, P, V, R, final score, and final rating. */
-  scoreFinding(finding, graph, index = 0) {
-    const node = findNodeForPackage(graph, finding.affectedPackage, finding.affectedVersion);
+  scoreFinding(finding, graphOrIndex, index = 0) {
+    const graphIndex = graphOrIndex instanceof PackageGraphIndex
+      ? graphOrIndex
+      : new PackageGraphIndex(graphOrIndex);
+    const node = graphIndex.resolveFinding(finding);
     const S = roundDimension(baselineValueForSmell(finding.type));
     const P = roundDimension(productionReachabilityValueForFinding(finding, node));
     const V = roundDimension(vulnerabilityValueForFinding(finding));
@@ -32,6 +36,7 @@ export class SsssScorer {
       affectedVersion: finding.affectedVersion,
       detectionSource: finding.detectionSource,
       evidence: finding.evidence,
+      ...(finding.graphContext ? { graphContext: finding.graphContext } : {}),
       evidenceData: finding.evidenceData ?? {},
       score: {
         S,

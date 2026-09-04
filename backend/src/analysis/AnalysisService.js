@@ -1,55 +1,33 @@
-import { ProjectInspector } from "./ProjectInspector.js";
-import { DetectorRegistry } from "../detectors/DetectorRegistry.js";
-import { DirtyWatersAdapter } from "../detectors/dirty-waters/DirtyWatersAdapter.js";
-import { CustomSmellDetector } from "../detectors/custom/CustomSmellDetector.js";
-import { SourceUsageSmellDetector } from "../detectors/source-usage/SourceUsageSmellDetector.js";
-import { PeerSpinDetector } from "../detectors/peer-spin/PeerSpinDetector.js";
-import { PackageGovernanceDetector } from "../detectors/package-governance/PackageGovernanceDetector.js";
-import { SsssScorer } from "../scoring/SsssScorer.js";
-import { JsonAnalysisExporter } from "../exporters/JsonAnalysisExporter.js";
-import { MarkdownReportExporter } from "../exporters/MarkdownReportExporter.js";
-import { VulnerabilityAnalyzerRegistry } from "../vulnerabilities/VulnerabilityAnalyzerRegistry.js";
-import { NpmAuditVulnerabilityAnalyzer } from "../vulnerabilities/NpmAuditVulnerabilityAnalyzer.js";
 import { enrichFindingsWithVulnerabilities } from "../vulnerabilities/FindingVulnerabilityEnricher.js";
-import { ResponsivenessAnalyzerRegistry } from "../responsiveness/ResponsivenessAnalyzerRegistry.js";
-import { NpmResponsivenessAnalyzer } from "../responsiveness/NpmResponsivenessAnalyzer.js";
 import { enrichFindingsWithResponsiveness } from "../responsiveness/FindingResponsivenessEnricher.js";
 
 /** Coordinates project inspection, smell detection, SSSS scoring, and output generation. */
 export class AnalysisService {
-  /** Wires default backend components while allowing tests or callers to inject alternatives. */
+  /** Receives pipeline collaborators assembled by the application's composition root. */
   constructor({
-    inspector = new ProjectInspector(),
-    detectorRegistry = null,
-    vulnerabilityAnalyzerRegistry = null,
-    responsivenessAnalyzerRegistry = null,
-    scorer = new SsssScorer(),
-    jsonExporter = new JsonAnalysisExporter(),
-    markdownExporter = new MarkdownReportExporter()
+    inspector,
+    detectorRegistry,
+    vulnerabilityAnalyzerRegistry,
+    responsivenessAnalyzerRegistry,
+    scorer,
+    jsonExporter,
+    markdownExporter
   } = {}) {
-    this.inspector = inspector;
-    this.detectorRegistry =
-      detectorRegistry ??
-      new DetectorRegistry([
-        new DirtyWatersAdapter(),
-        new CustomSmellDetector(),
-        new PackageGovernanceDetector(),
-        new PeerSpinDetector(),
-        new SourceUsageSmellDetector()
-      ]);
-    this.vulnerabilityAnalyzerRegistry =
-      vulnerabilityAnalyzerRegistry ??
-      new VulnerabilityAnalyzerRegistry([
-        new NpmAuditVulnerabilityAnalyzer()
-      ]);
-    this.responsivenessAnalyzerRegistry =
-      responsivenessAnalyzerRegistry ??
-      new ResponsivenessAnalyzerRegistry([
-        new NpmResponsivenessAnalyzer()
-      ]);
-    this.scorer = scorer;
-    this.jsonExporter = jsonExporter;
-    this.markdownExporter = markdownExporter;
+    this.inspector = requireCollaborator(inspector, "inspector", "inspect");
+    this.detectorRegistry = requireCollaborator(detectorRegistry, "detectorRegistry", "detect");
+    this.vulnerabilityAnalyzerRegistry = requireCollaborator(
+      vulnerabilityAnalyzerRegistry,
+      "vulnerabilityAnalyzerRegistry",
+      "analyze"
+    );
+    this.responsivenessAnalyzerRegistry = requireCollaborator(
+      responsivenessAnalyzerRegistry,
+      "responsivenessAnalyzerRegistry",
+      "analyze"
+    );
+    this.scorer = requireCollaborator(scorer, "scorer", "scoreFindings");
+    this.jsonExporter = requireCollaborator(jsonExporter, "jsonExporter", "export");
+    this.markdownExporter = requireCollaborator(markdownExporter, "markdownExporter", "export");
   }
 
   /** Runs a full non-interactive analysis and writes JSON plus Markdown artefacts. */
@@ -83,7 +61,8 @@ export class AnalysisService {
     ]);
     const vulnerabilityFindings = enrichFindingsWithVulnerabilities(
       detectionResult.findings,
-      vulnerabilityResult
+      vulnerabilityResult,
+      inspected.graph
     );
     const responsivenessResult = await this.responsivenessAnalyzerRegistry.analyze({
       project,
@@ -101,7 +80,8 @@ export class AnalysisService {
     ];
     const enrichedFindings = enrichFindingsWithResponsiveness(
       vulnerabilityFindings,
-      responsivenessResult
+      responsivenessResult,
+      inspected.graph
     );
     const smells = this.scorer.scoreFindings(enrichedFindings, inspected.graph);
 
@@ -122,7 +102,7 @@ export class AnalysisService {
     return {
       project,
       graph: jsonResult.document.graph,
-      smells,
+      smells: jsonResult.document.smells,
       summary: jsonResult.document.summary,
       outputs: {
         json: jsonResult.outputPath,
@@ -131,4 +111,13 @@ export class AnalysisService {
       warnings
     };
   }
+}
+
+/** Validates an injected pipeline collaborator and returns it for assignment. */
+function requireCollaborator(collaborator, name, operation) {
+  if (!collaborator || typeof collaborator[operation] !== "function") {
+    throw new TypeError(`AnalysisService requires ${name}.${operation}().`);
+  }
+
+  return collaborator;
 }

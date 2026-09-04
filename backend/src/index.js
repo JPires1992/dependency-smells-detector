@@ -1,8 +1,17 @@
 /** Public module surface for the Analysis and Scoring Layer. */
 export { AnalysisService } from "./analysis/AnalysisService.js";
+export {
+  createDefaultAnalysisService,
+  createDefaultDetectors,
+  createDefaultResponsivenessAnalyzers,
+  createDefaultVulnerabilityAnalyzers
+} from "./composition/createDefaultAnalysisService.js";
 export { ProjectInspector } from "./analysis/ProjectInspector.js";
+export { PackageGraphIndex } from "./analysis/PackageGraphIndex.js";
+export { PackageManagerAnalyzerRegistry } from "./analysis/PackageManagerAnalyzerRegistry.js";
 export { DetectorRegistry } from "./detectors/DetectorRegistry.js";
 export { DirtyWatersAdapter } from "./detectors/dirty-waters/DirtyWatersAdapter.js";
+export { DirtyWatersDependencyPathParser } from "./detectors/dirty-waters/DirtyWatersDependencyPathParser.js";
 export { DirtyWatersOutputParser } from "./detectors/dirty-waters/DirtyWatersOutputParser.js";
 export { CustomSmellDetector } from "./detectors/custom/CustomSmellDetector.js";
 export { NpmDependencySpecifierParser } from "./detectors/custom/NpmDependencySpecifierParser.js";

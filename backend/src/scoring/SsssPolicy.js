@@ -1,4 +1,4 @@
-import { BaselineSeverity, BASELINE_SEVERITY_BY_SMELL, SmellTypes } from "../domain/SmellCatalog.js";
+import { BaselineSeverity, BASELINE_SEVERITY_BY_SMELL } from "../domain/SmellCatalog.js";
 
 /** Dimension weights from the dissertation SSSS formula. */
 export const SSSS_WEIGHTS = Object.freeze({
@@ -43,31 +43,20 @@ export function ratingForScore(score) {
   return BaselineSeverity.LOW;
 }
 
-/** Derives the R dimension from finding evidence and smell-specific defaults. */
+/** Reads the R value produced by ResponsivenessPolicy and rejects incomplete pipeline input. */
 export function responsivenessValueForFinding(finding) {
-  const evidence = finding.evidenceData ?? {};
+  const value = finding.evidenceData?.responsivenessValue;
 
-  if (typeof evidence.responsivenessValue === "number") {
-    return clamp01(evidence.responsivenessValue);
+  if (!Number.isFinite(value) || value < 0 || value > 1) {
+    const packageId = finding.affectedVersion
+      ? `${finding.affectedPackage}@${finding.affectedVersion}`
+      : finding.affectedPackage;
+    throw new Error(
+      `Missing or invalid explicit responsiveness evidence for ${packageId ?? "unknown package"}.`
+    );
   }
 
-  if (finding.type === SmellTypes.DEPRECATED || evidence.archived === true || evidence.unmaintained === true) {
-    return 1;
-  }
-
-  if (evidence.blocksAvailableFix === true) {
-    return 0.75;
-  }
-
-  if ([SmellTypes.PINNED_DEPENDENCY, SmellTypes.RESTRICTIVE_CONSTRAINT].includes(finding.type)) {
-    return 0.5;
-  }
-
-  if (evidence.activeMaintenance === true) {
-    return 0.25;
-  }
-
-  return 0.5;
+  return value;
 }
 
 /** Derives the V dimension from vulnerability severity, age, or lookup status evidence. */

@@ -1,4 +1,4 @@
-import { findNodeForPackage } from "../../analysis/PackageLockGraphExtractor.js";
+import { PackageGraphIndex } from "../../analysis/PackageGraphIndex.js";
 import { SmellTypes } from "../../domain/SmellCatalog.js";
 import { ConstraintKind, SpecifierSource } from "./NpmDependencySpecifierParser.js";
 
@@ -28,6 +28,7 @@ export class DependencySpecifierRule {
       affectedVersion: node?.version ?? null,
       detectionSource: DETECTION_SOURCE,
       evidence: this.describe(dependency, specifier),
+      ...(node ? { graphContext: { nodeId: node.id } } : {}),
       evidenceData: {
         manifestPath: "package.json",
         dependencySection: dependency.section,
@@ -61,6 +62,11 @@ export class NoPackageLockRule {
       affectedVersion: manifests.packageJson?.version ?? null,
       detectionSource: DETECTION_SOURCE,
       evidence: "The repository does not contain package-lock.json or npm-shrinkwrap.json at the analysed ref.",
+      graphContext: {
+        nodeId: "root",
+        depth: 0,
+        dependencyType: "root"
+      },
       evidenceData: {
         repository: project.repository,
         analysedRef: project.analysedRef,
@@ -110,11 +116,7 @@ export function createDefaultDependencySpecifierRules() {
 
 /** Resolves the root declaration node before falling back to any package node with the same name. */
 function findDeclaredDependencyNode(graph, dependencyName) {
-  const nodeById = new Map((graph?.nodes ?? []).map((node) => [node.id, node]));
-  const directNode = (graph?.edges ?? [])
-    .filter((edge) => edge.source === "root")
-    .map((edge) => nodeById.get(edge.target))
-    .find((node) => node?.name === dependencyName);
-
-  return directNode ?? findNodeForPackage(graph, dependencyName);
+  const graphIndex = new PackageGraphIndex(graph);
+  return graphIndex.resolveDirectDependency(dependencyName)
+    ?? graphIndex.resolve({ name: dependencyName });
 }

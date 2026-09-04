@@ -12,6 +12,7 @@ export class JsonAnalysisExporter {
   /** Builds the full analysis result document without writing it to disk. */
   buildDocument({ project, graph, smells, warnings = [] }) {
     const smellGraph = projectSmellsOntoGraph(graph, smells);
+    const publicSmells = smells.map(toPublicSmell);
 
     return {
       metadata: {
@@ -27,7 +28,7 @@ export class JsonAnalysisExporter {
         analysedRef: project.analysedRef
       },
       graph: smellGraph,
-      smells,
+      smells: publicSmells,
       summary: buildSummary(graph, smells)
     };
   }
@@ -40,6 +41,12 @@ export class JsonAnalysisExporter {
     await writeFile(outputPath, `${JSON.stringify(document, null, 2)}\n`, "utf8");
     return { outputPath, document };
   }
+}
+
+/** Removes pipeline-only graph context from the public smell DTO. */
+function toPublicSmell(smell) {
+  const { graphContext: _graphContext, ...publicSmell } = smell;
+  return publicSmell;
 }
 
 /** Computes aggregate result counts from the full analysed graph and detected smell list. */

@@ -23,6 +23,7 @@ export class InstallScriptExecutionRule {
       affectedVersion: node.version,
       detectionSource: DETECTION_SOURCE,
       evidence: `${node.id} declares install lifecycle scripts: ${scriptNames.join(", ")}.`,
+      graphContext: { nodeId: node.id },
       evidenceData: {
         scriptNames,
         installScripts,
@@ -54,6 +55,7 @@ export class TooManyMaintainersRule {
       affectedVersion: node.version,
       detectionSource: DETECTION_SOURCE,
       evidence: `${node.name} declares ${maintainers.length} npm maintainers, exceeding the threshold of ${this.thresholdPolicy.maxMaintainers}.`,
+      graphContext: { nodeId: node.id },
       evidenceData: {
         maintainerCount: maintainers.length,
         maintainerThreshold: this.thresholdPolicy.maxMaintainers,
@@ -90,6 +92,7 @@ export class TooManyContributorsRule {
       affectedVersion: node.version,
       detectionSource: DETECTION_SOURCE,
       evidence: `${node.name} declares ${contributors.length} contributors for ${maintainers.length} maintainers (${formatRatio(ratio)} contributors per maintainer).`,
+      graphContext: { nodeId: node.id },
       evidenceData: {
         maintainerCount: maintainers.length,
         contributorCount: contributors.length,
@@ -145,6 +148,7 @@ export class ExpiredMaintainerDomainRule {
         affectedVersion: node.version,
         detectionSource: DETECTION_SOURCE,
         evidence: `${node.name} has npm maintainer email domains confirmed as unregistered: ${expiredDomains.map((item) => item.domain).join(", ")}.`,
+        graphContext: { nodeId: node.id },
         evidenceData: {
           expiredMaintainerDomains: expiredDomains,
           metadataSource: "npm Registry + DNS + RDAP",

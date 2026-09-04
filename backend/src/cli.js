@@ -1,16 +1,7 @@
 #!/usr/bin/env node
 import path from "node:path";
-import { AnalysisService } from "./analysis/AnalysisService.js";
-import { DetectorRegistry } from "./detectors/DetectorRegistry.js";
-import { DirtyWatersAdapter, parsePositiveInteger } from "./detectors/dirty-waters/DirtyWatersAdapter.js";
-import { CustomSmellDetector } from "./detectors/custom/CustomSmellDetector.js";
-import { KnipAdapter } from "./detectors/source-usage/KnipAdapter.js";
-import { SourceUsageSmellDetector } from "./detectors/source-usage/SourceUsageSmellDetector.js";
-import { NpmRegistryMetadataProvider } from "./detectors/peer-spin/NpmRegistryMetadataProvider.js";
-import { PeerSpinDetector } from "./detectors/peer-spin/PeerSpinDetector.js";
-import { PackageGovernanceDetector } from "./detectors/package-governance/PackageGovernanceDetector.js";
-import { ResponsivenessAnalyzerRegistry } from "./responsiveness/ResponsivenessAnalyzerRegistry.js";
-import { NpmResponsivenessAnalyzer } from "./responsiveness/NpmResponsivenessAnalyzer.js";
+import { createDefaultAnalysisService } from "./composition/createDefaultAnalysisService.js";
+import { parsePositiveInteger } from "./utils/PositiveInteger.js";
 
 const BOOLEAN_FLAGS = new Set([
   "help",
@@ -59,65 +50,45 @@ async function main() {
 
   const outputDirectory = path.resolve(args.output ?? args.o ?? "reports");
   
-  // Compose enabled detector modules while keeping CLI options outside detector implementations.
-  const detectors = [];
-  if (!args["skip-dirty-waters"]) {
-    detectors.push(
-      new DirtyWatersAdapter({
+  // Translate transport-level flags into module configuration for the composition root.
+  const service = createDefaultAnalysisService({
+    configuration: {
+      dirtyWaters: {
+        enabled: !args["skip-dirty-waters"],
         required: Boolean(args["require-dirty-waters"]),
         timeoutMs: parsePositiveInteger(args["dirty-waters-timeout-ms"], undefined)
-      })
-    );
-  }
-  detectors.push(new CustomSmellDetector());
-  if (!args["skip-package-governance"]) {
-    detectors.push(
-      new PackageGovernanceDetector({
+      },
+      packageGovernance: {
+        enabled: !args["skip-package-governance"],
         required: Boolean(args["require-package-governance"]),
         concurrency: parsePositiveInteger(
           args["package-governance-concurrency"],
           undefined
         )
-      })
-    );
-  }
-  if (!args["skip-peer-spin"]) {
-    detectors.push(
-      new PeerSpinDetector({
+      },
+      peerSpin: {
+        enabled: !args["skip-peer-spin"],
         required: Boolean(args["require-peer-spin"]),
         maxConflicts: parsePositiveInteger(args["peer-spin-max-conflicts"], undefined),
         verificationConcurrency: parsePositiveInteger(
           args["peer-spin-registry-concurrency"],
           undefined
         ),
-        metadataProvider: new NpmRegistryMetadataProvider({
-          timeoutMs: parsePositiveInteger(
-            args["peer-spin-registry-timeout-ms"],
-            undefined
-          )
-        })
-      })
-    );
-  }
-  if (!args["skip-source-usage"]) {
-    detectors.push(
-      new SourceUsageSmellDetector({
+        registryTimeoutMs: parsePositiveInteger(
+          args["peer-spin-registry-timeout-ms"],
+          undefined
+        )
+      },
+      sourceUsage: {
+        enabled: !args["skip-source-usage"],
         required: Boolean(args["require-source-usage"]),
-        analyzer: new KnipAdapter({
-          timeoutMs: parsePositiveInteger(args["source-usage-timeout-ms"], undefined)
-        })
-      })
-    );
-  }
-
-  const service = new AnalysisService({
-    detectorRegistry: new DetectorRegistry(detectors),
-    responsivenessAnalyzerRegistry: new ResponsivenessAnalyzerRegistry([
-      new NpmResponsivenessAnalyzer({
+        timeoutMs: parsePositiveInteger(args["source-usage-timeout-ms"], undefined)
+      },
+      responsiveness: {
         required: Boolean(args["require-responsiveness"]),
         concurrency: parsePositiveInteger(args["responsiveness-concurrency"], undefined)
-      })
-    ])
+      }
+    }
   });
 
   const result = await service.analyze({
@@ -190,7 +161,7 @@ Options:
                               Concurrent npm release-history lookups. Defaults to 4.
   --require-responsiveness    Fail when npm responsiveness evidence cannot be retrieved.
   --peer-spin-registry-timeout-ms <ms>
-                              Timeout for each npm registry verification. Defaults to 30000.
+                              Shared npm Registry request timeout. Defaults to 30000.
   --peer-spin-max-conflicts <count>
                               Maximum PeerSpin candidates verified per analysis. Defaults to 100.
   --peer-spin-registry-concurrency <count>
@@ -208,13 +179,18 @@ Environment:
   DIRTY_WATERS_AUTO_INSTALL   Set to false to disable automatic installation.
   NPM_REGISTRY_URL            Registry used for package metadata and PeerSpin verification.
   NPM_REGISTRY_TOKEN          Optional bearer token for private registry packages.
-  NPM_REGISTRY_TIMEOUT_MS     Package governance registry timeout. Defaults to 30000.
+  NPM_REGISTRY_TIMEOUT_MS     Shared npm Registry timeout. Defaults to 30000.
+  NPM_REGISTRY_MAX_ATTEMPTS   Attempts for transient registry failures. Defaults to 3.
+  NPM_REGISTRY_RETRY_DELAY_MS Base retry delay in milliseconds. Defaults to 250.
+  NPM_AUDIT_TIMEOUT_MS        npm audit timeout in milliseconds. Defaults to 600000.
+  NPM_AUDIT_MAX_ATTEMPTS      Attempts for transient audit endpoint failures. Defaults to 2.
+  NPM_AUDIT_RETRY_DELAY_MS    Base audit retry delay in milliseconds. Defaults to 1000.
   PACKAGE_GOVERNANCE_CONCURRENCY
                               Concurrent package governance analyses. Defaults to 4.
   RESPONSIVENESS_CONCURRENCY  Concurrent npm release-history lookups. Defaults to 4.
   DOMAIN_LOOKUP_TIMEOUT_MS    Timeout for each DNS and RDAP lookup. Defaults to 10000/15000.
   PEER_SPIN_REGISTRY_TIMEOUT_MS
-                              Registry verification timeout. Defaults to 30000.
+                              Legacy shared npm Registry timeout override. Defaults to 30000.
   PEER_SPIN_MAX_CONFLICTS     Maximum conflicts verified per analysis. Defaults to 100.
   PEER_SPIN_REGISTRY_CONCURRENCY
                               Concurrent registry verifications. Defaults to 4.

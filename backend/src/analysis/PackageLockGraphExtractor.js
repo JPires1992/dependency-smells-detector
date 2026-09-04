@@ -1,6 +1,6 @@
 import { readFile } from "node:fs/promises";
 import path from "node:path";
-import { parsePackageIdentifier, toPackageNodeId } from "../domain/PackageIdentifier.js";
+import { toPackageNodeId } from "../domain/PackageIdentifier.js";
 
 /** Extracts a dependency graph from npm package-lock.json files. */
 export class PackageLockGraphExtractor {
@@ -440,26 +440,4 @@ function collectDepthsFromRoot(adjacency) {
   }
 
   return depthById;
-}
-
-/** Finds the graph node matching a package name and optional version. */
-export function findNodeForPackage(graph, packageName, packageVersion = null) {
-  if (!graph?.nodes || !packageName) {
-    return null;
-  }
-
-  if (packageVersion) {
-    const exactId = toPackageNodeId(packageName, packageVersion);
-    const exact = graph.nodes.find((node) => node.id === exactId);
-    if (exact) {
-      return exact;
-    }
-  }
-
-  return graph.nodes.find((node) => node.name === packageName) ?? null;
-}
-
-/** Extracts only the package name from a full package identifier. */
-export function packageNameFromIdentifier(identifier) {
-  return parsePackageIdentifier(identifier).name;
 }
