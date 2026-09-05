@@ -1,22 +1,25 @@
 import { commandSucceeds, runCommand } from "../../utils/ChildProcess.js";
-
-/** Default upstream installation source for Dirty-Waters. */
-//const DEFAULT_INSTALL_SOURCE = "git+https://github.com/chains-project/dirty-waters.git";
-const DEFAULT_INSTALL_SOURCE = "git+https://github.com/JPires1992/dirty-waters.git@improvements";
+import {
+  requireBoolean,
+  requireNonEmptyString
+} from "../../utils/ConfigurationValue.js";
 
 /** Ensures Dirty-Waters is available, installing it automatically when configured. */
 export class DirtyWatersInstaller {
   /** Configures executable lookup and pip installation behavior. */
   constructor({
-    executable = process.env.DIRTY_WATERS_EXECUTABLE || "dirty-waters",
-    pipCommand = process.env.DIRTY_WATERS_PIP_COMMAND || "pip",
-    installSource = process.env.DIRTY_WATERS_INSTALL_SOURCE || DEFAULT_INSTALL_SOURCE,
-    autoInstall = process.env.DIRTY_WATERS_AUTO_INSTALL !== "false"
+    executable,
+    pipCommand,
+    installSource,
+    autoInstall
   } = {}) {
-    this.executable = executable;
-    this.pipCommand = pipCommand;
-    this.installSource = installSource;
-    this.autoInstall = autoInstall;
+    this.executable = requireNonEmptyString(executable, "dirtyWaters.executable");
+    this.pipCommand = requireNonEmptyString(pipCommand, "dirtyWaters.pipCommand");
+    this.installSource = requireNonEmptyString(
+      installSource,
+      "dirtyWaters.installSource"
+    );
+    this.autoInstall = requireBoolean(autoInstall, "dirtyWaters.autoInstall");
   }
 
   /** Returns a usable Dirty-Waters executable, installing from GitHub when missing. */

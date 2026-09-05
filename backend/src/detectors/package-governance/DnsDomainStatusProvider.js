@@ -1,20 +1,15 @@
 import { resolveNs } from "node:dns/promises";
-import { parsePositiveInteger } from "../../utils/PositiveInteger.js";
-
-const DEFAULT_TIMEOUT_MS = 10 * 1000;
+import { requirePositiveInteger } from "../../utils/ConfigurationValue.js";
 
 /** Resolves whether a registrable domain has an authoritative DNS delegation. */
 export class DnsDomainStatusProvider {
   /** Configures an injectable DNS resolver and bounded lookup duration. */
   constructor({
     resolveNameservers = resolveNs,
-    timeoutMs = parsePositiveInteger(
-      process.env.DOMAIN_LOOKUP_TIMEOUT_MS,
-      DEFAULT_TIMEOUT_MS
-    )
+    timeoutMs
   } = {}) {
     this.resolveNameservers = resolveNameservers;
-    this.timeoutMs = timeoutMs;
+    this.timeoutMs = requirePositiveInteger(timeoutMs, "domainLookup.dnsTimeoutMs");
   }
 
   /** Classifies a domain as registered, unregistered, or unavailable. */

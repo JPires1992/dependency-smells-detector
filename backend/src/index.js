@@ -1,6 +1,10 @@
 /** Public module surface for the Analysis and Scoring Layer. */
 export { AnalysisService } from "./analysis/AnalysisService.js";
 export {
+  loadConfiguration,
+  resolveConfiguration
+} from "./configuration/ConfigurationLoader.js";
+export {
   createDefaultAnalysisService,
   createDefaultDetectors,
   createDefaultResponsivenessAnalyzers,

@@ -35,8 +35,9 @@ export class AnalysisService {
     target,
     outputDirectory,
     analysedRef = null,
-    githubToken = process.env.GITHUB_API_TOKEN,
-    workspaceDirectory = process.cwd()
+    githubToken = null,
+    workspaceDirectory = process.cwd(),
+    environment = process.env
   }) {
     const inspected = await this.inspector.inspect({ target, analysedRef, githubToken });
     const project = {
@@ -50,13 +51,15 @@ export class AnalysisService {
         graph: inspected.graph,
         manifests: inspected.manifests,
         githubToken,
-        workspaceDirectory
+        workspaceDirectory,
+        environment
       }),
       this.vulnerabilityAnalyzerRegistry.analyze({
         project,
         graph: inspected.graph,
         manifests: inspected.manifests,
-        workspaceDirectory
+        workspaceDirectory,
+        environment
       })
     ]);
     const vulnerabilityFindings = enrichFindingsWithVulnerabilities(
@@ -70,7 +73,8 @@ export class AnalysisService {
       manifests: inspected.manifests,
       findings: vulnerabilityFindings,
       packageMetadata: detectionResult.packageMetadata ?? {},
-      workspaceDirectory
+      workspaceDirectory,
+      environment
     });
     const warnings = [
       ...(inspected.warnings ?? []),

@@ -20,8 +20,7 @@ export const SmellTypes = Object.freeze({
   EXPIRED_MAINTAINER_DOMAIN: "Expired Maintainer Domain",
   INSTALL_SCRIPT_EXECUTION: "Install Script Execution",
   TOO_MANY_MAINTAINERS: "Too Many Maintainers",
-  TOO_MANY_CONTRIBUTORS: "Too Many Contributors",
-  OVERLOADED_MAINTAINER: "Overloaded Maintainer"
+  TOO_MANY_CONTRIBUTORS: "Too Many Contributors"
 });
 
 /** Qualitative severity labels used by baseline and final SSSS ratings. */
@@ -54,32 +53,5 @@ export const BASELINE_SEVERITY_BY_SMELL = Object.freeze({
   [SmellTypes.EXPIRED_MAINTAINER_DOMAIN]: BaselineSeverity.CRITICAL,
   [SmellTypes.INSTALL_SCRIPT_EXECUTION]: BaselineSeverity.CRITICAL,
   [SmellTypes.TOO_MANY_MAINTAINERS]: BaselineSeverity.MEDIUM,
-  [SmellTypes.TOO_MANY_CONTRIBUTORS]: BaselineSeverity.LOW,
-  [SmellTypes.OVERLOADED_MAINTAINER]: BaselineSeverity.MEDIUM
-});
-
-/** Documents the planned primary detection source for each smell type. */
-export const DETECTION_SOURCE_BY_SMELL = Object.freeze({
-  [SmellTypes.PINNED_DEPENDENCY]: "Code Repository",
-  [SmellTypes.HARDCODED_URL]: "Code Repository",
-  [SmellTypes.RESTRICTIVE_CONSTRAINT]: "Code Repository",
-  [SmellTypes.PERMISSIVE_CONSTRAINT]: "Code Repository",
-  [SmellTypes.NO_PACKAGE_LOCK]: "Code Repository",
-  [SmellTypes.UNUSED_DEPENDENCY]: "Code Repository",
-  [SmellTypes.MISSING_DEPENDENCY]: "Code Repository",
-  [SmellTypes.PEER_DEPENDENCY_RESOLVING_LOOP]: "Package Registry",
-  [SmellTypes.NO_SOURCE_CODE_URL]: "Dirty-Waters",
-  [SmellTypes.INVALID_SOURCE_CODE_URL]: "Dirty-Waters",
-  [SmellTypes.INACCESSIBLE_COMMIT_SHA_OR_RELEASE_TAG]: "Dirty-Waters",
-  [SmellTypes.DEPRECATED]: "Dirty-Waters",
-  [SmellTypes.FORK]: "Dirty-Waters",
-  [SmellTypes.NO_CODE_SIGNATURE]: "Dirty-Waters",
-  [SmellTypes.INVALID_CODE_SIGNATURE]: "Dirty-Waters",
-  [SmellTypes.NO_PROVENANCE]: "Dirty-Waters",
-  [SmellTypes.ALIASED]: "Dirty-Waters",
-  [SmellTypes.EXPIRED_MAINTAINER_DOMAIN]: "Package Registry",
-  [SmellTypes.INSTALL_SCRIPT_EXECUTION]: "Package Registry",
-  [SmellTypes.TOO_MANY_MAINTAINERS]: "Package Registry",
-  [SmellTypes.TOO_MANY_CONTRIBUTORS]: "Package Registry",
-  [SmellTypes.OVERLOADED_MAINTAINER]: "Package Registry"
+  [SmellTypes.TOO_MANY_CONTRIBUTORS]: BaselineSeverity.LOW
 });

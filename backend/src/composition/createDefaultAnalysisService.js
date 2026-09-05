@@ -1,10 +1,17 @@
 import { AnalysisService } from "../analysis/AnalysisService.js";
+import { resolveConfiguration } from "../configuration/ConfigurationLoader.js";
+import { GitHubRepositoryWorkspaceProvider } from "../analysis/GitHubRepositoryWorkspaceProvider.js";
 import { ProjectInspector } from "../analysis/ProjectInspector.js";
 import { DetectorRegistry } from "../detectors/DetectorRegistry.js";
 import { CustomSmellDetector } from "../detectors/custom/CustomSmellDetector.js";
 import { DirtyWatersAdapter } from "../detectors/dirty-waters/DirtyWatersAdapter.js";
+import { DirtyWatersInstaller } from "../detectors/dirty-waters/DirtyWatersInstaller.js";
+import { DnsDomainStatusProvider } from "../detectors/package-governance/DnsDomainStatusProvider.js";
+import { DomainRegistrationVerifier } from "../detectors/package-governance/DomainRegistrationVerifier.js";
 import { PackageGovernanceDetector } from "../detectors/package-governance/PackageGovernanceDetector.js";
+import { RdapDomainStatusProvider } from "../detectors/package-governance/RdapDomainStatusProvider.js";
 import { PeerSpinDetector } from "../detectors/peer-spin/PeerSpinDetector.js";
+import { NodeReplacementConflictDetector } from "../detectors/peer-spin/NodeReplacementConflictDetector.js";
 import { KnipAdapter } from "../detectors/source-usage/KnipAdapter.js";
 import { SourceUsageSmellDetector } from "../detectors/source-usage/SourceUsageSmellDetector.js";
 import { JsonAnalysisExporter } from "../exporters/JsonAnalysisExporter.js";
@@ -14,42 +21,43 @@ import { NpmPackageActivityProvider } from "../responsiveness/NpmPackageActivity
 import { NpmResponsivenessAnalyzer } from "../responsiveness/NpmResponsivenessAnalyzer.js";
 import { ResponsivenessAnalyzerRegistry } from "../responsiveness/ResponsivenessAnalyzerRegistry.js";
 import { SsssScorer } from "../scoring/SsssScorer.js";
-import { parsePositiveInteger } from "../utils/PositiveInteger.js";
 import { NpmAuditVulnerabilityAnalyzer } from "../vulnerabilities/NpmAuditVulnerabilityAnalyzer.js";
 import { VulnerabilityAnalyzerRegistry } from "../vulnerabilities/VulnerabilityAnalyzerRegistry.js";
 
 /** Creates the production analysis pipeline from configurable, replaceable module lists. */
 export function createDefaultAnalysisService({
   configuration = {},
+  credentials = {},
   inspector = new ProjectInspector(),
   npmRegistryClient = null,
   detectors = null,
   vulnerabilityAnalyzers = null,
   responsivenessAnalyzers = null,
   scorer = new SsssScorer(),
-  jsonExporter = new JsonAnalysisExporter(),
+  jsonExporter = null,
   markdownExporter = new MarkdownReportExporter()
 } = {}) {
+  const resolvedConfiguration = resolveConfiguration(configuration);
   const sharedNpmRegistryClient = npmRegistryClient
-    ?? createDefaultNpmRegistryClient(configuration);
+    ?? createDefaultNpmRegistryClient(resolvedConfiguration, credentials);
 
   return new AnalysisService({
     inspector,
     detectorRegistry: new DetectorRegistry(
-      detectors ?? createDefaultDetectors(configuration, {
+      detectors ?? createDefaultDetectors(resolvedConfiguration, {
         npmRegistryClient: sharedNpmRegistryClient
       })
     ),
     vulnerabilityAnalyzerRegistry: new VulnerabilityAnalyzerRegistry(
-      vulnerabilityAnalyzers ?? createDefaultVulnerabilityAnalyzers(configuration)
+      vulnerabilityAnalyzers ?? createDefaultVulnerabilityAnalyzers(resolvedConfiguration)
     ),
     responsivenessAnalyzerRegistry: new ResponsivenessAnalyzerRegistry(
-      responsivenessAnalyzers ?? createDefaultResponsivenessAnalyzers(configuration, {
+      responsivenessAnalyzers ?? createDefaultResponsivenessAnalyzers(resolvedConfiguration, {
         npmRegistryClient: sharedNpmRegistryClient
       })
     ),
     scorer,
-    jsonExporter,
+    jsonExporter: jsonExporter ?? new JsonAnalysisExporter(resolvedConfiguration.output),
     markdownExporter
   });
 }
@@ -57,23 +65,50 @@ export function createDefaultAnalysisService({
 /** Builds the ordered detector list while keeping enablement decisions at the composition boundary. */
 export function createDefaultDetectors(
   configuration = {},
-  { npmRegistryClient = createDefaultNpmRegistryClient(configuration) } = {}
+  { npmRegistryClient = null } = {}
 ) {
+  const resolvedConfiguration = resolveConfiguration(configuration);
+  const sharedNpmRegistryClient = npmRegistryClient
+    ?? createDefaultNpmRegistryClient(resolvedConfiguration);
   const detectors = [];
-  const dirtyWaters = configuration.dirtyWaters ?? {};
-  const packageGovernance = configuration.packageGovernance ?? {};
-  const peerSpin = configuration.peerSpin ?? {};
-  const sourceUsage = configuration.sourceUsage ?? {};
+  const dirtyWaters = resolvedConfiguration.dirtyWaters;
+  const packageGovernance = resolvedConfiguration.packageGovernance;
+  const peerSpin = resolvedConfiguration.peerSpin;
+  const sourceUsage = resolvedConfiguration.sourceUsage;
 
   if (dirtyWaters.enabled !== false) {
-    detectors.push(new DirtyWatersAdapter(withoutEnabled(dirtyWaters)));
+    const {
+      enabled: _enabled,
+      executable,
+      pipCommand,
+      installSource,
+      autoInstall,
+      ...adapterOptions
+    } = dirtyWaters;
+    detectors.push(new DirtyWatersAdapter({
+      ...adapterOptions,
+      installer: new DirtyWatersInstaller({
+        executable,
+        pipCommand,
+        installSource,
+        autoInstall
+      })
+    }));
   }
 
   detectors.push(new CustomSmellDetector());
 
   if (packageGovernance.enabled !== false) {
+    const domainLookup = resolvedConfiguration.domainLookup;
     detectors.push(new PackageGovernanceDetector({
-      metadataProvider: npmRegistryClient,
+      metadataProvider: sharedNpmRegistryClient,
+      domainVerifier: new DomainRegistrationVerifier({
+        dnsProvider: new DnsDomainStatusProvider({ timeoutMs: domainLookup.dnsTimeoutMs }),
+        rdapProvider: new RdapDomainStatusProvider({
+          timeoutMs: domainLookup.rdapTimeoutMs,
+          bootstrapUrl: domainLookup.rdapBootstrapUrl
+        })
+      }),
       ...withoutEnabled(packageGovernance)
     }));
   }
@@ -81,12 +116,15 @@ export function createDefaultDetectors(
   if (peerSpin.enabled !== false) {
     const {
       enabled: _enabled,
-      registryTimeoutMs: _registryTimeoutMs,
+      maxTraversalNodes,
       ...detectorOptions
     } = peerSpin;
     detectors.push(new PeerSpinDetector({
       ...detectorOptions,
-      metadataProvider: detectorOptions.metadataProvider ?? npmRegistryClient
+      conflictDetector: new NodeReplacementConflictDetector({
+        maxTraversalNodes
+      }),
+      metadataProvider: sharedNpmRegistryClient
     }));
   }
 
@@ -94,11 +132,19 @@ export function createDefaultDetectors(
     const {
       enabled: _enabled,
       timeoutMs,
+      downloadTimeoutMs,
+      maxArchiveBytes,
+      maxExtractedBytes,
       ...detectorOptions
     } = sourceUsage;
     detectors.push(new SourceUsageSmellDetector({
       ...detectorOptions,
-      analyzer: new KnipAdapter({ timeoutMs })
+      analyzer: new KnipAdapter({ timeoutMs }),
+      workspaceProvider: new GitHubRepositoryWorkspaceProvider({
+        downloadTimeoutMs,
+        maxArchiveBytes,
+        maxExtractedBytes
+      })
     }));
   }
 
@@ -107,31 +153,35 @@ export function createDefaultDetectors(
 
 /** Builds package-manager-specific vulnerability analyzers for the default pipeline. */
 export function createDefaultVulnerabilityAnalyzers(configuration = {}) {
-  return [new NpmAuditVulnerabilityAnalyzer(configuration.npmAudit)];
+  const resolvedConfiguration = resolveConfiguration(configuration);
+  return [new NpmAuditVulnerabilityAnalyzer(resolvedConfiguration.npmAudit)];
 }
 
 /** Builds package-manager-specific responsiveness analyzers for the default pipeline. */
 export function createDefaultResponsivenessAnalyzers(
   configuration = {},
-  { npmRegistryClient = createDefaultNpmRegistryClient(configuration) } = {}
+  { npmRegistryClient = null } = {}
 ) {
-  const options = configuration.responsiveness ?? {};
+  const resolvedConfiguration = resolveConfiguration(configuration);
+  const sharedNpmRegistryClient = npmRegistryClient
+    ?? createDefaultNpmRegistryClient(resolvedConfiguration);
+  const options = resolvedConfiguration.responsiveness;
   return [new NpmResponsivenessAnalyzer({
     ...options,
-    activityProvider: options.activityProvider ?? new NpmPackageActivityProvider({
-      registryClient: npmRegistryClient
+    activityProvider: new NpmPackageActivityProvider({
+      registryClient: sharedNpmRegistryClient
     })
   })];
 }
 
-/** Creates the shared npm Registry client while preserving the legacy PeerSpin timeout setting. */
-function createDefaultNpmRegistryClient(configuration = {}) {
-  const options = configuration.npmRegistry ?? {};
-  const timeoutMs = options.timeoutMs
-    ?? configuration.peerSpin?.registryTimeoutMs
-    ?? parsePositiveInteger(process.env.PEER_SPIN_REGISTRY_TIMEOUT_MS, undefined);
-
-  return new NpmRegistryClient({ ...options, timeoutMs });
+/** Creates the shared npm Registry client with separately supplied credentials. */
+function createDefaultNpmRegistryClient(configuration = {}, credentials = {}) {
+  const resolvedConfiguration = resolveConfiguration(configuration);
+  const options = resolvedConfiguration.npmRegistry;
+  return new NpmRegistryClient({
+    ...options,
+    token: credentials.npmRegistryToken ?? null
+  });
 }
 
 /** Removes the composition-only enablement flag before constructing a module. */

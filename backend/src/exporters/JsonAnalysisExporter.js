@@ -1,12 +1,14 @@
 import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { projectSmellsOntoGraph } from "../analysis/GraphSmellProjection.js";
+import { requireNonEmptyString } from "../utils/ConfigurationValue.js";
 
 /** Builds and writes the structured JSON contract consumed by the frontend layer. */
 export class JsonAnalysisExporter {
-  /** Configures the output schema version written under metadata. */
-  constructor({ schemaVersion = "1.0" } = {}) {
-    this.schemaVersion = schemaVersion;
+  /** Configures the schema and application versions written under metadata. */
+  constructor({ schemaVersion, toolVersion } = {}) {
+    this.schemaVersion = requireNonEmptyString(schemaVersion, "output.schemaVersion");
+    this.toolVersion = requireNonEmptyString(toolVersion, "output.toolVersion");
   }
 
   /** Builds the full analysis result document without writing it to disk. */
@@ -18,7 +20,7 @@ export class JsonAnalysisExporter {
       metadata: {
         schemaVersion: this.schemaVersion,
         generatedAt: new Date().toISOString(),
-        toolVersion: process.env.npm_package_version || "0.1.0",
+        toolVersion: this.toolVersion,
         warnings
       },
       project: {

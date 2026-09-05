@@ -1,12 +1,9 @@
-import { DnsDomainStatusProvider } from "./DnsDomainStatusProvider.js";
-import { RdapDomainStatusProvider } from "./RdapDomainStatusProvider.js";
-
 /** Confirms unregistered maintainer domains using independent DNS and RDAP evidence. */
 export class DomainRegistrationVerifier {
   /** Configures independently replaceable domain evidence providers and a shared cache. */
   constructor({
-    dnsProvider = new DnsDomainStatusProvider(),
-    rdapProvider = new RdapDomainStatusProvider()
+    dnsProvider,
+    rdapProvider
   } = {}) {
     this.dnsProvider = dnsProvider;
     this.rdapProvider = rdapProvider;

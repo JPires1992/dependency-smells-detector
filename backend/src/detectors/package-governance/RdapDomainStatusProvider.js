@@ -1,25 +1,26 @@
-/** Authoritative IANA bootstrap document for domain RDAP service discovery. */
-const DEFAULT_BOOTSTRAP_URL = "https://data.iana.org/rdap/dns.json";
-const DEFAULT_TIMEOUT_MS = 15 * 1000;
+import {
+  requireNonEmptyString,
+  requirePositiveInteger
+} from "../../utils/ConfigurationValue.js";
 
 /** Queries authoritative RDAP services discovered from the IANA DNS bootstrap. */
 export class RdapDomainStatusProvider {
   /** Configures HTTP transport, service discovery, and bounded request duration. */
   constructor({
     fetchImpl = globalThis.fetch,
-    bootstrapUrl = DEFAULT_BOOTSTRAP_URL,
-    timeoutMs = parsePositiveInteger(
-      process.env.DOMAIN_LOOKUP_TIMEOUT_MS,
-      DEFAULT_TIMEOUT_MS
-    )
+    bootstrapUrl,
+    timeoutMs
   } = {}) {
     if (typeof fetchImpl !== "function") {
       throw new Error("RdapDomainStatusProvider requires a fetch implementation.");
     }
 
     this.fetchImpl = fetchImpl;
-    this.bootstrapUrl = bootstrapUrl;
-    this.timeoutMs = timeoutMs;
+    this.bootstrapUrl = requireNonEmptyString(
+      bootstrapUrl,
+      "domainLookup.rdapBootstrapUrl"
+    );
+    this.timeoutMs = requirePositiveInteger(timeoutMs, "domainLookup.rdapTimeoutMs");
     this.serviceMapPromise = null;
   }
 
@@ -121,5 +122,3 @@ export class RdapDomainStatusProvider {
 function ensureTrailingSlash(value) {
   return value.endsWith("/") ? value : `${value}/`;
 }
-
-import { parsePositiveInteger } from "../../utils/PositiveInteger.js";

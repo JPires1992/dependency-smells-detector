@@ -5,12 +5,7 @@ import path from "node:path";
 import { pipeline } from "node:stream/promises";
 import { Readable, Transform } from "node:stream";
 import { x as extractTar } from "tar";
-import { parsePositiveInteger } from "../utils/PositiveInteger.js";
-
-/** Default limits for downloading and extracting untrusted repository snapshots. */
-const DEFAULT_DOWNLOAD_TIMEOUT_MS = 2 * 60 * 1000;
-const DEFAULT_MAX_ARCHIVE_BYTES = 100 * 1024 * 1024;
-const DEFAULT_MAX_EXTRACTED_BYTES = 500 * 1024 * 1024;
+import { requirePositiveInteger } from "../utils/ConfigurationValue.js";
 
 /** Owns one temporary repository snapshot and removes it after source analysis. */
 export class RepositoryWorkspaceLease {
@@ -33,25 +28,25 @@ export class GitHubRepositoryWorkspaceProvider {
     fetchImpl = globalThis.fetch,
     archiveExtractor = extractRepositoryArchive,
     temporaryRootDirectory = os.tmpdir(),
-    downloadTimeoutMs = parsePositiveInteger(
-      process.env.SOURCE_USAGE_DOWNLOAD_TIMEOUT_MS,
-      DEFAULT_DOWNLOAD_TIMEOUT_MS
-    ),
-    maxArchiveBytes = parsePositiveInteger(
-      process.env.SOURCE_USAGE_MAX_ARCHIVE_BYTES,
-      DEFAULT_MAX_ARCHIVE_BYTES
-    ),
-    maxExtractedBytes = parsePositiveInteger(
-      process.env.SOURCE_USAGE_MAX_EXTRACTED_BYTES,
-      DEFAULT_MAX_EXTRACTED_BYTES
-    )
+    downloadTimeoutMs,
+    maxArchiveBytes,
+    maxExtractedBytes
   } = {}) {
     this.fetchImpl = fetchImpl;
     this.archiveExtractor = archiveExtractor;
     this.temporaryRootDirectory = temporaryRootDirectory;
-    this.downloadTimeoutMs = downloadTimeoutMs;
-    this.maxArchiveBytes = maxArchiveBytes;
-    this.maxExtractedBytes = maxExtractedBytes;
+    this.downloadTimeoutMs = requirePositiveInteger(
+      downloadTimeoutMs,
+      "sourceUsage.downloadTimeoutMs"
+    );
+    this.maxArchiveBytes = requirePositiveInteger(
+      maxArchiveBytes,
+      "sourceUsage.maxArchiveBytes"
+    );
+    this.maxExtractedBytes = requirePositiveInteger(
+      maxExtractedBytes,
+      "sourceUsage.maxExtractedBytes"
+    );
   }
 
   /** Materializes a repository ref and returns a lease that the caller must clean up. */

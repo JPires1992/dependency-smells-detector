@@ -1,35 +1,27 @@
-import { NodeReplacementConflictDetector } from "./NodeReplacementConflictDetector.js";
 import { PeerDependencyModelBuilder } from "./PeerDependencyModelBuilder.js";
 import { PeerSpinFindingMapper } from "./PeerSpinFindingMapper.js";
 import { PeerSpinRegistryVerifier } from "./PeerSpinRegistryVerifier.js";
 import { mapWithConcurrency } from "../../utils/AsyncPool.js";
-import { parsePositiveInteger } from "../../utils/PositiveInteger.js";
-
-/** Default maximum number of registry-verified PeerSpin conflicts emitted per analysis. */
-const DEFAULT_MAX_CONFLICTS = 100;
-const DEFAULT_VERIFICATION_CONCURRENCY = 4;
+import { requireBoolean, requirePositiveInteger } from "../../utils/ConfigurationValue.js";
 
 /** Coordinates lockfile modeling, replacement detection, registry verification, and mapping. */
 export class PeerSpinDetector {
   /** Configures independently replaceable PeerSpin analysis modules and safety limits. */
   constructor({
     modelBuilder = new PeerDependencyModelBuilder(),
-    conflictDetector = new NodeReplacementConflictDetector(),
+    conflictDetector,
     metadataProvider = null,
     registryVerifier = null,
     findingMapper = new PeerSpinFindingMapper(),
-    maxConflicts = parsePositiveInteger(
-      process.env.PEER_SPIN_MAX_CONFLICTS,
-      DEFAULT_MAX_CONFLICTS
-    ),
-    verificationConcurrency = parsePositiveInteger(
-      process.env.PEER_SPIN_REGISTRY_CONCURRENCY,
-      DEFAULT_VERIFICATION_CONCURRENCY
-    ),
-    required = false
+    maxConflicts,
+    verificationConcurrency,
+    required
   } = {}) {
     if (!registryVerifier && !metadataProvider) {
       throw new Error("PeerSpinDetector requires an npm metadata provider or registry verifier.");
+    }
+    if (typeof conflictDetector?.detect !== "function") {
+      throw new Error("PeerSpinDetector requires a replacement-conflict detector.");
     }
 
     this.name = "PeerSpinDetector";
@@ -38,9 +30,12 @@ export class PeerSpinDetector {
     this.registryVerifier = registryVerifier
       ?? new PeerSpinRegistryVerifier({ metadataProvider });
     this.findingMapper = findingMapper;
-    this.maxConflicts = maxConflicts;
-    this.verificationConcurrency = verificationConcurrency;
-    this.required = required;
+    this.maxConflicts = requirePositiveInteger(maxConflicts, "peerSpin.maxConflicts");
+    this.verificationConcurrency = requirePositiveInteger(
+      verificationConcurrency,
+      "peerSpin.verificationConcurrency"
+    );
+    this.required = requireBoolean(required, "peerSpin.required");
   }
 
   /** Detects registry-confirmed PeerSpin patterns in the exact analysed npm lockfile. */

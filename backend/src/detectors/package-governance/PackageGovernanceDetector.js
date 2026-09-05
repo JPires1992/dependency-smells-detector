@@ -1,6 +1,5 @@
 import { mapWithConcurrency } from "../../utils/AsyncPool.js";
-import { parsePositiveInteger } from "../../utils/PositiveInteger.js";
-import { DomainRegistrationVerifier } from "./DomainRegistrationVerifier.js";
+import { requireBoolean, requirePositiveInteger } from "../../utils/ConfigurationValue.js";
 import { GovernanceThresholdPolicy } from "./GovernanceThresholdPolicy.js";
 import { MaintainerDomainParser } from "./MaintainerDomainParser.js";
 import { normalizePeople } from "./PackageMetadataNormalizer.js";
@@ -12,7 +11,6 @@ import {
   TooManyMaintainersRule
 } from "./PackageGovernanceRules.js";
 
-const DEFAULT_CONCURRENCY = 4;
 const MAX_DIAGNOSTIC_WARNINGS = 20;
 
 /** Coordinates npm package metadata rules and external maintainer-domain verification. */
@@ -20,16 +18,13 @@ export class PackageGovernanceDetector {
   /** Configures replaceable providers, rules, thresholds, and resource limits. */
   constructor({
     metadataProvider,
-    domainVerifier = new DomainRegistrationVerifier(),
+    domainVerifier,
     domainParser = new MaintainerDomainParser(),
     thresholdPolicy = new GovernanceThresholdPolicy(),
     installScriptRule = new InstallScriptExecutionRule(),
     governanceRules = null,
-    concurrency = parsePositiveInteger(
-      process.env.PACKAGE_GOVERNANCE_CONCURRENCY,
-      DEFAULT_CONCURRENCY
-    ),
-    required = false
+    concurrency,
+    required
   } = {}) {
     if (
       typeof metadataProvider?.getLatestManifest !== "function"
@@ -46,8 +41,11 @@ export class PackageGovernanceDetector {
       new TooManyMaintainersRule({ thresholdPolicy }),
       new TooManyContributorsRule({ thresholdPolicy })
     ];
-    this.concurrency = concurrency;
-    this.required = required;
+    this.concurrency = requirePositiveInteger(
+      concurrency,
+      "packageGovernance.concurrency"
+    );
+    this.required = requireBoolean(required, "packageGovernance.required");
   }
 
   /** Detects package governance and install-script smells across the dependency graph. */

@@ -3,11 +3,10 @@ import path from "node:path";
 import { runCommand } from "../../utils/ChildProcess.js";
 import { findFilesByPredicate } from "../../utils/FileSearch.js";
 import { normalizeGithubRepository } from "../../utils/GithubRepository.js";
-import { parsePositiveInteger } from "../../utils/PositiveInteger.js";
-import { DirtyWatersInstaller } from "./DirtyWatersInstaller.js";
 import { DirtyWatersOutputParser } from "./DirtyWatersOutputParser.js";
 import { PackageManagerPreflight } from "./PackageManagerPreflight.js";
 import { DEFAULT_PACKAGE_MANAGER } from "../../domain/PackageManager.js";
+import { requireBoolean, requirePositiveInteger } from "../../utils/ConfigurationValue.js";
 
 /** Static Dirty-Waters checks required by the prototype smell subset. */
 const STATIC_CHECK_FLAGS = [
@@ -20,27 +19,24 @@ const STATIC_CHECK_FLAGS = [
   "--check-aliased-packages"
 ];
 
-/** Default maximum duration for one Dirty-Waters execution. */
-const DEFAULT_TIMEOUT_MS = 30 * 60 * 1000;
-
 /** Detector adapter that invokes Dirty-Waters and converts its output to internal findings. */
 export class DirtyWatersAdapter {
   /** Configures installer, parser, failure behavior, and command timeout. */
   constructor({
-    installer = new DirtyWatersInstaller(),
+    installer,
     parser = new DirtyWatersOutputParser(),
     packageManagerPreflight = new PackageManagerPreflight(),
     commandRunner = runCommand,
-    required = false,
-    timeoutMs = readTimeoutFromEnvironment()
+    required,
+    timeoutMs
   } = {}) {
     this.name = "DirtyWatersAdapter";
-    this.required = required;
+    this.required = requireBoolean(required, "dirtyWaters.required");
     this.installer = installer;
     this.parser = parser;
     this.packageManagerPreflight = packageManagerPreflight;
     this.commandRunner = commandRunner;
-    this.timeoutMs = timeoutMs;
+    this.timeoutMs = requirePositiveInteger(timeoutMs, "dirtyWaters.timeoutMs");
   }
 
   /** Runs Dirty-Waters for a GitHub project and parses generated static analysis artefacts. */
@@ -54,13 +50,13 @@ export class DirtyWatersAdapter {
       };
     }
 
-    const githubToken = context.githubToken || process.env.GITHUB_API_TOKEN;
+    const githubToken = context.githubToken;
     if (!githubToken) {
       throw new Error("Dirty-Waters requires GITHUB_API_TOKEN to access GitHub repository metadata.");
     }
 
     const baseEnv = {
-      ...process.env,
+      ...(context.environment ?? {}),
       GITHUB_API_TOKEN: githubToken
     };
     const workingDirectory = context.workspaceDirectory || process.cwd();
@@ -156,11 +152,6 @@ async function removeDirtyWatersResults(resultRoot) {
 /** Selects the newest generated artefact whose modification time matches the current run. */
 function newestSince(files, timestampMs) {
   return files.find((file) => file.mtimeMs >= timestampMs - 1000) ?? null;
-}
-
-/** Reads an optional Dirty-Waters timeout override from the process environment. */
-function readTimeoutFromEnvironment() {
-  return parsePositiveInteger(process.env.DIRTY_WATERS_TIMEOUT_MS, DEFAULT_TIMEOUT_MS);
 }
 
 /** Builds a concise failure message and highlights common dependency extraction failures. */

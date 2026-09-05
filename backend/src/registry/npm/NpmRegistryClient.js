@@ -1,8 +1,8 @@
-/** Default npm registry endpoint used for package metadata requests. */
-const DEFAULT_REGISTRY_URL = "https://registry.npmjs.org";
-const DEFAULT_TIMEOUT_MS = 30 * 1000;
-const DEFAULT_MAX_ATTEMPTS = 3;
-const DEFAULT_RETRY_DELAY_MS = 250;
+import {
+  requireNonEmptyString,
+  requirePositiveInteger
+} from "../../utils/ConfigurationValue.js";
+
 const MAX_RETRY_DELAY_MS = 30 * 1000;
 const RETRYABLE_STATUS_CODES = new Set([408, 425, 429, 500, 502, 503, 504]);
 
@@ -11,20 +11,11 @@ export class NpmRegistryClient {
   /** Configures registry transport, authentication, timeout, and request caches. */
   constructor({
     fetchImpl = globalThis.fetch,
-    registryUrl = process.env.NPM_REGISTRY_URL || DEFAULT_REGISTRY_URL,
-    token = process.env.NPM_REGISTRY_TOKEN || process.env.NODE_AUTH_TOKEN || null,
-    timeoutMs = parsePositiveInteger(
-      process.env.NPM_REGISTRY_TIMEOUT_MS,
-      DEFAULT_TIMEOUT_MS
-    ),
-    maxAttempts = parsePositiveInteger(
-      process.env.NPM_REGISTRY_MAX_ATTEMPTS,
-      DEFAULT_MAX_ATTEMPTS
-    ),
-    retryDelayMs = parsePositiveInteger(
-      process.env.NPM_REGISTRY_RETRY_DELAY_MS,
-      DEFAULT_RETRY_DELAY_MS
-    ),
+    registryUrl,
+    token = null,
+    timeoutMs,
+    maxAttempts,
+    retryDelayMs,
     sleep = wait
   } = {}) {
     if (typeof fetchImpl !== "function") {
@@ -32,11 +23,14 @@ export class NpmRegistryClient {
     }
 
     this.fetchImpl = fetchImpl;
-    this.registryUrl = registryUrl.replace(/\/+$/, "");
+    this.registryUrl = requireNonEmptyString(
+      registryUrl,
+      "npmRegistry.registryUrl"
+    ).replace(/\/+$/, "");
     this.token = token;
-    this.timeoutMs = timeoutMs;
-    this.maxAttempts = maxAttempts;
-    this.retryDelayMs = retryDelayMs;
+    this.timeoutMs = requirePositiveInteger(timeoutMs, "npmRegistry.timeoutMs");
+    this.maxAttempts = requirePositiveInteger(maxAttempts, "npmRegistry.maxAttempts");
+    this.retryDelayMs = requirePositiveInteger(retryDelayMs, "npmRegistry.retryDelayMs");
     this.sleep = sleep;
     this.manifestPromises = new Map();
   }
@@ -200,5 +194,3 @@ function validatePackageName(packageName) {
     throw new Error("A package name is required for registry metadata lookup.");
   }
 }
-
-import { parsePositiveInteger } from "../../utils/PositiveInteger.js";

@@ -1,14 +1,15 @@
 import semver from "semver";
 import { peerPlacementPath } from "./PeerDependencyModelBuilder.js";
-
-/** Maximum model traversal size accepted before a candidate path is abandoned. */
-const DEFAULT_MAX_TRAVERSAL_NODES = 10_000;
+import { requirePositiveInteger } from "../../utils/ConfigurationValue.js";
 
 /** Detects the two minimal PeerSpin patterns through repeated replacement conflicts. */
 export class NodeReplacementConflictDetector {
   /** Configures a hard traversal limit for malformed or unexpectedly large lock graphs. */
-  constructor({ maxTraversalNodes = DEFAULT_MAX_TRAVERSAL_NODES } = {}) {
-    this.maxTraversalNodes = maxTraversalNodes;
+  constructor({ maxTraversalNodes } = {}) {
+    this.maxTraversalNodes = requirePositiveInteger(
+      maxTraversalNodes,
+      "peerSpin.maxTraversalNodes"
+    );
   }
 
   /** Returns verified-by-model replacement candidates and bounded-analysis diagnostics. */

@@ -1,21 +1,20 @@
-import { GitHubRepositoryWorkspaceProvider } from "../../analysis/GitHubRepositoryWorkspaceProvider.js";
-import { KnipAdapter } from "./KnipAdapter.js";
 import { KnipOutputParser } from "./KnipOutputParser.js";
+import { requireBoolean } from "../../utils/ConfigurationValue.js";
 
 /** Coordinates remote source materialization, Knip analysis, and finding normalization. */
 export class SourceUsageSmellDetector {
   /** Configures replaceable workspace, analyzer, parser, and failure behavior modules. */
   constructor({
-    workspaceProvider = new GitHubRepositoryWorkspaceProvider(),
-    analyzer = new KnipAdapter(),
+    workspaceProvider,
+    analyzer,
     parser = new KnipOutputParser(),
-    required = false
+    required
   } = {}) {
     this.name = "SourceUsageSmellDetector";
     this.workspaceProvider = workspaceProvider;
     this.analyzer = analyzer;
     this.parser = parser;
-    this.required = required;
+    this.required = requireBoolean(required, "sourceUsage.required");
   }
 
   /** Detects unused and missing dependencies against the exact analysed repository ref. */
@@ -36,7 +35,7 @@ export class SourceUsageSmellDetector {
     try {
       const analysis = await this.analyzer.analyze({
         projectDirectory: lease.directory,
-        env: process.env
+        env: context.environment ?? {}
       });
       const parsed = this.parser.parse(analysis.report, context);
 

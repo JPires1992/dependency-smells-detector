@@ -4,18 +4,15 @@ import { fileURLToPath } from "node:url";
 import os from "node:os";
 import path from "node:path";
 import { runCommand } from "../../utils/ChildProcess.js";
-import { parsePositiveInteger } from "../../utils/PositiveInteger.js";
-
-/** Default maximum duration for source-usage analysis. */
-const DEFAULT_TIMEOUT_MS = 5 * 60 * 1000;
+import { requirePositiveInteger } from "../../utils/ConfigurationValue.js";
 
 /** Absolute CLI path for the Knip version installed with the backend. */
-const DEFAULT_KNIP_CLI_PATH = fileURLToPath(
+const BUNDLED_KNIP_CLI_PATH = fileURLToPath(
   new URL("../../../node_modules/knip/bin/knip.js", import.meta.url)
 );
 
 /** Analyzer-owned configuration that avoids executing dependency-bound Vite config files. */
-const DEFAULT_KNIP_CONFIGURATION = Object.freeze({
+const SAFE_KNIP_CONFIGURATION = Object.freeze({
   vite: {
     config: [],
     entry: ["vite.config.{js,mjs,ts,cjs,mts,cts}"]
@@ -27,16 +24,16 @@ export class KnipAdapter {
   /** Configures process execution, CLI location, and analysis timeout. */
   constructor({
     commandRunner = runCommand,
-    knipCliPath = DEFAULT_KNIP_CLI_PATH,
-    configuration = DEFAULT_KNIP_CONFIGURATION,
-    timeoutMs = readTimeoutFromEnvironment(),
+    knipCliPath = BUNDLED_KNIP_CLI_PATH,
+    configuration = SAFE_KNIP_CONFIGURATION,
+    timeoutMs,
     temporaryRootDirectory = os.tmpdir()
   } = {}) {
     this.name = "KnipAdapter";
     this.commandRunner = commandRunner;
     this.knipCliPath = knipCliPath;
     this.configuration = configuration;
-    this.timeoutMs = timeoutMs;
+    this.timeoutMs = requirePositiveInteger(timeoutMs, "sourceUsage.timeoutMs");
     this.temporaryRootDirectory = temporaryRootDirectory;
   }
 
@@ -139,9 +136,4 @@ function normalizeDiagnosticWarnings(stderr) {
     .map((line) => line.trim())
     .filter(Boolean)
     .map((line) => `Knip diagnostic: ${line}`);
-}
-
-/** Reads an optional source-usage timeout from the process environment. */
-function readTimeoutFromEnvironment() {
-  return parsePositiveInteger(process.env.SOURCE_USAGE_TIMEOUT_MS, DEFAULT_TIMEOUT_MS);
 }

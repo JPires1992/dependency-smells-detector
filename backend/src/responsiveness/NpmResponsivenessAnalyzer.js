@@ -3,10 +3,9 @@ import { collectManifestDependencies } from "../detectors/custom/ManifestDepende
 import { NpmDependencySpecifierParser } from "../detectors/custom/NpmDependencySpecifierParser.js";
 import { toPackageNodeId } from "../domain/PackageIdentifier.js";
 import { mapWithConcurrency } from "../utils/AsyncPool.js";
-import { parsePositiveInteger } from "../utils/PositiveInteger.js";
 import { ResponsivenessPolicy } from "./ResponsivenessPolicy.js";
+import { requireBoolean, requirePositiveInteger } from "../utils/ConfigurationValue.js";
 
-const DEFAULT_CONCURRENCY = 4;
 const MAX_WARNING_EXAMPLES = 10;
 
 /** Produces package-level R evidence from npm activity, maintenance, and constraints. */
@@ -16,11 +15,8 @@ export class NpmResponsivenessAnalyzer {
     activityProvider,
     policy = new ResponsivenessPolicy(),
     specifierParser = new NpmDependencySpecifierParser(),
-    concurrency = parsePositiveInteger(
-      process.env.RESPONSIVENESS_CONCURRENCY,
-      DEFAULT_CONCURRENCY
-    ),
-    required = false,
+    concurrency,
+    required,
     clock = () => new Date()
   } = {}) {
     if (typeof activityProvider?.getActivity !== "function") {
@@ -31,8 +27,8 @@ export class NpmResponsivenessAnalyzer {
     this.activityProvider = activityProvider;
     this.policy = policy;
     this.specifierParser = specifierParser;
-    this.concurrency = concurrency;
-    this.required = required;
+    this.concurrency = requirePositiveInteger(concurrency, "responsiveness.concurrency");
+    this.required = requireBoolean(required, "responsiveness.required");
     this.clock = clock;
   }
 
