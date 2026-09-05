@@ -1,0 +1,14 @@
+{
+  "dirtyWaters": {
+    "timeoutMs": 3600000
+  },
+  "npmAudit": {
+    "timeoutMs": 900000
+  },
+  "packageGovernance": {
+    "concurrency": 6
+  },
+  "sourceUsage": {
+    "maxArchiveBytes": 157286400
+  }
+}

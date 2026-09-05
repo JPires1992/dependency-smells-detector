@@ -1,0 +1,56 @@
+{
+  "dirtyWaters": {
+    "enabled": true,
+    "required": false,
+    "timeoutMs": 1800000,
+    "executable": "dirty-waters",
+    "pipCommand": "pip",
+    "installSource": "git+https://github.com/JPires1992/dirty-waters.git@improvements",
+    "autoInstall": true
+  },
+  "npmRegistry": {
+    "registryUrl": "https://registry.npmjs.org",
+    "timeoutMs": 30000,
+    "maxAttempts": 3,
+    "retryDelayMs": 250
+  },
+  "npmAudit": {
+    "required": false,
+    "timeoutMs": 600000,
+    "maxAttempts": 2,
+    "retryDelayMs": 1000
+  },
+  "packageGovernance": {
+    "enabled": true,
+    "required": false,
+    "concurrency": 4
+  },
+  "domainLookup": {
+    "dnsTimeoutMs": 10000,
+    "rdapTimeoutMs": 15000,
+    "rdapBootstrapUrl": "https://data.iana.org/rdap/dns.json"
+  },
+  "responsiveness": {
+    "required": false,
+    "concurrency": 4
+  },
+  "peerSpin": {
+    "enabled": true,
+    "required": false,
+    "maxConflicts": 100,
+    "verificationConcurrency": 4,
+    "maxTraversalNodes": 10000
+  },
+  "sourceUsage": {
+    "enabled": true,
+    "required": false,
+    "timeoutMs": 300000,
+    "downloadTimeoutMs": 120000,
+    "maxArchiveBytes": 104857600,
+    "maxExtractedBytes": 524288000
+  },
+  "output": {
+    "schemaVersion": "1.0",
+    "toolVersion": "0.1.0"
+  }
+}
