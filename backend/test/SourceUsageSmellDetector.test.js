@@ -1,11 +1,15 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { SourceUsageSmellDetector } from "../src/detectors/source-usage/SourceUsageSmellDetector.js";
+import { resolveConfiguration } from "../src/configuration/ConfigurationLoader.js";
+
+const TEST_CONFIGURATION = resolveConfiguration();
 
 /** Verifies exact-ref materialization, result aggregation, and workspace cleanup. */
 test("SourceUsageSmellDetector coordinates adapter modules and always cleans its lease", async () => {
   let cleaned = false;
   const detector = new SourceUsageSmellDetector({
+    required: TEST_CONFIGURATION.sourceUsage.required,
     workspaceProvider: {
       async materialize(input) {
         assert.deepEqual(input, {
@@ -48,6 +52,7 @@ test("SourceUsageSmellDetector coordinates adapter modules and always cleans its
 /** Verifies source analysis is skipped cleanly when the project manifest is unavailable. */
 test("SourceUsageSmellDetector skips unavailable package manifests", async () => {
   const detector = new SourceUsageSmellDetector({
+    required: TEST_CONFIGURATION.sourceUsage.required,
     workspaceProvider: {
       async materialize() {
         throw new Error("must not run");

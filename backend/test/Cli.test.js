@@ -15,5 +15,6 @@ test("CLI loads the configured detector registry", async () => {
   );
 
   assert.match(stdout, /--target <owner\/repo>/);
+  assert.match(stdout, /--config <file>/);
   assert.equal(stderr, "");
 });

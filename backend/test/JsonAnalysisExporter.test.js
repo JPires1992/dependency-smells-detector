@@ -1,10 +1,13 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { JsonAnalysisExporter } from "../src/exporters/JsonAnalysisExporter.js";
+import { resolveConfiguration } from "../src/configuration/ConfigurationLoader.js";
+
+const TEST_CONFIGURATION = resolveConfiguration();
 
 /** Verifies that exported JSON follows the backend/frontend analysis contract. */
 test("JsonAnalysisExporter builds the documented JSON contract", () => {
-  const exporter = new JsonAnalysisExporter();
+  const exporter = new JsonAnalysisExporter(TEST_CONFIGURATION.output);
   const document = exporter.buildDocument({
     project: {
       name: "sample-app",

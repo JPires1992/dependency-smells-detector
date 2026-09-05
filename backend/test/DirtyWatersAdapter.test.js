@@ -4,12 +4,17 @@ import { access, mkdir, mkdtemp, rm, utimes, writeFile } from "node:fs/promises"
 import os from "node:os";
 import path from "node:path";
 import { DirtyWatersAdapter } from "../src/detectors/dirty-waters/DirtyWatersAdapter.js";
+import { resolveConfiguration } from "../src/configuration/ConfigurationLoader.js";
+
+const TEST_CONFIGURATION = resolveConfiguration();
 
 /** Verifies that Dirty-Waters uses the package manager present in the project context. */
 test("DirtyWatersAdapter passes the project package manager to Dirty-Waters and preflight", async () => {
   const executed = [];
   const workspaceDirectory = await mkdtemp(path.join(os.tmpdir(), "dirty-waters-adapter-test-"));
   const adapter = new DirtyWatersAdapter({
+    required: TEST_CONFIGURATION.dirtyWaters.required,
+    timeoutMs: TEST_CONFIGURATION.dirtyWaters.timeoutMs,
     installer: {
       async ensureInstalled() {
         return "dirty-waters";
@@ -48,6 +53,8 @@ test("DirtyWatersAdapter passes the project package manager to Dirty-Waters and 
 test("DirtyWatersAdapter cleans generated result artefacts after parsing", async () => {
   const workspaceDirectory = await mkdtemp(path.join(os.tmpdir(), "dirty-waters-cleanup-test-"));
   const adapter = new DirtyWatersAdapter({
+    required: TEST_CONFIGURATION.dirtyWaters.required,
+    timeoutMs: TEST_CONFIGURATION.dirtyWaters.timeoutMs,
     installer: {
       async ensureInstalled() {
         return "dirty-waters";
@@ -105,6 +112,8 @@ test("DirtyWatersAdapter rejects stale result artefacts", async () => {
   const staleTimestamp = new Date(Date.now() - 10_000);
   await utimes(staleResultPath, staleTimestamp, staleTimestamp);
   const adapter = new DirtyWatersAdapter({
+    required: TEST_CONFIGURATION.dirtyWaters.required,
+    timeoutMs: TEST_CONFIGURATION.dirtyWaters.timeoutMs,
     installer: {
       async ensureInstalled() {
         return "dirty-waters";

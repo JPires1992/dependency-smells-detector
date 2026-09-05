@@ -4,6 +4,9 @@ import { access, mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promise
 import os from "node:os";
 import path from "node:path";
 import { KnipAdapter, parseKnipJsonReport } from "../src/detectors/source-usage/KnipAdapter.js";
+import { resolveConfiguration } from "../src/configuration/ConfigurationLoader.js";
+
+const TEST_CONFIGURATION = resolveConfiguration();
 
 /** Creates and later removes an isolated npm project that exercises Knip issue types. */
 async function createSourceUsageFixture(t) {
@@ -66,6 +69,7 @@ test("KnipAdapter executes dependency-only analysis with a static temporary conf
   const projectDirectory = await createSourceUsageFixture(t);
   let configPath = null;
   const adapter = new KnipAdapter({
+    timeoutMs: TEST_CONFIGURATION.sourceUsage.timeoutMs,
     temporaryRootDirectory,
     knipCliPath: "C:\\tools\\knip.js",
     commandRunner: async (command, args, options) => {
@@ -110,6 +114,7 @@ test("KnipAdapter executes dependency-only analysis with a static temporary conf
 /** Verifies that a zero exit code cannot hide incomplete Knip configuration analysis. */
 test("KnipAdapter rejects reports accompanied by fatal diagnostics", async () => {
   const adapter = new KnipAdapter({
+    timeoutMs: TEST_CONFIGURATION.sourceUsage.timeoutMs,
     commandRunner: async () => ({
       exitCode: 0,
       stdout: '{"issues":[]}',
@@ -126,7 +131,9 @@ test("KnipAdapter rejects reports accompanied by fatal diagnostics", async () =>
 /** Verifies the installed Knip version against a real source fixture without node_modules. */
 test("KnipAdapter reports unused and unlisted fixture dependencies", async (t) => {
   const projectDirectory = await createSourceUsageFixture(t);
-  const result = await new KnipAdapter().analyze({ projectDirectory });
+  const result = await new KnipAdapter({
+    timeoutMs: TEST_CONFIGURATION.sourceUsage.timeoutMs
+  }).analyze({ projectDirectory });
   const packageIssues = result.report.issues.find((issue) => issue.file === "package.json");
   const sourceIssues = result.report.issues.find((issue) => issue.file === "src/index.ts");
 

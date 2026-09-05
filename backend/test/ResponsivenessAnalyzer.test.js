@@ -5,6 +5,9 @@ import { NpmPackageActivityProvider } from "../src/responsiveness/NpmPackageActi
 import { NpmResponsivenessAnalyzer } from "../src/responsiveness/NpmResponsivenessAnalyzer.js";
 import { ResponsivenessPolicy } from "../src/responsiveness/ResponsivenessPolicy.js";
 import { enrichFindingsWithResponsiveness } from "../src/responsiveness/FindingResponsivenessEnricher.js";
+import { resolveConfiguration } from "../src/configuration/ConfigurationLoader.js";
+
+const TEST_CONFIGURATION = resolveConfiguration();
 
 /** Creates a minimal finding with optional vulnerability fix evidence. */
 function createFinding({
@@ -122,6 +125,7 @@ test("ResponsivenessPolicy maps maintenance and update evidence to R values", ()
 test("NpmResponsivenessAnalyzer creates one profile per smelled package", async () => {
   let activityRequests = 0;
   const analyzer = new NpmResponsivenessAnalyzer({
+    ...TEST_CONFIGURATION.responsiveness,
     activityProvider: {
       async getActivity() {
         activityRequests += 1;
@@ -146,6 +150,7 @@ test("NpmResponsivenessAnalyzer creates one profile per smelled package", async 
 test("NpmResponsivenessAnalyzer isolates project-root activity from npm registry packages", async () => {
   let activityRequests = 0;
   const analyzer = new NpmResponsivenessAnalyzer({
+    ...TEST_CONFIGURATION.responsiveness,
     activityProvider: {
       async getActivity() {
         activityRequests += 1;
@@ -212,6 +217,7 @@ test("NpmResponsivenessAnalyzer isolates project-root activity from npm registry
 test("NpmResponsivenessAnalyzer records unavailable project-root activity explicitly", async () => {
   let activityRequests = 0;
   const analyzer = new NpmResponsivenessAnalyzer({
+    ...TEST_CONFIGURATION.responsiveness,
     activityProvider: {
       async getActivity() {
         activityRequests += 1;
@@ -247,6 +253,7 @@ test("NpmResponsivenessAnalyzer records unavailable project-root activity explic
 /** Verifies a direct restrictive constraint and available fix produce high remediation delay. */
 test("NpmResponsivenessAnalyzer applies constraints only to direct package nodes", async () => {
   const analyzer = new NpmResponsivenessAnalyzer({
+    ...TEST_CONFIGURATION.responsiveness,
     activityProvider: {
       async getActivity() {
         return createActivity(20, 5);
@@ -283,6 +290,7 @@ test("NpmResponsivenessAnalyzer applies constraints only to direct package nodes
 /** Verifies optional registry failures retain an auditable conservative R value. */
 test("NpmResponsivenessAnalyzer records unavailable activity without implicit fallback", async () => {
   const analyzer = new NpmResponsivenessAnalyzer({
+    ...TEST_CONFIGURATION.responsiveness,
     activityProvider: {
       async getActivity() {
         throw new Error("registry unavailable");

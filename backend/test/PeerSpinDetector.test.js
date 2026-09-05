@@ -5,6 +5,9 @@ import { NodeReplacementConflictDetector } from "../src/detectors/peer-spin/Node
 import { PeerDependencyModelBuilder } from "../src/detectors/peer-spin/PeerDependencyModelBuilder.js";
 import { PeerSpinDetector } from "../src/detectors/peer-spin/PeerSpinDetector.js";
 import { SmellTypes } from "../src/domain/SmellCatalog.js";
+import { resolveConfiguration } from "../src/configuration/ConfigurationLoader.js";
+
+const TEST_CONFIGURATION = resolveConfiguration();
 
 /** Creates the paper's Peer-to-Regular pattern with incompatible B requirements. */
 function createPeerToRegularLockfile(peerRange = "^1.0.0") {
@@ -100,7 +103,7 @@ test("PeerDependencyModelBuilder retains dependency kinds, ranges, and peer prov
 
 /** Verifies detection of the minimal Peer-to-Regular node replacement cycle. */
 test("NodeReplacementConflictDetector detects Peer-to-Regular conflicts", () => {
-  const result = new NodeReplacementConflictDetector().detect(
+  const result = new NodeReplacementConflictDetector(TEST_CONFIGURATION.peerSpin).detect(
     buildModel(createPeerToRegularLockfile())
   );
 
@@ -116,7 +119,7 @@ test("NodeReplacementConflictDetector detects Peer-to-Regular conflicts", () => 
 
 /** Verifies detection of incompatible peer requirements reached through one peer set. */
 test("NodeReplacementConflictDetector detects Peer-to-Peer conflicts", () => {
-  const result = new NodeReplacementConflictDetector().detect(
+  const result = new NodeReplacementConflictDetector(TEST_CONFIGURATION.peerSpin).detect(
     buildModel(createPeerToPeerLockfile())
   );
 
@@ -137,9 +140,12 @@ test("NodeReplacementConflictDetector ignores compatible and optional peer requi
     b: { optional: true }
   };
 
-  assert.deepEqual(new NodeReplacementConflictDetector().detect(compatibleModel).conflicts, []);
   assert.deepEqual(
-    new NodeReplacementConflictDetector().detect(buildModel(optionalLock)).conflicts,
+    new NodeReplacementConflictDetector(TEST_CONFIGURATION.peerSpin).detect(compatibleModel).conflicts,
+    []
+  );
+  assert.deepEqual(
+    new NodeReplacementConflictDetector(TEST_CONFIGURATION.peerSpin).detect(buildModel(optionalLock)).conflicts,
     []
   );
 });
@@ -148,6 +154,8 @@ test("NodeReplacementConflictDetector ignores compatible and optional peer requi
 test("PeerSpinDetector emits only registry-confirmed replacement conflicts", async () => {
   const packageLock = createPeerToRegularLockfile();
   const detector = new PeerSpinDetector({
+    ...TEST_CONFIGURATION.peerSpin,
+    conflictDetector: new NodeReplacementConflictDetector(TEST_CONFIGURATION.peerSpin),
     metadataProvider: createMetadataProvider({
       "a@1.0.0": {
         name: "a",
@@ -184,6 +192,8 @@ test("PeerSpinDetector emits only registry-confirmed replacement conflicts", asy
 test("PeerSpinDetector rejects candidates not confirmed by registry metadata", async () => {
   const packageLock = createPeerToRegularLockfile();
   const detector = new PeerSpinDetector({
+    ...TEST_CONFIGURATION.peerSpin,
+    conflictDetector: new NodeReplacementConflictDetector(TEST_CONFIGURATION.peerSpin),
     metadataProvider: createMetadataProvider({
       "a@1.0.0": {
         name: "a",
@@ -215,6 +225,8 @@ test("PeerSpinDetector rejects candidates not confirmed by registry metadata", a
 test("PeerSpinDetector enforces registry verification when required", async () => {
   const packageLock = createPeerToRegularLockfile();
   const detector = new PeerSpinDetector({
+    ...TEST_CONFIGURATION.peerSpin,
+    conflictDetector: new NodeReplacementConflictDetector(TEST_CONFIGURATION.peerSpin),
     required: true,
     metadataProvider: createMetadataProvider({})
   });
@@ -236,6 +248,7 @@ test("PeerSpinDetector enforces registry verification when required", async () =
 test("NpmRegistryMetadataProvider caches exact authenticated manifest requests", async () => {
   const requests = [];
   const provider = new NpmRegistryMetadataProvider({
+    ...TEST_CONFIGURATION.npmRegistry,
     registryUrl: "https://registry.example.test/",
     token: "registry-token",
     fetchImpl: async (url, options) => {

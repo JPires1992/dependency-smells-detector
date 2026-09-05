@@ -12,6 +12,9 @@ import {
 } from "../src/detectors/package-governance/PackageGovernanceRules.js";
 import { SmellTypes } from "../src/domain/SmellCatalog.js";
 import { NpmRegistryClient } from "../src/registry/npm/NpmRegistryClient.js";
+import { resolveConfiguration } from "../src/configuration/ConfigurationLoader.js";
+
+const TEST_CONFIGURATION = resolveConfiguration();
 
 /** Creates unique npm person records for deterministic threshold tests. */
 function createPeople(count, prefix, domain = "example.com") {
@@ -59,6 +62,7 @@ test("DomainRegistrationVerifier confirms only matching unregistered evidence", 
 test("RdapDomainStatusProvider uses the IANA bootstrap service for the domain suffix", async () => {
   const requests = [];
   const provider = new RdapDomainStatusProvider({
+    timeoutMs: TEST_CONFIGURATION.domainLookup.rdapTimeoutMs,
     bootstrapUrl: "https://iana.example.test/dns.json",
     fetchImpl: async (url) => {
       requests.push(String(url));
@@ -152,6 +156,7 @@ test("NpmRegistryClient caches latest and exact manifest requests", async () => 
   const requests = [];
   const acceptHeaders = [];
   const client = new NpmRegistryClient({
+    ...TEST_CONFIGURATION.npmRegistry,
     registryUrl: "https://registry.example.test",
     fetchImpl: async (url, options) => {
       requests.push(String(url));
@@ -187,6 +192,7 @@ test("NpmRegistryClient retries transient HTTP failures", async () => {
   let requestCount = 0;
   const delays = [];
   const client = new NpmRegistryClient({
+    ...TEST_CONFIGURATION.npmRegistry,
     maxAttempts: 2,
     retryDelayMs: 10,
     sleep: async (delayMs) => delays.push(delayMs),
@@ -213,6 +219,7 @@ test("NpmRegistryClient retries transient HTTP failures", async () => {
 test("NpmRegistryClient evicts rejected requests", async () => {
   let requestCount = 0;
   const client = new NpmRegistryClient({
+    ...TEST_CONFIGURATION.npmRegistry,
     maxAttempts: 1,
     fetchImpl: async () => {
       requestCount += 1;
@@ -240,6 +247,7 @@ test("PackageGovernanceDetector emits registry and domain-confirmed findings", a
   ];
   const contributors = createPeople(840, "contributor");
   const detector = new PackageGovernanceDetector({
+    ...TEST_CONFIGURATION.packageGovernance,
     metadataProvider: {
       async getLatestManifest() {
         return { name: "sample", version: "2.0.0", maintainers, contributors };
@@ -312,6 +320,7 @@ test("PackageGovernanceDetector emits registry and domain-confirmed findings", a
 /** Verifies missing contributor declarations are reported as unknown rather than zero. */
 test("PackageGovernanceDetector does not infer absent contributor metadata", async () => {
   const detector = new PackageGovernanceDetector({
+    ...TEST_CONFIGURATION.packageGovernance,
     metadataProvider: {
       async getLatestManifest() {
         return {
@@ -347,6 +356,7 @@ test("PackageGovernanceDetector does not infer absent contributor metadata", asy
 /** Verifies root install scripts are detected from the analysed repository manifest. */
 test("PackageGovernanceDetector detects root install lifecycle scripts", async () => {
   const detector = new PackageGovernanceDetector({
+    ...TEST_CONFIGURATION.packageGovernance,
     governanceRules: [],
     metadataProvider: {
       async getLatestManifest() {

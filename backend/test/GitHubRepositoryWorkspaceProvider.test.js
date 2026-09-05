@@ -5,6 +5,9 @@ import os from "node:os";
 import path from "node:path";
 import { c as createTar } from "tar";
 import { GitHubRepositoryWorkspaceProvider } from "../src/analysis/GitHubRepositoryWorkspaceProvider.js";
+import { resolveConfiguration } from "../src/configuration/ConfigurationLoader.js";
+
+const TEST_CONFIGURATION = resolveConfiguration();
 
 /** Verifies authenticated archive transport and explicit workspace cleanup. */
 test("GitHubRepositoryWorkspaceProvider materializes and cleans a repository ref", async (t) => {
@@ -16,6 +19,7 @@ test("GitHubRepositoryWorkspaceProvider materializes and cleans a repository ref
   let requestedUrl = null;
   let requestedOptions = null;
   const provider = new GitHubRepositoryWorkspaceProvider({
+    ...TEST_CONFIGURATION.sourceUsage,
     temporaryRootDirectory,
     fetchImpl: async (url, options) => {
       requestedUrl = url;
@@ -75,6 +79,7 @@ test("GitHubRepositoryWorkspaceProvider extracts a GitHub-style tarball", async 
   }, ["owner-repository-sha"]);
   const archive = await readFile(archivePath);
   const provider = new GitHubRepositoryWorkspaceProvider({
+    ...TEST_CONFIGURATION.sourceUsage,
     temporaryRootDirectory,
     fetchImpl: async () => new Response(archive, { status: 200 })
   });
@@ -98,6 +103,7 @@ test("GitHubRepositoryWorkspaceProvider rejects oversized repository archives", 
 
   let extractorCalled = false;
   const provider = new GitHubRepositoryWorkspaceProvider({
+    ...TEST_CONFIGURATION.sourceUsage,
     temporaryRootDirectory,
     maxArchiveBytes: 2,
     fetchImpl: async () => new Response(new Uint8Array([1, 2, 3]), {

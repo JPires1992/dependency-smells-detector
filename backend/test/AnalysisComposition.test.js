@@ -81,3 +81,68 @@ test("createDefaultAnalysisService shares one npm registry client", () => {
   assert.equal(peerSpin.registryVerifier.metadataProvider, npmRegistryClient);
   assert.equal(responsiveness.activityProvider.registryClient, npmRegistryClient);
 });
+
+/** Verifies resolved application settings are injected into their owning modules. */
+test("createDefaultAnalysisService propagates centralized configuration", () => {
+  const service = createDefaultAnalysisService({
+    configuration: {
+      dirtyWaters: {
+        timeoutMs: 1001,
+        executable: "configured-dirty-waters",
+        pipCommand: "configured-pip",
+        installSource: "configured-source",
+        autoInstall: false
+      },
+      npmRegistry: {
+        registryUrl: "https://registry.example.test",
+        timeoutMs: 1002,
+        maxAttempts: 2,
+        retryDelayMs: 100
+      },
+      npmAudit: { timeoutMs: 1003, maxAttempts: 3, retryDelayMs: 101 },
+      packageGovernance: { concurrency: 5 },
+      domainLookup: {
+        dnsTimeoutMs: 1004,
+        rdapTimeoutMs: 1005,
+        rdapBootstrapUrl: "https://rdap.example.test/bootstrap.json"
+      },
+      responsiveness: { concurrency: 6 },
+      peerSpin: { maxConflicts: 7, verificationConcurrency: 8, maxTraversalNodes: 9 },
+      sourceUsage: {
+        timeoutMs: 1006,
+        downloadTimeoutMs: 1007,
+        maxArchiveBytes: 1008,
+        maxExtractedBytes: 1009
+      },
+      output: { schemaVersion: "1.1", toolVersion: "2.0.0" }
+    },
+    credentials: { npmRegistryToken: "registry-token" }
+  });
+  const detectors = Object.fromEntries(
+    service.detectorRegistry.detectors.map((detector) => [detector.name, detector])
+  );
+  const registryClient = detectors.PackageGovernanceDetector.metadataProvider;
+
+  assert.equal(detectors.DirtyWatersAdapter.timeoutMs, 1001);
+  assert.equal(detectors.DirtyWatersAdapter.installer.executable, "configured-dirty-waters");
+  assert.equal(detectors.DirtyWatersAdapter.installer.autoInstall, false);
+  assert.equal(registryClient.registryUrl, "https://registry.example.test");
+  assert.equal(registryClient.token, "registry-token");
+  assert.equal(registryClient.timeoutMs, 1002);
+  assert.equal(detectors.PackageGovernanceDetector.concurrency, 5);
+  assert.equal(detectors.PackageGovernanceDetector.governanceRules[0].domainVerifier.dnsProvider.timeoutMs, 1004);
+  assert.equal(detectors.PackageGovernanceDetector.governanceRules[0].domainVerifier.rdapProvider.timeoutMs, 1005);
+  assert.equal(
+    detectors.PackageGovernanceDetector.governanceRules[0].domainVerifier.rdapProvider.bootstrapUrl,
+    "https://rdap.example.test/bootstrap.json"
+  );
+  assert.equal(detectors.PeerSpinDetector.maxConflicts, 7);
+  assert.equal(detectors.PeerSpinDetector.verificationConcurrency, 8);
+  assert.equal(detectors.PeerSpinDetector.conflictDetector.maxTraversalNodes, 9);
+  assert.equal(detectors.SourceUsageSmellDetector.analyzer.timeoutMs, 1006);
+  assert.equal(detectors.SourceUsageSmellDetector.workspaceProvider.downloadTimeoutMs, 1007);
+  assert.equal(service.vulnerabilityAnalyzerRegistry.analyzers[0].timeoutMs, 1003);
+  assert.equal(service.responsivenessAnalyzerRegistry.analyzers[0].concurrency, 6);
+  assert.equal(service.jsonExporter.schemaVersion, "1.1");
+  assert.equal(service.jsonExporter.toolVersion, "2.0.0");
+});
