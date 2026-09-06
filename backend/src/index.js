@@ -39,5 +39,11 @@ export { DEFAULT_PACKAGE_MANAGER } from "./domain/PackageManager.js";
 export { SsssScorer } from "./scoring/SsssScorer.js";
 export { VulnerabilityAnalyzerRegistry } from "./vulnerabilities/VulnerabilityAnalyzerRegistry.js";
 export { NpmAuditVulnerabilityAnalyzer } from "./vulnerabilities/NpmAuditVulnerabilityAnalyzer.js";
+export { GitHubAdvisoryClient } from "./vulnerabilities/GitHubAdvisoryClient.js";
+export {
+  VulnerabilityPersistenceEnricher,
+  calculateVulnerabilityAgeDays,
+  extractGhsaId
+} from "./vulnerabilities/VulnerabilityPersistenceEnricher.js";
 export { JsonAnalysisExporter } from "./exporters/JsonAnalysisExporter.js";
 export { MarkdownReportExporter } from "./exporters/MarkdownReportExporter.js";

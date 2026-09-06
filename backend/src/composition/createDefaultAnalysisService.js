@@ -21,7 +21,9 @@ import { NpmPackageActivityProvider } from "../responsiveness/NpmPackageActivity
 import { NpmResponsivenessAnalyzer } from "../responsiveness/NpmResponsivenessAnalyzer.js";
 import { ResponsivenessAnalyzerRegistry } from "../responsiveness/ResponsivenessAnalyzerRegistry.js";
 import { SsssScorer } from "../scoring/SsssScorer.js";
+import { GitHubAdvisoryClient } from "../vulnerabilities/GitHubAdvisoryClient.js";
 import { NpmAuditVulnerabilityAnalyzer } from "../vulnerabilities/NpmAuditVulnerabilityAnalyzer.js";
+import { VulnerabilityPersistenceEnricher } from "../vulnerabilities/VulnerabilityPersistenceEnricher.js";
 import { VulnerabilityAnalyzerRegistry } from "../vulnerabilities/VulnerabilityAnalyzerRegistry.js";
 
 /** Creates the production analysis pipeline from configurable, replaceable module lists. */
@@ -30,6 +32,7 @@ export function createDefaultAnalysisService({
   credentials = {},
   inspector = new ProjectInspector(),
   npmRegistryClient = null,
+  githubAdvisoryClient = null,
   detectors = null,
   vulnerabilityAnalyzers = null,
   responsivenessAnalyzers = null,
@@ -49,7 +52,10 @@ export function createDefaultAnalysisService({
       })
     ),
     vulnerabilityAnalyzerRegistry: new VulnerabilityAnalyzerRegistry(
-      vulnerabilityAnalyzers ?? createDefaultVulnerabilityAnalyzers(resolvedConfiguration)
+      vulnerabilityAnalyzers ?? createDefaultVulnerabilityAnalyzers(resolvedConfiguration, {
+        githubAdvisoryClient,
+        credentials
+      })
     ),
     responsivenessAnalyzerRegistry: new ResponsivenessAnalyzerRegistry(
       responsivenessAnalyzers ?? createDefaultResponsivenessAnalyzers(resolvedConfiguration, {
@@ -152,9 +158,24 @@ export function createDefaultDetectors(
 }
 
 /** Builds package-manager-specific vulnerability analyzers for the default pipeline. */
-export function createDefaultVulnerabilityAnalyzers(configuration = {}) {
+export function createDefaultVulnerabilityAnalyzers(
+  configuration = {},
+  { githubAdvisoryClient = null, credentials = {} } = {}
+) {
   const resolvedConfiguration = resolveConfiguration(configuration);
-  return [new NpmAuditVulnerabilityAnalyzer(resolvedConfiguration.npmAudit)];
+  const { concurrency, ...clientOptions } = resolvedConfiguration.githubAdvisories;
+  const sharedGitHubAdvisoryClient = githubAdvisoryClient ?? new GitHubAdvisoryClient({
+    ...clientOptions,
+    token: credentials.githubToken ?? null
+  });
+
+  return [new NpmAuditVulnerabilityAnalyzer({
+    ...resolvedConfiguration.npmAudit,
+    persistenceEnricher: new VulnerabilityPersistenceEnricher({
+      advisoryProvider: sharedGitHubAdvisoryClient,
+      concurrency
+    })
+  })];
 }
 
 /** Builds package-manager-specific responsiveness analyzers for the default pipeline. */

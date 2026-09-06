@@ -59,7 +59,7 @@ export function responsivenessValueForFinding(finding) {
   return value;
 }
 
-/** Derives the V dimension from vulnerability severity, age, or lookup status evidence. */
+/** Derives V from the strongest available vulnerability severity or persistence signal. */
 export function vulnerabilityValueForFinding(finding) {
   const evidence = finding.evidenceData ?? {};
 
@@ -68,38 +68,44 @@ export function vulnerabilityValueForFinding(finding) {
   }
 
   const severity = String(evidence.vulnerabilitySeverity ?? "").toLowerCase();
-  if (severity === "critical") {
-    return 1;
-  }
-  if (severity === "high") {
-    return 0.8;
-  }
-  if (severity === "medium") {
-    return 0.6;
-  }
-  if (severity === "low") {
-    return 0.3;
-  }
-  if (severity === "none" || evidence.vulnerabilityLookupStatus === "clean") {
+  if (evidence.vulnerabilityLookupStatus === "clean" || severity === "none") {
     return 0;
   }
 
-  if (typeof evidence.vulnerabilityAgeDays === "number") {
-    if (evidence.vulnerabilityAgeDays > 180) {
-      return 1;
-    }
-    if (evidence.vulnerabilityAgeDays >= 90) {
-      return 0.8;
-    }
-    if (evidence.vulnerabilityAgeDays >= 30) {
-      return 0.6;
-    }
-    if (evidence.vulnerabilityAgeDays >= 0) {
-      return 0.3;
-    }
+  const values = [
+    vulnerabilitySeverityValue(severity),
+    vulnerabilityAgeValue(evidence.vulnerabilityAgeDays)
+  ].filter((value) => Number.isFinite(value));
+
+  if (values.length > 0) {
+    return Math.max(...values);
   }
 
   return 0.25;
+}
+
+/** Maps normalized npm vulnerability severity to the SSSS V scale. */
+function vulnerabilitySeverityValue(severity) {
+  return ({ critical: 1, high: 0.8, medium: 0.6, low: 0.3 })[
+    String(severity ?? "").toLowerCase()
+  ] ?? null;
+}
+
+/** Maps elapsed advisory disclosure days to the SSSS persistence thresholds. */
+function vulnerabilityAgeValue(ageDays) {
+  if (!Number.isFinite(ageDays) || ageDays < 0) {
+    return null;
+  }
+  if (ageDays > 180) {
+    return 1;
+  }
+  if (ageDays >= 90) {
+    return 0.8;
+  }
+  if (ageDays >= 30) {
+    return 0.6;
+  }
+  return 0.3;
 }
 
 /** Derives the P dimension from dependency type and graph depth. */

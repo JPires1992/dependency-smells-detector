@@ -203,7 +203,7 @@ Options:
   --require-source-usage      Fail the analysis if source-usage detection fails.
 
 Environment:
-  GITHUB_API_TOKEN            Required by Dirty-Waters for GitHub API access.
+  GITHUB_API_TOKEN            Authenticates GitHub access; required by Dirty-Waters and optional for public advisories.
   DIRTY_WATERS_TIMEOUT_MS     Dirty-Waters timeout override in milliseconds.
   DIRTY_WATERS_AUTO_INSTALL   Set to false to disable automatic installation.
   NPM_REGISTRY_URL            Registry used for package metadata and PeerSpin verification.
@@ -214,6 +214,14 @@ Environment:
   NPM_AUDIT_TIMEOUT_MS        npm audit timeout in milliseconds. Defaults to ${defaults.npmAudit.timeoutMs}.
   NPM_AUDIT_MAX_ATTEMPTS      Attempts for transient audit endpoint failures. Defaults to ${defaults.npmAudit.maxAttempts}.
   NPM_AUDIT_RETRY_DELAY_MS    Base audit retry delay in milliseconds. Defaults to ${defaults.npmAudit.retryDelayMs}.
+  GITHUB_ADVISORY_API_URL     GitHub Advisory API base URL.
+  GITHUB_ADVISORY_API_VERSION GitHub REST API version. Defaults to ${defaults.githubAdvisories.apiVersion}.
+  GITHUB_ADVISORY_TIMEOUT_MS  Advisory request timeout. Defaults to ${defaults.githubAdvisories.timeoutMs}.
+  GITHUB_ADVISORY_MAX_ATTEMPTS
+                               Attempts for transient advisory failures. Defaults to ${defaults.githubAdvisories.maxAttempts}.
+  GITHUB_ADVISORY_RETRY_DELAY_MS
+                               Base advisory retry delay. Defaults to ${defaults.githubAdvisories.retryDelayMs}.
+  GITHUB_ADVISORY_CONCURRENCY Concurrent advisory requests. Defaults to ${defaults.githubAdvisories.concurrency}.
   PACKAGE_GOVERNANCE_CONCURRENCY
                               Concurrent package governance analyses. Defaults to ${defaults.packageGovernance.concurrency}.
   RESPONSIVENESS_CONCURRENCY  Concurrent npm release-history lookups. Defaults to ${defaults.responsiveness.concurrency}.
