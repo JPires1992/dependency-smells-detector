@@ -5,6 +5,9 @@
   "npmAudit": {
     "timeoutMs": 900000
   },
+  "githubAdvisories": {
+    "concurrency": 6
+  },
   "packageGovernance": {
     "concurrency": 6
   },

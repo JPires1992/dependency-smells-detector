@@ -20,6 +20,14 @@
     "maxAttempts": 2,
     "retryDelayMs": 1000
   },
+  "githubAdvisories": {
+    "apiUrl": "https://api.github.com/advisories",
+    "apiVersion": "2026-03-10",
+    "timeoutMs": 30000,
+    "maxAttempts": 3,
+    "retryDelayMs": 250,
+    "concurrency": 4
+  },
   "packageGovernance": {
     "enabled": true,
     "required": false,
