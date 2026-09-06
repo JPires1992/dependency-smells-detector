@@ -100,6 +100,14 @@ test("createDefaultAnalysisService propagates centralized configuration", () => 
         retryDelayMs: 100
       },
       npmAudit: { timeoutMs: 1003, maxAttempts: 3, retryDelayMs: 101 },
+      githubAdvisories: {
+        apiUrl: "https://api.github.example.test/advisories",
+        apiVersion: "2026-03-10",
+        timeoutMs: 1010,
+        maxAttempts: 2,
+        retryDelayMs: 102,
+        concurrency: 3
+      },
       packageGovernance: { concurrency: 5 },
       domainLookup: {
         dnsTimeoutMs: 1004,
@@ -116,7 +124,7 @@ test("createDefaultAnalysisService propagates centralized configuration", () => 
       },
       output: { schemaVersion: "1.1", toolVersion: "2.0.0" }
     },
-    credentials: { npmRegistryToken: "registry-token" }
+    credentials: { githubToken: "github-token", npmRegistryToken: "registry-token" }
   });
   const detectors = Object.fromEntries(
     service.detectorRegistry.detectors.map((detector) => [detector.name, detector])
@@ -142,6 +150,11 @@ test("createDefaultAnalysisService propagates centralized configuration", () => 
   assert.equal(detectors.SourceUsageSmellDetector.analyzer.timeoutMs, 1006);
   assert.equal(detectors.SourceUsageSmellDetector.workspaceProvider.downloadTimeoutMs, 1007);
   assert.equal(service.vulnerabilityAnalyzerRegistry.analyzers[0].timeoutMs, 1003);
+  const advisoryEnricher = service.vulnerabilityAnalyzerRegistry.analyzers[0].persistenceEnricher;
+  assert.equal(advisoryEnricher.concurrency, 3);
+  assert.equal(advisoryEnricher.advisoryProvider.apiUrl, "https://api.github.example.test/advisories");
+  assert.equal(advisoryEnricher.advisoryProvider.token, "github-token");
+  assert.equal(advisoryEnricher.advisoryProvider.timeoutMs, 1010);
   assert.equal(service.responsivenessAnalyzerRegistry.analyzers[0].concurrency, 6);
   assert.equal(service.jsonExporter.schemaVersion, "1.1");
   assert.equal(service.jsonExporter.toolVersion, "2.0.0");

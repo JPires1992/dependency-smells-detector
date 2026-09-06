@@ -23,6 +23,7 @@ test("loadConfiguration merges defaults, file, environment, and CLI overrides", 
       NODE_AUTH_TOKEN: "registry-secret",
       DIRTY_WATERS_TIMEOUT_MS: "3000",
       NPM_AUDIT_MAX_ATTEMPTS: "5",
+      GITHUB_ADVISORY_CONCURRENCY: "7",
       DOMAIN_LOOKUP_TIMEOUT_MS: "7000",
       RDAP_BOOTSTRAP_URL: "https://rdap.example.test/bootstrap.json",
       PEER_SPIN_MAX_TRAVERSAL_NODES: "12000"
@@ -38,6 +39,7 @@ test("loadConfiguration merges defaults, file, environment, and CLI overrides", 
   assert.equal(configuration.packageGovernance.required, true);
   assert.equal(configuration.sourceUsage.enabled, false);
   assert.equal(configuration.npmAudit.maxAttempts, 5);
+  assert.equal(configuration.githubAdvisories.concurrency, 7);
   assert.equal(configuration.domainLookup.dnsTimeoutMs, 7000);
   assert.equal(configuration.domainLookup.rdapTimeoutMs, 7000);
   assert.equal(
