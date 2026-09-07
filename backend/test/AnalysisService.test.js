@@ -11,6 +11,7 @@ test("AnalysisService preserves inspector-resolved analysed refs", async () => {
     edges: []
   };
   const detectorProjects = [];
+  let markdownInput = null;
   const service = new AnalysisService({
     inspector: {
       async inspect() {
@@ -52,6 +53,7 @@ test("AnalysisService preserves inspector-resolved analysed refs", async () => {
         return {
           outputPath: "analysis-results.json",
           document: {
+            metadata: { generatedAt: "2026-09-07T09:30:00.000Z" },
             graph,
             summary: { dependenciesAnalysed: 0, smellsDetected: 0, severityCounts: {} },
             project
@@ -60,7 +62,8 @@ test("AnalysisService preserves inspector-resolved analysed refs", async () => {
       }
     },
     markdownExporter: {
-      async export() {
+      async export(input) {
+        markdownInput = input;
         return { outputPath: "analysis-report.md" };
       }
     }
@@ -73,6 +76,8 @@ test("AnalysisService preserves inspector-resolved analysed refs", async () => {
 
   assert.equal(result.project.analysedRef, "main");
   assert.equal(detectorProjects[0].analysedRef, "main");
+  assert.equal(markdownInput.generatedAt, "2026-09-07T09:30:00.000Z");
+  assert.equal(markdownInput.summary.dependenciesAnalysed, 0);
 });
 
 /** Verifies that vulnerability evidence is added to findings before the scorer runs. */

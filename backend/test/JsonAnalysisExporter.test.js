@@ -39,6 +39,10 @@ test("JsonAnalysisExporter builds the documented JSON contract", () => {
           dependencyType: "production",
           parentNodeIds: ["root"]
         },
+        evidenceData: {
+          vulnerabilitySeverity: "high",
+          responsivenessValue: 0.75
+        },
         score: {
           finalScore: 86.5,
           finalRating: "High"
@@ -64,4 +68,5 @@ test("JsonAnalysisExporter builds the documented JSON contract", () => {
   assert.equal(document.summary.smellsDetected, 1);
   assert.equal(document.summary.severityCounts.High, 1);
   assert.equal(document.smells[0].graphContext, undefined);
+  assert.equal(document.smells[0].evidenceData, undefined);
 });
