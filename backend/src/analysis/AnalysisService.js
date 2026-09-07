@@ -100,7 +100,9 @@ export class AnalysisService {
       outputDirectory,
       project,
       smells,
-      warnings
+      warnings,
+      generatedAt: jsonResult.document.metadata?.generatedAt,
+      summary: jsonResult.document.summary
     });
 
     return {

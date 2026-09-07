@@ -45,9 +45,13 @@ export class JsonAnalysisExporter {
   }
 }
 
-/** Removes pipeline-only graph context from the public smell DTO. */
+/** Removes pipeline-only graph context and scoring evidence from the public smell DTO. */
 function toPublicSmell(smell) {
-  const { graphContext: _graphContext, ...publicSmell } = smell;
+  const {
+    graphContext: _graphContext,
+    evidenceData: _evidenceData,
+    ...publicSmell
+  } = smell;
   return publicSmell;
 }
 
