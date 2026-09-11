@@ -42,8 +42,8 @@ The `dirtyWaters` section controls the external Dirty-Waters adapter and its aut
 - `timeoutMs`: maximum duration, in milliseconds, of one Dirty-Waters analysis command.
 - `executable`: preferred Dirty-Waters executable name or path. The installer also probes the known platform-specific executable names.
 - `pipCommand`: Python package installer command or path used when automatic installation is required.
-- `installSource`: package specification passed to `pip install`. The default tracks the `improvements` Git branch. Before reuse, the installer resolves the configured branch or tag and compares its current commit with the installed distribution. Exact Git commits and `dirty-waters==version` specifications are also supported.
-- `autoInstall`: installs Dirty-Waters automatically when no usable executable is found. It also replaces an installed distribution when its source repository or resolved revision does not match `installSource`. When `false`, a missing or mismatched executable is reported as a detector failure.
+- `installSource`: Dirty-Waters package source passed to `pip install` when no usable executable is found. It can identify the tool through a Git repository and optional branch, tag, or commit, or through a supported Python package specification. The concrete installation source is defined in `config/default.json`. An executable already available on `PATH` is reused without validating its installed source or revision against this setting.
+- `autoInstall`: installs Dirty-Waters automatically when no usable executable is found. When `false`, a missing executable is reported as a detector failure.
 
 ## `npmRegistry`
 

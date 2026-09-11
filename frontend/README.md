@@ -17,19 +17,20 @@ React Web Application Layer for visualising backend analysis JSON artefacts.
 
 ## Commands
 
- - To install dependencies, run:
+Install dependencies from the lockfile:
+
 ```powershell
-    npm install
+npm ci
 ```
 
- - To run the development server, run:
- ```powershell
-    npm run dev
- ```
+Run the development server:
 
-  - To build the production bundle, run:
-  ```powershell
-      npm run build
-  ```
+```powershell
+npm run dev
+```
 
+Build the production bundle:
 
+```powershell
+npm run build
+```

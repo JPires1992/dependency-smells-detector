@@ -1,125 +1,134 @@
 # Dependency-smells-detector backend
 
-Analysis and Scoring Layer for detecting, scoring, and exporting software supply chain smells in React/npm projects.
+Analysis and Scoring Layer for detecting, scoring, prioritising, and exporting software supply chain smells in React/npm projects.
 
 ## Architecture
 
-The backend follows the prototype design described in the dissertation:
+The backend follows the prototype architecture described in the dissertation and is organised into focused modules:
 
-- `src/analysis`: project inspection, npm `package-lock.json` graph extraction, and analysis orchestration.
-- `src/detectors`: modular detector interface and registry. External tools and custom detectors are isolated from scoring and exporters.
-- `src/detectors/dirty-waters`: Dirty-Waters adapter, automatic installer, command runner, and static-result parser.
-- `src/scoring`: SSSS implementation with the documented S, P, V, and R dimensions and final rating mapping.
-- `src/exporters`: JSON contract for the Web Application Layer and Markdown report for CI/CD or textual inspection.
+- `src/analysis`: project inspection, npm dependency-graph extraction, and analysis orchestration.
+- `src/composition`: composition root that assembles detectors, analysers, scoring, and exporters.
+- `src/configuration`: validated configuration loading and overrides.
+- `src/detectors`: modular smell detectors and external-tool adapters.
+- `src/registry`: shared npm Registry access.
+- `src/vulnerabilities`: vulnerability analysis and finding enrichment.
+- `src/responsiveness`: package activity and update-strategy analysis.
+- `src/scoring`: SSSS calculation and final rating mapping.
+- `src/exporters`: JSON and Markdown report generation.
+- `src/utils`: shared filesystem, process, concurrency, and parsing utilities.
 
-The current backend runtime supports npm only, and the CLI does not expose package-manager selection. npm is defined as the prototype default package manager in `src/domain/PackageManager.js`. Future package-manager support should be added by introducing focused modules for lockfile inspection and detector preparation, then wiring them at the orchestration boundary without changing the exported JSON contract.
+The current runtime supports npm only. Repository targets are supplied in GitHub `owner/repo` format; local paths are intentionally not supported because part of the analysis pipeline relies on remote repository evidence. The backend retrieves the project manifest and available npm lockfile (`package-lock.json` or `npm-shrinkwrap.json`) from the analysed GitHub ref and correlates detector findings with the resulting dependency graph.
 
-The backend accepts GitHub repository targets in `owner/repo` format. Local project paths are intentionally not supported, because Dirty-Waters analyses GitHub repositories and mixing local dependency graphs with remote Dirty-Waters evidence can produce inconsistent versions, depths, and edges.
+Internally, findings are matched using exact graph node identifiers whenever possible. Otherwise, `package@version` identity is used, while name-only matching is accepted only when it identifies a unique graph node. The exported graph is intentionally reduced to packages with detected smells and their immediate parents so that the frontend remains focused and usable on larger projects.
 
-For remote `owner/repo` targets, the backend does not clone the repository. It fetches `package.json` and `package-lock.json` from GitHub for graph extraction, while Dirty-Waters analyses the same repository/ref. To keep large projects usable in the frontend, the exported JSON graph intentionally contains only packages with smells and their immediate parents.
+## Supported Detectors
 
-## Dirty-Waters Integration
+The backend composes independent detector components that return a common finding structure.
 
-Dirty-Waters is integrated through `DirtyWatersAdapter`. The adapter:
+| Detector | Smells |
+| --- | --- |
+| `CustomSmellDetector` | Pinned Dependency; Hardcoded URL; Restrictive Constraint; Permissive Constraint; No Package-Lock |
+| `SourceUsageSmellDetector` + `KnipAdapter` | Unused Dependency; Missing Dependency |
+| `PeerSpinDetector` | Peer Dependency Resolving Loop (PeerSpin) |
+| `DirtyWatersAdapter` | No Source Code URL; Invalid Source Code URL; Inaccessible Commit SHA/Release Tag; Deprecated; Fork; No Code Signature; Invalid Code Signature; No Provenance; Aliased |
+| `PackageGovernanceDetector` | Expired Maintainer Domain; Install Script Execution; Too Many Maintainers; Too Many Contributors |
 
-- checks whether `dirty-waters` is available on `PATH`;
-- installs it automatically when missing, using `pip install git+https://github.com/chains-project/dirty-waters.git`;
-- runs the static checks supported by Dirty-Waters for npm;
-- parses the generated `*_static_results.json` file into smell findings;
-- keeps `GITHUB_API_TOKEN` out of JSON and Markdown outputs.
+The custom detector evaluates dependency declarations from `dependencies`, `devDependencies`, and `optionalDependencies`. It uses `npm-package-arg` and `semver` to interpret npm package specifiers and version ranges.
 
-On Windows, the adapter also creates temporary npm command shims under the system temp directory. This avoids failures where Dirty-Waters cannot resolve `npm` when it extracts dependencies internally.
 
-The Dirty-Waters package-manager preflight remains generic inside the adapter because Dirty-Waters supports more package managers than the current prototype exposes. In the current pipeline it is always called with npm.
+## Analysis Pipeline
 
-Required environment:
+The backend first inspects the target repository and reconstructs the npm dependency graph from the project manifest and available lockfile. The configured smell detectors then analyse dependency declarations, source usage, package metadata, peer dependency conflicts, and Dirty-Waters results.
 
-```powershell
-$env:GITHUB_API_TOKEN = "<github-api-token>"
+Detector outputs are normalised into a common finding representation and correlated with the dependency graph. Findings are then enriched with vulnerability information obtained through `npm audit` and GitHub advisory metadata, together with responsiveness information derived from npm release history, repository activity, direct dependency constraints, and available fix information.
+
+The resulting S, P, V, and R dimensions are combined by the Smell Severity Scoring System (SSSS). Final results are exported as:
+
+- `analysis-results.json`: structured contract consumed by the frontend.
+- `analysis-report.md`: concise textual report for direct inspection or CI/CD usage.
+
+Metadata-dependent modules follow an optional-versus-required execution policy. Optional failures are reported as warnings and do not prevent the remaining analysis from completing. Such outputs may represent a partial analysis, so the generated `warnings` section must be reviewed before interpreting smell counts and scores.
+
+Detailed scoring rules are documented in [`Smell-Severity-Scoring-System.md`](../docs/Smell-Severity-Scoring-System.md).
+
+## Configuration
+
+Default non-secret settings are loaded from `config/default.json`. Optional overrides can be supplied through a partial JSON configuration file, environment variables, or CLI options.
+
+Configuration precedence is:
+
+```text
+default.json < --config file < environment variables < CLI options
 ```
 
-Optional environment:
+Credentials are supplied only through environment variables and are not written to generated JSON or Markdown reports.
+
+A custom configuration file can be supplied with:
 
 ```powershell
-$env:DIRTY_WATERS_AUTO_INSTALL = "false"
-$env:DIRTY_WATERS_INSTALL_SOURCE = "git+https://github.com/chains-project/dirty-waters.git"
-$env:DIRTY_WATERS_EXECUTABLE = "dirty-waters"
-$env:DIRTY_WATERS_PIP_COMMAND = "pip"
-$env:DIRTY_WATERS_TIMEOUT_MS = "3600000"
+npm.cmd run analyze -- --target owner/repository --config config/analysis.json --output reports
 ```
+
+See [`Backend-Configuration-Reference.md`](../docs/Backend-Configuration-Reference.md) for the complete list of configuration properties, defaults, environment overrides, timeouts, retry settings, concurrency limits, and credential requirements.
 
 ## Usage
 
-Run commands from this folder:
+Run commands from the backend folder:
+
+The examples below use `npm.cmd`, which is the reliable command variant for Windows PowerShell. On Linux and macOS, replace `npm.cmd` with `npm`.
 
 ```powershell
 cd backend
+npm.cmd ci
 ```
 
-Run against a GitHub repository identifier and generate both outputs.
-
-Using the npm script:
+Analyse a GitHub repository and generate the JSON and Markdown reports:
 
 ```powershell
-npm.cmd run analyze -- --target owner/react-project --output reports
+npm.cmd run analyze -- --target owner/repository --output reports
 ```
 
-Using Node directly:
+The CLI can also be invoked directly with Node.js on any supported platform. The same analysis options are accepted:
 
-```powershell
-node src/cli.js analyze --target owner/react-project --output reports
+```bash
+node src/cli.js analyze --target owner/repository --output reports
 ```
 
-When `--ref` is omitted for a remote `owner/repo` target, the backend resolves the GitHub repository `default_branch`, uses it for remote file fetching and Dirty-Waters, and records it in `project.analysedRef` in the JSON output. If the lookup fails, the analysis continues with tool defaults and emits a warning.
-
-Run against a specific branch, tag, or commit SHA by keeping `--target` in `owner/repo` format and passing the Git ref through `--ref`:
+Analyse a specific branch, tag, or commit SHA:
 
 ```powershell
-npm.cmd run analyze -- --target owner/react-project --ref main --output reports
+npm.cmd run analyze -- --target owner/repository --ref main --output reports
 ```
 
-The equivalent direct Node command is:
+When `--ref` is omitted, the backend attempts to resolve the repository default branch and records the analysed reference in the generated JSON output.
+
+List all supported CLI options through the npm script:
 
 ```powershell
-node src/cli.js analyze --target owner/react-project --ref main --output reports
+npm.cmd run analyze -- --help
 ```
 
-If Dirty-Waters times out on a larger repository, increase the timeout. The value is in milliseconds:
+Or invoke the CLI help directly with Node.js:
 
-```powershell
-npm.cmd run analyze -- --target owner/react-project --output reports --dirty-waters-timeout-ms 3600000
-```
-
-The equivalent direct Node command is:
-
-```powershell
-node src/cli.js analyze --target owner/react-project --output reports --dirty-waters-timeout-ms 3600000
-```
-
-Run the pipeline without Dirty-Waters, useful for validating GitHub package metadata, graph extraction, and exporters:
-
-```powershell
-node src/cli.js analyze --target owner/react-project --skip-dirty-waters --output reports
+```bash
+node src/cli.js --help
 ```
 
 Generated files:
 
-- `analysis-results.json`: structured contract with `metadata`, `project`, `graph`, `smells`, and `summary`.
-- `analysis-report.md`: concise Markdown report listing detected smells, affected packages, scores, and ratings.
+- `analysis-results.json`
+- `analysis-report.md`
 
-The JSON `graph.edges` field is intentionally reduced. Each edge links an immediate parent package to a package affected by at least one smell:
+## GitHub Actions
 
-```json
-{
-  "source": "parent-package@1.0.0",
-  "target": "smelled-package@2.0.0",
-  "relationship": "parent",
-  "smellIds": ["SMELL-001"]
-}
-```
+An example GitHub Actions workflow is available in the `examples` directory. It can be adapted for use under `.github/workflows` to execute the backend non-interactively and upload `analysis-results.json` and `analysis-report.md` as workflow artefacts.
+
+The workflow exposes the optional `API_TOKEN` repository secret as `GITHUB_API_TOKEN` and falls back to the workflow-provided `github.token` when the secret is absent. Configure `API_TOKEN` with a suitable personal access token when the automatic token cannot access the target, particularly for private repositories outside the workflow repository.
 
 ## Testing
 
+Run the backend test suite with:
+
 ```powershell
-npm.cmd test
+npm test
 ```
