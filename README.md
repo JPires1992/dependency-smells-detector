@@ -52,7 +52,7 @@ npm ci
 npm run dev
 ```
 
-The React application loads backend JSON output files and renders the smell graph with Cytoscape. See [frontend/README.md](frontend/README.md) for feature and command details.
+The React application loads backend JSON output files and renders the smell graph with Cytoscape. See [README](frontend/README.md) for feature and command details.
 
 
 ## Additional Documentation
