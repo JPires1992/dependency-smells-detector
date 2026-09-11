@@ -1,7 +1,7 @@
 {
   "metadata": {
     "schemaVersion": "1.0",
-    "generatedAt": "2026-09-07T14:29:24.714Z",
+    "generatedAt": "2026-09-10T16:15:24.714Z",
     "toolVersion": "0.1.0",
     "warnings": [
       "Too Many Contributors was not evaluated for 247 package versions because latest npm metadata did not declare contributors."
@@ -517,7 +517,7 @@
         "dependencyType": "development",
         "depth": 1,
         "hasSmells": true,
-        "highestSeverity": "Low"
+        "highestSeverity": "Medium"
       },
       {
         "id": "@eslint-community/regexpp@4.12.2",
@@ -3104,7 +3104,7 @@
         "relationship": "direct",
         "smellIds": [
           "SMELL-084",
-          "SMELL-240"
+          "SMELL-241"
         ]
       },
       {
@@ -3185,7 +3185,7 @@
         "relationship": "direct",
         "smellIds": [
           "SMELL-091",
-          "SMELL-244"
+          "SMELL-245"
         ]
       },
       {
@@ -3436,7 +3436,7 @@
         "relationship": "transitive",
         "smellIds": [
           "SMELL-112",
-          "SMELL-241"
+          "SMELL-242"
         ]
       },
       {
@@ -3468,7 +3468,8 @@
         "target": "eslint@9.39.1",
         "relationship": "direct",
         "smellIds": [
-          "SMELL-116"
+          "SMELL-116",
+          "SMELL-117"
         ]
       },
       {
@@ -3476,7 +3477,8 @@
         "target": "eslint@9.39.1",
         "relationship": "direct",
         "smellIds": [
-          "SMELL-116"
+          "SMELL-116",
+          "SMELL-117"
         ]
       },
       {
@@ -3484,7 +3486,8 @@
         "target": "eslint@9.39.1",
         "relationship": "direct",
         "smellIds": [
-          "SMELL-116"
+          "SMELL-116",
+          "SMELL-117"
         ]
       },
       {
@@ -3492,7 +3495,8 @@
         "target": "eslint@9.39.1",
         "relationship": "direct",
         "smellIds": [
-          "SMELL-116"
+          "SMELL-116",
+          "SMELL-117"
         ]
       },
       {
@@ -3500,7 +3504,7 @@
         "target": "esquery@1.6.0",
         "relationship": "transitive",
         "smellIds": [
-          "SMELL-117"
+          "SMELL-118"
         ]
       },
       {
@@ -3508,7 +3512,7 @@
         "target": "esrecurse@4.3.0",
         "relationship": "transitive",
         "smellIds": [
-          "SMELL-118"
+          "SMELL-119"
         ]
       },
       {
@@ -3516,7 +3520,7 @@
         "target": "estraverse@5.3.0",
         "relationship": "transitive",
         "smellIds": [
-          "SMELL-119"
+          "SMELL-120"
         ]
       },
       {
@@ -3524,7 +3528,7 @@
         "target": "estraverse@5.3.0",
         "relationship": "transitive",
         "smellIds": [
-          "SMELL-119"
+          "SMELL-120"
         ]
       },
       {
@@ -3532,7 +3536,7 @@
         "target": "estraverse@5.3.0",
         "relationship": "transitive",
         "smellIds": [
-          "SMELL-119"
+          "SMELL-120"
         ]
       },
       {
@@ -3540,7 +3544,7 @@
         "target": "esutils@2.0.3",
         "relationship": "transitive",
         "smellIds": [
-          "SMELL-120"
+          "SMELL-121"
         ]
       },
       {
@@ -3548,7 +3552,7 @@
         "target": "fast-deep-equal@3.1.3",
         "relationship": "transitive",
         "smellIds": [
-          "SMELL-121"
+          "SMELL-122"
         ]
       },
       {
@@ -3556,7 +3560,7 @@
         "target": "fast-deep-equal@3.1.3",
         "relationship": "transitive",
         "smellIds": [
-          "SMELL-121"
+          "SMELL-122"
         ]
       },
       {
@@ -3564,8 +3568,8 @@
         "target": "fast-json-stable-stringify@2.1.0",
         "relationship": "transitive",
         "smellIds": [
-          "SMELL-122",
-          "SMELL-123"
+          "SMELL-123",
+          "SMELL-124"
         ]
       },
       {
@@ -3573,7 +3577,7 @@
         "target": "fast-levenshtein@2.0.6",
         "relationship": "transitive",
         "smellIds": [
-          "SMELL-124"
+          "SMELL-125"
         ]
       },
       {
@@ -3581,7 +3585,7 @@
         "target": "fdir@6.5.0",
         "relationship": "transitive",
         "smellIds": [
-          "SMELL-125"
+          "SMELL-126"
         ]
       },
       {
@@ -3589,7 +3593,7 @@
         "target": "fdir@6.5.0",
         "relationship": "transitive",
         "smellIds": [
-          "SMELL-125"
+          "SMELL-126"
         ]
       },
       {
@@ -3597,8 +3601,8 @@
         "target": "file-entry-cache@8.0.0",
         "relationship": "transitive",
         "smellIds": [
-          "SMELL-126",
-          "SMELL-127"
+          "SMELL-127",
+          "SMELL-128"
         ]
       },
       {
@@ -3606,7 +3610,7 @@
         "target": "find-up@5.0.0",
         "relationship": "transitive",
         "smellIds": [
-          "SMELL-128"
+          "SMELL-129"
         ]
       },
       {
@@ -3614,8 +3618,8 @@
         "target": "flat-cache@4.0.1",
         "relationship": "transitive",
         "smellIds": [
-          "SMELL-129",
-          "SMELL-130"
+          "SMELL-130",
+          "SMELL-131"
         ]
       },
       {
@@ -3623,7 +3627,7 @@
         "target": "flatted@3.3.3",
         "relationship": "transitive",
         "smellIds": [
-          "SMELL-131"
+          "SMELL-132"
         ]
       },
       {
@@ -3631,7 +3635,7 @@
         "target": "follow-redirects@1.15.11",
         "relationship": "transitive",
         "smellIds": [
-          "SMELL-132"
+          "SMELL-133"
         ]
       },
       {
@@ -3639,7 +3643,7 @@
         "target": "form-data@4.0.5",
         "relationship": "transitive",
         "smellIds": [
-          "SMELL-133"
+          "SMELL-134"
         ]
       },
       {
@@ -3647,7 +3651,7 @@
         "target": "fraction.js@5.3.4",
         "relationship": "transitive",
         "smellIds": [
-          "SMELL-134"
+          "SMELL-135"
         ]
       },
       {
@@ -3655,8 +3659,8 @@
         "target": "fsevents@2.3.3",
         "relationship": "transitive",
         "smellIds": [
-          "SMELL-138",
-          "SMELL-242"
+          "SMELL-139",
+          "SMELL-243"
         ]
       },
       {
@@ -3664,8 +3668,8 @@
         "target": "fsevents@2.3.3",
         "relationship": "transitive",
         "smellIds": [
-          "SMELL-138",
-          "SMELL-242"
+          "SMELL-139",
+          "SMELL-243"
         ]
       },
       {
@@ -3673,7 +3677,7 @@
         "target": "function-bind@1.1.2",
         "relationship": "transitive",
         "smellIds": [
-          "SMELL-139"
+          "SMELL-140"
         ]
       },
       {
@@ -3681,7 +3685,7 @@
         "target": "function-bind@1.1.2",
         "relationship": "transitive",
         "smellIds": [
-          "SMELL-139"
+          "SMELL-140"
         ]
       },
       {
@@ -3689,7 +3693,7 @@
         "target": "function-bind@1.1.2",
         "relationship": "transitive",
         "smellIds": [
-          "SMELL-139"
+          "SMELL-140"
         ]
       },
       {
@@ -3697,7 +3701,7 @@
         "target": "gensync@1.0.0-beta.2",
         "relationship": "transitive",
         "smellIds": [
-          "SMELL-140"
+          "SMELL-141"
         ]
       },
       {
@@ -3705,7 +3709,7 @@
         "target": "get-intrinsic@1.3.0",
         "relationship": "transitive",
         "smellIds": [
-          "SMELL-141"
+          "SMELL-142"
         ]
       },
       {
@@ -3713,7 +3717,7 @@
         "target": "get-proto@1.0.1",
         "relationship": "transitive",
         "smellIds": [
-          "SMELL-142"
+          "SMELL-143"
         ]
       },
       {
@@ -3721,7 +3725,7 @@
         "target": "glob-parent@6.0.2",
         "relationship": "transitive",
         "smellIds": [
-          "SMELL-143"
+          "SMELL-144"
         ]
       },
       {
@@ -3729,7 +3733,7 @@
         "target": "globals@14.0.0",
         "relationship": "transitive",
         "smellIds": [
-          "SMELL-144"
+          "SMELL-145"
         ]
       },
       {
@@ -3737,7 +3741,7 @@
         "target": "globals@16.5.0",
         "relationship": "direct",
         "smellIds": [
-          "SMELL-145"
+          "SMELL-146"
         ]
       },
       {
@@ -3745,7 +3749,7 @@
         "target": "gopd@1.2.0",
         "relationship": "transitive",
         "smellIds": [
-          "SMELL-146"
+          "SMELL-147"
         ]
       },
       {
@@ -3753,7 +3757,7 @@
         "target": "gopd@1.2.0",
         "relationship": "transitive",
         "smellIds": [
-          "SMELL-146"
+          "SMELL-147"
         ]
       },
       {
@@ -3761,7 +3765,7 @@
         "target": "graceful-fs@4.2.11",
         "relationship": "transitive",
         "smellIds": [
-          "SMELL-147"
+          "SMELL-148"
         ]
       },
       {
@@ -3769,7 +3773,7 @@
         "target": "has-flag@4.0.0",
         "relationship": "transitive",
         "smellIds": [
-          "SMELL-148"
+          "SMELL-149"
         ]
       },
       {
@@ -3777,7 +3781,7 @@
         "target": "has-symbols@1.1.0",
         "relationship": "transitive",
         "smellIds": [
-          "SMELL-149"
+          "SMELL-150"
         ]
       },
       {
@@ -3785,7 +3789,7 @@
         "target": "has-symbols@1.1.0",
         "relationship": "transitive",
         "smellIds": [
-          "SMELL-149"
+          "SMELL-150"
         ]
       },
       {
@@ -3793,7 +3797,7 @@
         "target": "has-tostringtag@1.0.2",
         "relationship": "transitive",
         "smellIds": [
-          "SMELL-150"
+          "SMELL-151"
         ]
       },
       {
@@ -3801,7 +3805,7 @@
         "target": "hasown@2.0.2",
         "relationship": "transitive",
         "smellIds": [
-          "SMELL-151"
+          "SMELL-152"
         ]
       },
       {
@@ -3809,7 +3813,7 @@
         "target": "hasown@2.0.2",
         "relationship": "transitive",
         "smellIds": [
-          "SMELL-151"
+          "SMELL-152"
         ]
       },
       {
@@ -3817,7 +3821,7 @@
         "target": "hasown@2.0.2",
         "relationship": "transitive",
         "smellIds": [
-          "SMELL-151"
+          "SMELL-152"
         ]
       },
       {
@@ -3825,8 +3829,8 @@
         "target": "hermes-estree@0.25.1",
         "relationship": "transitive",
         "smellIds": [
-          "SMELL-152",
-          "SMELL-153"
+          "SMELL-153",
+          "SMELL-154"
         ]
       },
       {
@@ -3834,29 +3838,13 @@
         "target": "hermes-parser@0.25.1",
         "relationship": "transitive",
         "smellIds": [
-          "SMELL-154",
-          "SMELL-155"
-        ]
-      },
-      {
-        "source": "@eslint/eslintrc@3.3.3",
-        "target": "ignore@5.3.2",
-        "relationship": "transitive",
-        "smellIds": [
-          "SMELL-156"
-        ]
-      },
-      {
-        "source": "eslint@9.39.1",
-        "target": "ignore@5.3.2",
-        "relationship": "transitive",
-        "smellIds": [
+          "SMELL-155",
           "SMELL-156"
         ]
       },
       {
         "source": "@eslint/eslintrc@3.3.3",
-        "target": "import-fresh@3.3.1",
+        "target": "ignore@5.3.2",
         "relationship": "transitive",
         "smellIds": [
           "SMELL-157"
@@ -3864,10 +3852,26 @@
       },
       {
         "source": "eslint@9.39.1",
-        "target": "imurmurhash@0.1.4",
+        "target": "ignore@5.3.2",
+        "relationship": "transitive",
+        "smellIds": [
+          "SMELL-157"
+        ]
+      },
+      {
+        "source": "@eslint/eslintrc@3.3.3",
+        "target": "import-fresh@3.3.1",
         "relationship": "transitive",
         "smellIds": [
           "SMELL-158"
+        ]
+      },
+      {
+        "source": "eslint@9.39.1",
+        "target": "imurmurhash@0.1.4",
+        "relationship": "transitive",
+        "smellIds": [
+          "SMELL-159"
         ]
       },
       {
@@ -3875,7 +3879,7 @@
         "target": "is-extglob@2.1.1",
         "relationship": "transitive",
         "smellIds": [
-          "SMELL-159"
+          "SMELL-160"
         ]
       },
       {
@@ -3883,7 +3887,7 @@
         "target": "is-glob@4.0.3",
         "relationship": "transitive",
         "smellIds": [
-          "SMELL-160"
+          "SMELL-161"
         ]
       },
       {
@@ -3891,7 +3895,7 @@
         "target": "is-glob@4.0.3",
         "relationship": "transitive",
         "smellIds": [
-          "SMELL-160"
+          "SMELL-161"
         ]
       },
       {
@@ -3899,7 +3903,7 @@
         "target": "isexe@2.0.0",
         "relationship": "transitive",
         "smellIds": [
-          "SMELL-161"
+          "SMELL-162"
         ]
       },
       {
@@ -3907,7 +3911,7 @@
         "target": "jiti@2.6.1",
         "relationship": "transitive",
         "smellIds": [
-          "SMELL-162"
+          "SMELL-163"
         ]
       },
       {
@@ -3915,7 +3919,7 @@
         "target": "jiti@2.6.1",
         "relationship": "transitive",
         "smellIds": [
-          "SMELL-162"
+          "SMELL-163"
         ]
       },
       {
@@ -3923,7 +3927,7 @@
         "target": "jiti@2.6.1",
         "relationship": "transitive",
         "smellIds": [
-          "SMELL-162"
+          "SMELL-163"
         ]
       },
       {
@@ -3931,7 +3935,7 @@
         "target": "js-tokens@4.0.0",
         "relationship": "transitive",
         "smellIds": [
-          "SMELL-163"
+          "SMELL-164"
         ]
       },
       {
@@ -3939,7 +3943,7 @@
         "target": "js-yaml@4.1.1",
         "relationship": "transitive",
         "smellIds": [
-          "SMELL-164"
+          "SMELL-165"
         ]
       },
       {
@@ -3947,7 +3951,7 @@
         "target": "jsesc@3.1.0",
         "relationship": "transitive",
         "smellIds": [
-          "SMELL-165"
+          "SMELL-166"
         ]
       },
       {
@@ -3955,7 +3959,7 @@
         "target": "json-buffer@3.0.1",
         "relationship": "transitive",
         "smellIds": [
-          "SMELL-166"
+          "SMELL-167"
         ]
       },
       {
@@ -3963,7 +3967,7 @@
         "target": "json-schema-traverse@0.4.1",
         "relationship": "transitive",
         "smellIds": [
-          "SMELL-167"
+          "SMELL-168"
         ]
       },
       {
@@ -3971,8 +3975,8 @@
         "target": "json-stable-stringify-without-jsonify@1.0.1",
         "relationship": "transitive",
         "smellIds": [
-          "SMELL-168",
-          "SMELL-169"
+          "SMELL-169",
+          "SMELL-170"
         ]
       },
       {
@@ -3980,7 +3984,7 @@
         "target": "json5@2.2.3",
         "relationship": "transitive",
         "smellIds": [
-          "SMELL-170"
+          "SMELL-171"
         ]
       },
       {
@@ -3988,8 +3992,8 @@
         "target": "keyv@4.5.4",
         "relationship": "transitive",
         "smellIds": [
-          "SMELL-171",
-          "SMELL-172"
+          "SMELL-172",
+          "SMELL-173"
         ]
       },
       {
@@ -3997,7 +4001,7 @@
         "target": "leaflet@1.9.4",
         "relationship": "direct",
         "smellIds": [
-          "SMELL-173"
+          "SMELL-174"
         ]
       },
       {
@@ -4005,7 +4009,7 @@
         "target": "leaflet@1.9.4",
         "relationship": "direct",
         "smellIds": [
-          "SMELL-173"
+          "SMELL-174"
         ]
       },
       {
@@ -4013,7 +4017,7 @@
         "target": "leaflet@1.9.4",
         "relationship": "direct",
         "smellIds": [
-          "SMELL-173"
+          "SMELL-174"
         ]
       },
       {
@@ -4021,7 +4025,7 @@
         "target": "levn@0.4.1",
         "relationship": "transitive",
         "smellIds": [
-          "SMELL-174"
+          "SMELL-175"
         ]
       },
       {
@@ -4029,7 +4033,7 @@
         "target": "levn@0.4.1",
         "relationship": "transitive",
         "smellIds": [
-          "SMELL-174"
+          "SMELL-175"
         ]
       },
       {
@@ -4037,7 +4041,7 @@
         "target": "lightningcss-android-arm64@1.30.2",
         "relationship": "transitive",
         "smellIds": [
-          "SMELL-175"
+          "SMELL-176"
         ]
       },
       {
@@ -4045,7 +4049,7 @@
         "target": "lightningcss-darwin-arm64@1.30.2",
         "relationship": "transitive",
         "smellIds": [
-          "SMELL-176"
+          "SMELL-177"
         ]
       },
       {
@@ -4053,7 +4057,7 @@
         "target": "lightningcss-darwin-x64@1.30.2",
         "relationship": "transitive",
         "smellIds": [
-          "SMELL-177"
+          "SMELL-178"
         ]
       },
       {
@@ -4061,7 +4065,7 @@
         "target": "lightningcss-freebsd-x64@1.30.2",
         "relationship": "transitive",
         "smellIds": [
-          "SMELL-178"
+          "SMELL-179"
         ]
       },
       {
@@ -4069,7 +4073,7 @@
         "target": "lightningcss-linux-arm-gnueabihf@1.30.2",
         "relationship": "transitive",
         "smellIds": [
-          "SMELL-179"
+          "SMELL-180"
         ]
       },
       {
@@ -4077,7 +4081,7 @@
         "target": "lightningcss-linux-arm64-gnu@1.30.2",
         "relationship": "transitive",
         "smellIds": [
-          "SMELL-180"
+          "SMELL-181"
         ]
       },
       {
@@ -4085,7 +4089,7 @@
         "target": "lightningcss-linux-arm64-musl@1.30.2",
         "relationship": "transitive",
         "smellIds": [
-          "SMELL-181"
+          "SMELL-182"
         ]
       },
       {
@@ -4093,7 +4097,7 @@
         "target": "lightningcss-linux-x64-gnu@1.30.2",
         "relationship": "transitive",
         "smellIds": [
-          "SMELL-182"
+          "SMELL-183"
         ]
       },
       {
@@ -4101,7 +4105,7 @@
         "target": "lightningcss-linux-x64-musl@1.30.2",
         "relationship": "transitive",
         "smellIds": [
-          "SMELL-183"
+          "SMELL-184"
         ]
       },
       {
@@ -4109,7 +4113,7 @@
         "target": "lightningcss-win32-arm64-msvc@1.30.2",
         "relationship": "transitive",
         "smellIds": [
-          "SMELL-184"
+          "SMELL-185"
         ]
       },
       {
@@ -4117,7 +4121,7 @@
         "target": "lightningcss-win32-x64-msvc@1.30.2",
         "relationship": "transitive",
         "smellIds": [
-          "SMELL-185"
+          "SMELL-186"
         ]
       },
       {
@@ -4125,7 +4129,7 @@
         "target": "lightningcss@1.30.2",
         "relationship": "transitive",
         "smellIds": [
-          "SMELL-186"
+          "SMELL-187"
         ]
       },
       {
@@ -4133,7 +4137,7 @@
         "target": "lightningcss@1.30.2",
         "relationship": "transitive",
         "smellIds": [
-          "SMELL-186"
+          "SMELL-187"
         ]
       },
       {
@@ -4141,7 +4145,7 @@
         "target": "locate-path@6.0.0",
         "relationship": "transitive",
         "smellIds": [
-          "SMELL-187"
+          "SMELL-188"
         ]
       },
       {
@@ -4149,8 +4153,8 @@
         "target": "lodash.merge@4.6.2",
         "relationship": "transitive",
         "smellIds": [
-          "SMELL-188",
-          "SMELL-189"
+          "SMELL-189",
+          "SMELL-190"
         ]
       },
       {
@@ -4158,7 +4162,7 @@
         "target": "lru-cache@5.1.1",
         "relationship": "transitive",
         "smellIds": [
-          "SMELL-190"
+          "SMELL-191"
         ]
       },
       {
@@ -4166,7 +4170,7 @@
         "target": "math-intrinsics@1.1.0",
         "relationship": "transitive",
         "smellIds": [
-          "SMELL-191"
+          "SMELL-192"
         ]
       },
       {
@@ -4174,7 +4178,7 @@
         "target": "mime-db@1.52.0",
         "relationship": "transitive",
         "smellIds": [
-          "SMELL-192"
+          "SMELL-193"
         ]
       },
       {
@@ -4182,7 +4186,7 @@
         "target": "mime-types@2.1.35",
         "relationship": "transitive",
         "smellIds": [
-          "SMELL-193"
+          "SMELL-194"
         ]
       },
       {
@@ -4190,7 +4194,7 @@
         "target": "minimatch@3.1.2",
         "relationship": "transitive",
         "smellIds": [
-          "SMELL-194"
+          "SMELL-195"
         ]
       },
       {
@@ -4198,7 +4202,7 @@
         "target": "minimatch@3.1.2",
         "relationship": "transitive",
         "smellIds": [
-          "SMELL-194"
+          "SMELL-195"
         ]
       },
       {
@@ -4206,7 +4210,7 @@
         "target": "minimatch@3.1.2",
         "relationship": "transitive",
         "smellIds": [
-          "SMELL-194"
+          "SMELL-195"
         ]
       },
       {
@@ -4214,8 +4218,8 @@
         "target": "ms@2.1.3",
         "relationship": "transitive",
         "smellIds": [
-          "SMELL-195",
-          "SMELL-243"
+          "SMELL-196",
+          "SMELL-244"
         ]
       },
       {
@@ -4223,7 +4227,7 @@
         "target": "nanoid@3.3.11",
         "relationship": "transitive",
         "smellIds": [
-          "SMELL-196"
+          "SMELL-197"
         ]
       },
       {
@@ -4231,7 +4235,7 @@
         "target": "natural-compare@1.4.0",
         "relationship": "transitive",
         "smellIds": [
-          "SMELL-197"
+          "SMELL-198"
         ]
       },
       {
@@ -4239,7 +4243,7 @@
         "target": "node-releases@2.0.27",
         "relationship": "transitive",
         "smellIds": [
-          "SMELL-198"
+          "SMELL-199"
         ]
       },
       {
@@ -4247,7 +4251,7 @@
         "target": "normalize-range@0.1.2",
         "relationship": "transitive",
         "smellIds": [
-          "SMELL-199"
+          "SMELL-200"
         ]
       },
       {
@@ -4255,7 +4259,7 @@
         "target": "optionator@0.9.4",
         "relationship": "transitive",
         "smellIds": [
-          "SMELL-200"
+          "SMELL-201"
         ]
       },
       {
@@ -4263,7 +4267,7 @@
         "target": "p-limit@3.1.0",
         "relationship": "transitive",
         "smellIds": [
-          "SMELL-201"
+          "SMELL-202"
         ]
       },
       {
@@ -4271,7 +4275,7 @@
         "target": "p-locate@5.0.0",
         "relationship": "transitive",
         "smellIds": [
-          "SMELL-202"
+          "SMELL-203"
         ]
       },
       {
@@ -4279,7 +4283,7 @@
         "target": "parent-module@1.0.1",
         "relationship": "transitive",
         "smellIds": [
-          "SMELL-203"
+          "SMELL-204"
         ]
       },
       {
@@ -4287,7 +4291,7 @@
         "target": "path-exists@4.0.0",
         "relationship": "transitive",
         "smellIds": [
-          "SMELL-204"
+          "SMELL-205"
         ]
       },
       {
@@ -4295,7 +4299,7 @@
         "target": "path-key@3.1.1",
         "relationship": "transitive",
         "smellIds": [
-          "SMELL-205"
+          "SMELL-206"
         ]
       },
       {
@@ -4303,7 +4307,7 @@
         "target": "picocolors@1.1.1",
         "relationship": "transitive",
         "smellIds": [
-          "SMELL-206"
+          "SMELL-207"
         ]
       },
       {
@@ -4311,7 +4315,7 @@
         "target": "picocolors@1.1.1",
         "relationship": "transitive",
         "smellIds": [
-          "SMELL-206"
+          "SMELL-207"
         ]
       },
       {
@@ -4319,7 +4323,7 @@
         "target": "picocolors@1.1.1",
         "relationship": "transitive",
         "smellIds": [
-          "SMELL-206"
+          "SMELL-207"
         ]
       },
       {
@@ -4327,7 +4331,7 @@
         "target": "picocolors@1.1.1",
         "relationship": "transitive",
         "smellIds": [
-          "SMELL-206"
+          "SMELL-207"
         ]
       },
       {
@@ -4335,7 +4339,7 @@
         "target": "picomatch@4.0.3",
         "relationship": "transitive",
         "smellIds": [
-          "SMELL-207"
+          "SMELL-208"
         ]
       },
       {
@@ -4343,7 +4347,7 @@
         "target": "picomatch@4.0.3",
         "relationship": "transitive",
         "smellIds": [
-          "SMELL-207"
+          "SMELL-208"
         ]
       },
       {
@@ -4351,7 +4355,7 @@
         "target": "picomatch@4.0.3",
         "relationship": "transitive",
         "smellIds": [
-          "SMELL-207"
+          "SMELL-208"
         ]
       },
       {
@@ -4359,7 +4363,7 @@
         "target": "postcss-value-parser@4.2.0",
         "relationship": "transitive",
         "smellIds": [
-          "SMELL-208"
+          "SMELL-209"
         ]
       },
       {
@@ -4367,7 +4371,7 @@
         "target": "postcss@8.5.6",
         "relationship": "direct",
         "smellIds": [
-          "SMELL-209"
+          "SMELL-210"
         ]
       },
       {
@@ -4375,7 +4379,7 @@
         "target": "postcss@8.5.6",
         "relationship": "direct",
         "smellIds": [
-          "SMELL-209"
+          "SMELL-210"
         ]
       },
       {
@@ -4383,7 +4387,7 @@
         "target": "postcss@8.5.6",
         "relationship": "direct",
         "smellIds": [
-          "SMELL-209"
+          "SMELL-210"
         ]
       },
       {
@@ -4391,7 +4395,7 @@
         "target": "postcss@8.5.6",
         "relationship": "direct",
         "smellIds": [
-          "SMELL-209"
+          "SMELL-210"
         ]
       },
       {
@@ -4399,7 +4403,7 @@
         "target": "prelude-ls@1.2.1",
         "relationship": "transitive",
         "smellIds": [
-          "SMELL-210"
+          "SMELL-211"
         ]
       },
       {
@@ -4407,7 +4411,7 @@
         "target": "prelude-ls@1.2.1",
         "relationship": "transitive",
         "smellIds": [
-          "SMELL-210"
+          "SMELL-211"
         ]
       },
       {
@@ -4415,7 +4419,7 @@
         "target": "prelude-ls@1.2.1",
         "relationship": "transitive",
         "smellIds": [
-          "SMELL-210"
+          "SMELL-211"
         ]
       },
       {
@@ -4423,7 +4427,7 @@
         "target": "proxy-from-env@1.1.0",
         "relationship": "transitive",
         "smellIds": [
-          "SMELL-211"
+          "SMELL-212"
         ]
       },
       {
@@ -4431,7 +4435,7 @@
         "target": "punycode@2.3.1",
         "relationship": "transitive",
         "smellIds": [
-          "SMELL-212"
+          "SMELL-213"
         ]
       },
       {
@@ -4439,7 +4443,7 @@
         "target": "react-dom@19.2.0",
         "relationship": "direct",
         "smellIds": [
-          "SMELL-213"
+          "SMELL-214"
         ]
       },
       {
@@ -4447,7 +4451,7 @@
         "target": "react-dom@19.2.0",
         "relationship": "direct",
         "smellIds": [
-          "SMELL-213"
+          "SMELL-214"
         ]
       },
       {
@@ -4455,7 +4459,7 @@
         "target": "react-dom@19.2.0",
         "relationship": "direct",
         "smellIds": [
-          "SMELL-213"
+          "SMELL-214"
         ]
       },
       {
@@ -4463,7 +4467,7 @@
         "target": "react-dom@19.2.0",
         "relationship": "direct",
         "smellIds": [
-          "SMELL-213"
+          "SMELL-214"
         ]
       },
       {
@@ -4471,7 +4475,7 @@
         "target": "react-dom@19.2.0",
         "relationship": "direct",
         "smellIds": [
-          "SMELL-213"
+          "SMELL-214"
         ]
       },
       {
@@ -4479,7 +4483,7 @@
         "target": "react-leaflet@5.0.0",
         "relationship": "direct",
         "smellIds": [
-          "SMELL-214"
+          "SMELL-215"
         ]
       },
       {
@@ -4487,7 +4491,7 @@
         "target": "react-refresh@0.18.0",
         "relationship": "transitive",
         "smellIds": [
-          "SMELL-215"
+          "SMELL-216"
         ]
       },
       {
@@ -4495,7 +4499,7 @@
         "target": "react@19.2.0",
         "relationship": "direct",
         "smellIds": [
-          "SMELL-216"
+          "SMELL-217"
         ]
       },
       {
@@ -4503,7 +4507,7 @@
         "target": "react@19.2.0",
         "relationship": "direct",
         "smellIds": [
-          "SMELL-216"
+          "SMELL-217"
         ]
       },
       {
@@ -4511,7 +4515,7 @@
         "target": "react@19.2.0",
         "relationship": "direct",
         "smellIds": [
-          "SMELL-216"
+          "SMELL-217"
         ]
       },
       {
@@ -4519,7 +4523,7 @@
         "target": "react@19.2.0",
         "relationship": "direct",
         "smellIds": [
-          "SMELL-216"
+          "SMELL-217"
         ]
       },
       {
@@ -4527,7 +4531,7 @@
         "target": "react@19.2.0",
         "relationship": "direct",
         "smellIds": [
-          "SMELL-216"
+          "SMELL-217"
         ]
       },
       {
@@ -4535,7 +4539,7 @@
         "target": "react@19.2.0",
         "relationship": "direct",
         "smellIds": [
-          "SMELL-216"
+          "SMELL-217"
         ]
       },
       {
@@ -4543,7 +4547,7 @@
         "target": "react@19.2.0",
         "relationship": "direct",
         "smellIds": [
-          "SMELL-216"
+          "SMELL-217"
         ]
       },
       {
@@ -4551,7 +4555,7 @@
         "target": "resolve-from@4.0.0",
         "relationship": "transitive",
         "smellIds": [
-          "SMELL-217"
+          "SMELL-218"
         ]
       },
       {
@@ -4559,7 +4563,7 @@
         "target": "scheduler@0.27.0",
         "relationship": "transitive",
         "smellIds": [
-          "SMELL-218"
+          "SMELL-219"
         ]
       },
       {
@@ -4567,7 +4571,7 @@
         "target": "semver@6.3.1",
         "relationship": "transitive",
         "smellIds": [
-          "SMELL-219"
+          "SMELL-220"
         ]
       },
       {
@@ -4575,7 +4579,7 @@
         "target": "semver@6.3.1",
         "relationship": "transitive",
         "smellIds": [
-          "SMELL-219"
+          "SMELL-220"
         ]
       },
       {
@@ -4583,7 +4587,7 @@
         "target": "shebang-command@2.0.0",
         "relationship": "transitive",
         "smellIds": [
-          "SMELL-220"
+          "SMELL-221"
         ]
       },
       {
@@ -4591,7 +4595,7 @@
         "target": "shebang-regex@3.0.0",
         "relationship": "transitive",
         "smellIds": [
-          "SMELL-221"
+          "SMELL-222"
         ]
       },
       {
@@ -4599,8 +4603,8 @@
         "target": "source-map-js@1.2.1",
         "relationship": "transitive",
         "smellIds": [
-          "SMELL-222",
-          "SMELL-223"
+          "SMELL-223",
+          "SMELL-224"
         ]
       },
       {
@@ -4608,8 +4612,8 @@
         "target": "source-map-js@1.2.1",
         "relationship": "transitive",
         "smellIds": [
-          "SMELL-222",
-          "SMELL-223"
+          "SMELL-223",
+          "SMELL-224"
         ]
       },
       {
@@ -4617,7 +4621,7 @@
         "target": "strip-json-comments@3.1.1",
         "relationship": "transitive",
         "smellIds": [
-          "SMELL-224"
+          "SMELL-225"
         ]
       },
       {
@@ -4625,7 +4629,7 @@
         "target": "supports-color@7.2.0",
         "relationship": "transitive",
         "smellIds": [
-          "SMELL-225"
+          "SMELL-226"
         ]
       },
       {
@@ -4633,7 +4637,7 @@
         "target": "tapable@2.3.0",
         "relationship": "transitive",
         "smellIds": [
-          "SMELL-226"
+          "SMELL-227"
         ]
       },
       {
@@ -4641,7 +4645,7 @@
         "target": "type-check@0.4.0",
         "relationship": "transitive",
         "smellIds": [
-          "SMELL-227"
+          "SMELL-228"
         ]
       },
       {
@@ -4649,7 +4653,7 @@
         "target": "type-check@0.4.0",
         "relationship": "transitive",
         "smellIds": [
-          "SMELL-227"
+          "SMELL-228"
         ]
       },
       {
@@ -4657,7 +4661,7 @@
         "target": "update-browserslist-db@1.1.4",
         "relationship": "transitive",
         "smellIds": [
-          "SMELL-228"
+          "SMELL-229"
         ]
       },
       {
@@ -4665,7 +4669,7 @@
         "target": "uri-js@4.4.1",
         "relationship": "transitive",
         "smellIds": [
-          "SMELL-229"
+          "SMELL-230"
         ]
       },
       {
@@ -4673,7 +4677,7 @@
         "target": "which@2.0.2",
         "relationship": "transitive",
         "smellIds": [
-          "SMELL-230"
+          "SMELL-231"
         ]
       },
       {
@@ -4681,7 +4685,7 @@
         "target": "word-wrap@1.2.5",
         "relationship": "transitive",
         "smellIds": [
-          "SMELL-231"
+          "SMELL-232"
         ]
       },
       {
@@ -4689,7 +4693,7 @@
         "target": "ws@8.18.3",
         "relationship": "transitive",
         "smellIds": [
-          "SMELL-232"
+          "SMELL-233"
         ]
       },
       {
@@ -4697,8 +4701,8 @@
         "target": "xmlhttprequest-ssl@2.1.2",
         "relationship": "transitive",
         "smellIds": [
-          "SMELL-233",
-          "SMELL-234"
+          "SMELL-234",
+          "SMELL-235"
         ]
       },
       {
@@ -4706,7 +4710,7 @@
         "target": "yallist@3.1.1",
         "relationship": "transitive",
         "smellIds": [
-          "SMELL-235"
+          "SMELL-236"
         ]
       },
       {
@@ -4714,7 +4718,7 @@
         "target": "yocto-queue@0.1.0",
         "relationship": "transitive",
         "smellIds": [
-          "SMELL-236"
+          "SMELL-237"
         ]
       },
       {
@@ -4722,7 +4726,7 @@
         "target": "zod-validation-error@4.0.2",
         "relationship": "transitive",
         "smellIds": [
-          "SMELL-237"
+          "SMELL-238"
         ]
       },
       {
@@ -4730,7 +4734,7 @@
         "target": "eslint-plugin-react-refresh@0.4.24",
         "relationship": "direct",
         "smellIds": [
-          "SMELL-238"
+          "SMELL-239"
         ]
       },
       {
@@ -4738,7 +4742,7 @@
         "target": "lucide-react@0.554.0",
         "relationship": "direct",
         "smellIds": [
-          "SMELL-239"
+          "SMELL-240"
         ]
       },
       {
@@ -4746,7 +4750,7 @@
         "target": "tailwind-merge@3.4.0",
         "relationship": "direct",
         "smellIds": [
-          "SMELL-245"
+          "SMELL-246"
         ]
       }
     ]
@@ -6709,6 +6713,23 @@
     },
     {
       "id": "SMELL-116",
+      "type": "Deprecated",
+      "affectedPackage": "eslint",
+      "affectedVersion": "9.39.1",
+      "detectionSource": "Dirty-Waters",
+      "evidence": "Package version is marked as deprecated in registry metadata.",
+      "score": {
+        "S": 0.75,
+        "P": 0.3,
+        "V": 0,
+        "R": 1,
+        "finalScore": 45,
+        "finalRating": "Medium",
+        "baselineSeverity": "High"
+      }
+    },
+    {
+      "id": "SMELL-117",
       "type": "No Provenance",
       "affectedPackage": "eslint",
       "affectedVersion": "9.39.1",
@@ -6725,7 +6746,7 @@
       }
     },
     {
-      "id": "SMELL-117",
+      "id": "SMELL-118",
       "type": "No Provenance",
       "affectedPackage": "esquery",
       "affectedVersion": "1.6.0",
@@ -6742,7 +6763,7 @@
       }
     },
     {
-      "id": "SMELL-118",
+      "id": "SMELL-119",
       "type": "No Provenance",
       "affectedPackage": "esrecurse",
       "affectedVersion": "4.3.0",
@@ -6759,7 +6780,7 @@
       }
     },
     {
-      "id": "SMELL-119",
+      "id": "SMELL-120",
       "type": "No Provenance",
       "affectedPackage": "estraverse",
       "affectedVersion": "5.3.0",
@@ -6776,7 +6797,7 @@
       }
     },
     {
-      "id": "SMELL-120",
+      "id": "SMELL-121",
       "type": "No Provenance",
       "affectedPackage": "esutils",
       "affectedVersion": "2.0.3",
@@ -6793,7 +6814,7 @@
       }
     },
     {
-      "id": "SMELL-121",
+      "id": "SMELL-122",
       "type": "No Provenance",
       "affectedPackage": "fast-deep-equal",
       "affectedVersion": "3.1.3",
@@ -6810,7 +6831,7 @@
       }
     },
     {
-      "id": "SMELL-122",
+      "id": "SMELL-123",
       "type": "Fork",
       "affectedPackage": "fast-json-stable-stringify",
       "affectedVersion": "2.1.0",
@@ -6827,7 +6848,7 @@
       }
     },
     {
-      "id": "SMELL-123",
+      "id": "SMELL-124",
       "type": "No Provenance",
       "affectedPackage": "fast-json-stable-stringify",
       "affectedVersion": "2.1.0",
@@ -6844,7 +6865,7 @@
       }
     },
     {
-      "id": "SMELL-124",
+      "id": "SMELL-125",
       "type": "No Provenance",
       "affectedPackage": "fast-levenshtein",
       "affectedVersion": "2.0.6",
@@ -6861,7 +6882,7 @@
       }
     },
     {
-      "id": "SMELL-125",
+      "id": "SMELL-126",
       "type": "No Provenance",
       "affectedPackage": "fdir",
       "affectedVersion": "6.5.0",
@@ -6878,7 +6899,7 @@
       }
     },
     {
-      "id": "SMELL-126",
+      "id": "SMELL-127",
       "type": "Invalid Source Code URL",
       "affectedPackage": "file-entry-cache",
       "affectedVersion": "8.0.0",
@@ -6895,7 +6916,7 @@
       }
     },
     {
-      "id": "SMELL-127",
+      "id": "SMELL-128",
       "type": "No Provenance",
       "affectedPackage": "file-entry-cache",
       "affectedVersion": "8.0.0",
@@ -6912,7 +6933,7 @@
       }
     },
     {
-      "id": "SMELL-128",
+      "id": "SMELL-129",
       "type": "No Provenance",
       "affectedPackage": "find-up",
       "affectedVersion": "5.0.0",
@@ -6929,7 +6950,7 @@
       }
     },
     {
-      "id": "SMELL-129",
+      "id": "SMELL-130",
       "type": "Invalid Source Code URL",
       "affectedPackage": "flat-cache",
       "affectedVersion": "4.0.1",
@@ -6946,7 +6967,7 @@
       }
     },
     {
-      "id": "SMELL-130",
+      "id": "SMELL-131",
       "type": "No Provenance",
       "affectedPackage": "flat-cache",
       "affectedVersion": "4.0.1",
@@ -6963,7 +6984,7 @@
       }
     },
     {
-      "id": "SMELL-131",
+      "id": "SMELL-132",
       "type": "No Provenance",
       "affectedPackage": "flatted",
       "affectedVersion": "3.3.3",
@@ -6972,15 +6993,15 @@
       "score": {
         "S": 0.25,
         "P": 0.3,
-        "V": 0.8,
+        "V": 1,
         "R": 0.1,
-        "finalScore": 40.5,
+        "finalScore": 46.5,
         "finalRating": "Medium",
         "baselineSeverity": "Low"
       }
     },
     {
-      "id": "SMELL-132",
+      "id": "SMELL-133",
       "type": "No Provenance",
       "affectedPackage": "follow-redirects",
       "affectedVersion": "1.15.11",
@@ -6997,7 +7018,7 @@
       }
     },
     {
-      "id": "SMELL-133",
+      "id": "SMELL-134",
       "type": "No Provenance",
       "affectedPackage": "form-data",
       "affectedVersion": "4.0.5",
@@ -7014,7 +7035,7 @@
       }
     },
     {
-      "id": "SMELL-134",
+      "id": "SMELL-135",
       "type": "No Provenance",
       "affectedPackage": "fraction.js",
       "affectedVersion": "5.3.4",
@@ -7031,7 +7052,7 @@
       }
     },
     {
-      "id": "SMELL-135",
+      "id": "SMELL-136",
       "type": "No Source Code URL",
       "affectedPackage": "frontend",
       "affectedVersion": "0.0.0",
@@ -7048,7 +7069,7 @@
       }
     },
     {
-      "id": "SMELL-136",
+      "id": "SMELL-137",
       "type": "No Provenance",
       "affectedPackage": "frontend",
       "affectedVersion": "0.0.0",
@@ -7065,7 +7086,7 @@
       }
     },
     {
-      "id": "SMELL-137",
+      "id": "SMELL-138",
       "type": "No Code Signature",
       "affectedPackage": "frontend",
       "affectedVersion": "0.0.0",
@@ -7082,7 +7103,7 @@
       }
     },
     {
-      "id": "SMELL-138",
+      "id": "SMELL-139",
       "type": "No Provenance",
       "affectedPackage": "fsevents",
       "affectedVersion": "2.3.3",
@@ -7099,7 +7120,7 @@
       }
     },
     {
-      "id": "SMELL-139",
+      "id": "SMELL-140",
       "type": "No Provenance",
       "affectedPackage": "function-bind",
       "affectedVersion": "1.1.2",
@@ -7116,7 +7137,7 @@
       }
     },
     {
-      "id": "SMELL-140",
+      "id": "SMELL-141",
       "type": "No Provenance",
       "affectedPackage": "gensync",
       "affectedVersion": "1.0.0-beta.2",
@@ -7133,7 +7154,7 @@
       }
     },
     {
-      "id": "SMELL-141",
+      "id": "SMELL-142",
       "type": "No Provenance",
       "affectedPackage": "get-intrinsic",
       "affectedVersion": "1.3.0",
@@ -7150,7 +7171,7 @@
       }
     },
     {
-      "id": "SMELL-142",
+      "id": "SMELL-143",
       "type": "No Provenance",
       "affectedPackage": "get-proto",
       "affectedVersion": "1.0.1",
@@ -7167,7 +7188,7 @@
       }
     },
     {
-      "id": "SMELL-143",
+      "id": "SMELL-144",
       "type": "No Provenance",
       "affectedPackage": "glob-parent",
       "affectedVersion": "6.0.2",
@@ -7184,7 +7205,7 @@
       }
     },
     {
-      "id": "SMELL-144",
+      "id": "SMELL-145",
       "type": "No Provenance",
       "affectedPackage": "globals",
       "affectedVersion": "14.0.0",
@@ -7201,7 +7222,7 @@
       }
     },
     {
-      "id": "SMELL-145",
+      "id": "SMELL-146",
       "type": "No Provenance",
       "affectedPackage": "globals",
       "affectedVersion": "16.5.0",
@@ -7218,7 +7239,7 @@
       }
     },
     {
-      "id": "SMELL-146",
+      "id": "SMELL-147",
       "type": "No Provenance",
       "affectedPackage": "gopd",
       "affectedVersion": "1.2.0",
@@ -7235,7 +7256,7 @@
       }
     },
     {
-      "id": "SMELL-147",
+      "id": "SMELL-148",
       "type": "No Provenance",
       "affectedPackage": "graceful-fs",
       "affectedVersion": "4.2.11",
@@ -7252,7 +7273,7 @@
       }
     },
     {
-      "id": "SMELL-148",
+      "id": "SMELL-149",
       "type": "No Provenance",
       "affectedPackage": "has-flag",
       "affectedVersion": "4.0.0",
@@ -7269,7 +7290,7 @@
       }
     },
     {
-      "id": "SMELL-149",
+      "id": "SMELL-150",
       "type": "No Provenance",
       "affectedPackage": "has-symbols",
       "affectedVersion": "1.1.0",
@@ -7286,7 +7307,7 @@
       }
     },
     {
-      "id": "SMELL-150",
+      "id": "SMELL-151",
       "type": "No Provenance",
       "affectedPackage": "has-tostringtag",
       "affectedVersion": "1.0.2",
@@ -7303,7 +7324,7 @@
       }
     },
     {
-      "id": "SMELL-151",
+      "id": "SMELL-152",
       "type": "No Provenance",
       "affectedPackage": "hasown",
       "affectedVersion": "2.0.2",
@@ -7320,7 +7341,7 @@
       }
     },
     {
-      "id": "SMELL-152",
+      "id": "SMELL-153",
       "type": "Inaccessible Commit SHA/Release Tag",
       "affectedPackage": "hermes-estree",
       "affectedVersion": "0.25.1",
@@ -7334,27 +7355,27 @@
         "finalScore": 31.5,
         "finalRating": "Low",
         "baselineSeverity": "High"
-      }
-    },
-    {
-      "id": "SMELL-153",
-      "type": "No Provenance",
-      "affectedPackage": "hermes-estree",
-      "affectedVersion": "0.25.1",
-      "detectionSource": "Dirty-Waters",
-      "evidence": "Package version does not expose build provenance or attestation metadata.",
-      "score": {
-        "S": 0.25,
-        "P": 0.3,
-        "V": 0,
-        "R": 0.1,
-        "finalScore": 16.5,
-        "finalRating": "Low",
-        "baselineSeverity": "Low"
       }
     },
     {
       "id": "SMELL-154",
+      "type": "No Provenance",
+      "affectedPackage": "hermes-estree",
+      "affectedVersion": "0.25.1",
+      "detectionSource": "Dirty-Waters",
+      "evidence": "Package version does not expose build provenance or attestation metadata.",
+      "score": {
+        "S": 0.25,
+        "P": 0.3,
+        "V": 0,
+        "R": 0.1,
+        "finalScore": 16.5,
+        "finalRating": "Low",
+        "baselineSeverity": "Low"
+      }
+    },
+    {
+      "id": "SMELL-155",
       "type": "Inaccessible Commit SHA/Release Tag",
       "affectedPackage": "hermes-parser",
       "affectedVersion": "0.25.1",
@@ -7371,7 +7392,7 @@
       }
     },
     {
-      "id": "SMELL-155",
+      "id": "SMELL-156",
       "type": "No Provenance",
       "affectedPackage": "hermes-parser",
       "affectedVersion": "0.25.1",
@@ -7388,7 +7409,7 @@
       }
     },
     {
-      "id": "SMELL-156",
+      "id": "SMELL-157",
       "type": "No Provenance",
       "affectedPackage": "ignore",
       "affectedVersion": "5.3.2",
@@ -7398,14 +7419,14 @@
         "S": 0.25,
         "P": 0.3,
         "V": 0,
-        "R": 0.25,
-        "finalScore": 18.75,
+        "R": 0.1,
+        "finalScore": 16.5,
         "finalRating": "Low",
         "baselineSeverity": "Low"
       }
     },
     {
-      "id": "SMELL-157",
+      "id": "SMELL-158",
       "type": "No Provenance",
       "affectedPackage": "import-fresh",
       "affectedVersion": "3.3.1",
@@ -7422,7 +7443,7 @@
       }
     },
     {
-      "id": "SMELL-158",
+      "id": "SMELL-159",
       "type": "No Provenance",
       "affectedPackage": "imurmurhash",
       "affectedVersion": "0.1.4",
@@ -7439,7 +7460,7 @@
       }
     },
     {
-      "id": "SMELL-159",
+      "id": "SMELL-160",
       "type": "No Provenance",
       "affectedPackage": "is-extglob",
       "affectedVersion": "2.1.1",
@@ -7456,7 +7477,7 @@
       }
     },
     {
-      "id": "SMELL-160",
+      "id": "SMELL-161",
       "type": "No Provenance",
       "affectedPackage": "is-glob",
       "affectedVersion": "4.0.3",
@@ -7473,7 +7494,7 @@
       }
     },
     {
-      "id": "SMELL-161",
+      "id": "SMELL-162",
       "type": "No Provenance",
       "affectedPackage": "isexe",
       "affectedVersion": "2.0.0",
@@ -7490,7 +7511,7 @@
       }
     },
     {
-      "id": "SMELL-162",
+      "id": "SMELL-163",
       "type": "No Provenance",
       "affectedPackage": "jiti",
       "affectedVersion": "2.6.1",
@@ -7507,7 +7528,7 @@
       }
     },
     {
-      "id": "SMELL-163",
+      "id": "SMELL-164",
       "type": "No Provenance",
       "affectedPackage": "js-tokens",
       "affectedVersion": "4.0.0",
@@ -7524,7 +7545,7 @@
       }
     },
     {
-      "id": "SMELL-164",
+      "id": "SMELL-165",
       "type": "No Provenance",
       "affectedPackage": "js-yaml",
       "affectedVersion": "4.1.1",
@@ -7541,7 +7562,7 @@
       }
     },
     {
-      "id": "SMELL-165",
+      "id": "SMELL-166",
       "type": "No Provenance",
       "affectedPackage": "jsesc",
       "affectedVersion": "3.1.0",
@@ -7558,7 +7579,7 @@
       }
     },
     {
-      "id": "SMELL-166",
+      "id": "SMELL-167",
       "type": "No Provenance",
       "affectedPackage": "json-buffer",
       "affectedVersion": "3.0.1",
@@ -7575,7 +7596,7 @@
       }
     },
     {
-      "id": "SMELL-167",
+      "id": "SMELL-168",
       "type": "No Provenance",
       "affectedPackage": "json-schema-traverse",
       "affectedVersion": "0.4.1",
@@ -7592,7 +7613,7 @@
       }
     },
     {
-      "id": "SMELL-168",
+      "id": "SMELL-169",
       "type": "Fork",
       "affectedPackage": "json-stable-stringify-without-jsonify",
       "affectedVersion": "1.0.1",
@@ -7609,7 +7630,7 @@
       }
     },
     {
-      "id": "SMELL-169",
+      "id": "SMELL-170",
       "type": "No Provenance",
       "affectedPackage": "json-stable-stringify-without-jsonify",
       "affectedVersion": "1.0.1",
@@ -7626,7 +7647,7 @@
       }
     },
     {
-      "id": "SMELL-170",
+      "id": "SMELL-171",
       "type": "No Provenance",
       "affectedPackage": "json5",
       "affectedVersion": "2.2.3",
@@ -7643,7 +7664,7 @@
       }
     },
     {
-      "id": "SMELL-171",
+      "id": "SMELL-172",
       "type": "Inaccessible Commit SHA/Release Tag",
       "affectedPackage": "keyv",
       "affectedVersion": "4.5.4",
@@ -7660,7 +7681,7 @@
       }
     },
     {
-      "id": "SMELL-172",
+      "id": "SMELL-173",
       "type": "No Provenance",
       "affectedPackage": "keyv",
       "affectedVersion": "4.5.4",
@@ -7677,7 +7698,7 @@
       }
     },
     {
-      "id": "SMELL-173",
+      "id": "SMELL-174",
       "type": "No Provenance",
       "affectedPackage": "leaflet",
       "affectedVersion": "1.9.4",
@@ -7694,7 +7715,7 @@
       }
     },
     {
-      "id": "SMELL-174",
+      "id": "SMELL-175",
       "type": "No Provenance",
       "affectedPackage": "levn",
       "affectedVersion": "0.4.1",
@@ -7711,7 +7732,7 @@
       }
     },
     {
-      "id": "SMELL-175",
+      "id": "SMELL-176",
       "type": "No Provenance",
       "affectedPackage": "lightningcss-android-arm64",
       "affectedVersion": "1.30.2",
@@ -7728,7 +7749,7 @@
       }
     },
     {
-      "id": "SMELL-176",
+      "id": "SMELL-177",
       "type": "No Provenance",
       "affectedPackage": "lightningcss-darwin-arm64",
       "affectedVersion": "1.30.2",
@@ -7745,7 +7766,7 @@
       }
     },
     {
-      "id": "SMELL-177",
+      "id": "SMELL-178",
       "type": "No Provenance",
       "affectedPackage": "lightningcss-darwin-x64",
       "affectedVersion": "1.30.2",
@@ -7762,7 +7783,7 @@
       }
     },
     {
-      "id": "SMELL-178",
+      "id": "SMELL-179",
       "type": "No Provenance",
       "affectedPackage": "lightningcss-freebsd-x64",
       "affectedVersion": "1.30.2",
@@ -7779,7 +7800,7 @@
       }
     },
     {
-      "id": "SMELL-179",
+      "id": "SMELL-180",
       "type": "No Provenance",
       "affectedPackage": "lightningcss-linux-arm-gnueabihf",
       "affectedVersion": "1.30.2",
@@ -7796,7 +7817,7 @@
       }
     },
     {
-      "id": "SMELL-180",
+      "id": "SMELL-181",
       "type": "No Provenance",
       "affectedPackage": "lightningcss-linux-arm64-gnu",
       "affectedVersion": "1.30.2",
@@ -7813,7 +7834,7 @@
       }
     },
     {
-      "id": "SMELL-181",
+      "id": "SMELL-182",
       "type": "No Provenance",
       "affectedPackage": "lightningcss-linux-arm64-musl",
       "affectedVersion": "1.30.2",
@@ -7830,7 +7851,7 @@
       }
     },
     {
-      "id": "SMELL-182",
+      "id": "SMELL-183",
       "type": "No Provenance",
       "affectedPackage": "lightningcss-linux-x64-gnu",
       "affectedVersion": "1.30.2",
@@ -7847,7 +7868,7 @@
       }
     },
     {
-      "id": "SMELL-183",
+      "id": "SMELL-184",
       "type": "No Provenance",
       "affectedPackage": "lightningcss-linux-x64-musl",
       "affectedVersion": "1.30.2",
@@ -7864,7 +7885,7 @@
       }
     },
     {
-      "id": "SMELL-184",
+      "id": "SMELL-185",
       "type": "No Provenance",
       "affectedPackage": "lightningcss-win32-arm64-msvc",
       "affectedVersion": "1.30.2",
@@ -7881,7 +7902,7 @@
       }
     },
     {
-      "id": "SMELL-185",
+      "id": "SMELL-186",
       "type": "No Provenance",
       "affectedPackage": "lightningcss-win32-x64-msvc",
       "affectedVersion": "1.30.2",
@@ -7898,7 +7919,7 @@
       }
     },
     {
-      "id": "SMELL-186",
+      "id": "SMELL-187",
       "type": "No Provenance",
       "affectedPackage": "lightningcss",
       "affectedVersion": "1.30.2",
@@ -7915,7 +7936,7 @@
       }
     },
     {
-      "id": "SMELL-187",
+      "id": "SMELL-188",
       "type": "No Provenance",
       "affectedPackage": "locate-path",
       "affectedVersion": "6.0.0",
@@ -7932,7 +7953,7 @@
       }
     },
     {
-      "id": "SMELL-188",
+      "id": "SMELL-189",
       "type": "Inaccessible Commit SHA/Release Tag",
       "affectedPackage": "lodash.merge",
       "affectedVersion": "4.6.2",
@@ -7949,7 +7970,7 @@
       }
     },
     {
-      "id": "SMELL-189",
+      "id": "SMELL-190",
       "type": "No Provenance",
       "affectedPackage": "lodash.merge",
       "affectedVersion": "4.6.2",
@@ -7966,7 +7987,7 @@
       }
     },
     {
-      "id": "SMELL-190",
+      "id": "SMELL-191",
       "type": "No Provenance",
       "affectedPackage": "lru-cache",
       "affectedVersion": "5.1.1",
@@ -7983,7 +8004,7 @@
       }
     },
     {
-      "id": "SMELL-191",
+      "id": "SMELL-192",
       "type": "No Provenance",
       "affectedPackage": "math-intrinsics",
       "affectedVersion": "1.1.0",
@@ -8000,7 +8021,7 @@
       }
     },
     {
-      "id": "SMELL-192",
+      "id": "SMELL-193",
       "type": "No Provenance",
       "affectedPackage": "mime-db",
       "affectedVersion": "1.52.0",
@@ -8017,7 +8038,7 @@
       }
     },
     {
-      "id": "SMELL-193",
+      "id": "SMELL-194",
       "type": "No Provenance",
       "affectedPackage": "mime-types",
       "affectedVersion": "2.1.35",
@@ -8034,7 +8055,7 @@
       }
     },
     {
-      "id": "SMELL-194",
+      "id": "SMELL-195",
       "type": "No Provenance",
       "affectedPackage": "minimatch",
       "affectedVersion": "3.1.2",
@@ -8051,7 +8072,7 @@
       }
     },
     {
-      "id": "SMELL-195",
+      "id": "SMELL-196",
       "type": "No Provenance",
       "affectedPackage": "ms",
       "affectedVersion": "2.1.3",
@@ -8068,7 +8089,7 @@
       }
     },
     {
-      "id": "SMELL-196",
+      "id": "SMELL-197",
       "type": "No Provenance",
       "affectedPackage": "nanoid",
       "affectedVersion": "3.3.11",
@@ -8085,7 +8106,7 @@
       }
     },
     {
-      "id": "SMELL-197",
+      "id": "SMELL-198",
       "type": "No Provenance",
       "affectedPackage": "natural-compare",
       "affectedVersion": "1.4.0",
@@ -8102,7 +8123,7 @@
       }
     },
     {
-      "id": "SMELL-198",
+      "id": "SMELL-199",
       "type": "No Provenance",
       "affectedPackage": "node-releases",
       "affectedVersion": "2.0.27",
@@ -8119,7 +8140,7 @@
       }
     },
     {
-      "id": "SMELL-199",
+      "id": "SMELL-200",
       "type": "No Provenance",
       "affectedPackage": "normalize-range",
       "affectedVersion": "0.1.2",
@@ -8136,7 +8157,7 @@
       }
     },
     {
-      "id": "SMELL-200",
+      "id": "SMELL-201",
       "type": "No Provenance",
       "affectedPackage": "optionator",
       "affectedVersion": "0.9.4",
@@ -8153,7 +8174,7 @@
       }
     },
     {
-      "id": "SMELL-201",
+      "id": "SMELL-202",
       "type": "No Provenance",
       "affectedPackage": "p-limit",
       "affectedVersion": "3.1.0",
@@ -8170,7 +8191,7 @@
       }
     },
     {
-      "id": "SMELL-202",
+      "id": "SMELL-203",
       "type": "No Provenance",
       "affectedPackage": "p-locate",
       "affectedVersion": "5.0.0",
@@ -8187,7 +8208,7 @@
       }
     },
     {
-      "id": "SMELL-203",
+      "id": "SMELL-204",
       "type": "No Provenance",
       "affectedPackage": "parent-module",
       "affectedVersion": "1.0.1",
@@ -8204,7 +8225,7 @@
       }
     },
     {
-      "id": "SMELL-204",
+      "id": "SMELL-205",
       "type": "No Provenance",
       "affectedPackage": "path-exists",
       "affectedVersion": "4.0.0",
@@ -8221,7 +8242,7 @@
       }
     },
     {
-      "id": "SMELL-205",
+      "id": "SMELL-206",
       "type": "No Provenance",
       "affectedPackage": "path-key",
       "affectedVersion": "3.1.1",
@@ -8238,7 +8259,7 @@
       }
     },
     {
-      "id": "SMELL-206",
+      "id": "SMELL-207",
       "type": "No Provenance",
       "affectedPackage": "picocolors",
       "affectedVersion": "1.1.1",
@@ -8255,7 +8276,7 @@
       }
     },
     {
-      "id": "SMELL-207",
+      "id": "SMELL-208",
       "type": "No Provenance",
       "affectedPackage": "picomatch",
       "affectedVersion": "4.0.3",
@@ -8272,7 +8293,7 @@
       }
     },
     {
-      "id": "SMELL-208",
+      "id": "SMELL-209",
       "type": "No Provenance",
       "affectedPackage": "postcss-value-parser",
       "affectedVersion": "4.2.0",
@@ -8289,7 +8310,7 @@
       }
     },
     {
-      "id": "SMELL-209",
+      "id": "SMELL-210",
       "type": "No Provenance",
       "affectedPackage": "postcss",
       "affectedVersion": "8.5.6",
@@ -8306,7 +8327,7 @@
       }
     },
     {
-      "id": "SMELL-210",
+      "id": "SMELL-211",
       "type": "No Provenance",
       "affectedPackage": "prelude-ls",
       "affectedVersion": "1.2.1",
@@ -8323,7 +8344,7 @@
       }
     },
     {
-      "id": "SMELL-211",
+      "id": "SMELL-212",
       "type": "No Provenance",
       "affectedPackage": "proxy-from-env",
       "affectedVersion": "1.1.0",
@@ -8340,7 +8361,7 @@
       }
     },
     {
-      "id": "SMELL-212",
+      "id": "SMELL-213",
       "type": "No Provenance",
       "affectedPackage": "punycode",
       "affectedVersion": "2.3.1",
@@ -8357,7 +8378,7 @@
       }
     },
     {
-      "id": "SMELL-213",
+      "id": "SMELL-214",
       "type": "No Provenance",
       "affectedPackage": "react-dom",
       "affectedVersion": "19.2.0",
@@ -8374,7 +8395,7 @@
       }
     },
     {
-      "id": "SMELL-214",
+      "id": "SMELL-215",
       "type": "No Provenance",
       "affectedPackage": "react-leaflet",
       "affectedVersion": "5.0.0",
@@ -8391,7 +8412,7 @@
       }
     },
     {
-      "id": "SMELL-215",
+      "id": "SMELL-216",
       "type": "No Provenance",
       "affectedPackage": "react-refresh",
       "affectedVersion": "0.18.0",
@@ -8408,7 +8429,7 @@
       }
     },
     {
-      "id": "SMELL-216",
+      "id": "SMELL-217",
       "type": "No Provenance",
       "affectedPackage": "react",
       "affectedVersion": "19.2.0",
@@ -8425,7 +8446,7 @@
       }
     },
     {
-      "id": "SMELL-217",
+      "id": "SMELL-218",
       "type": "No Provenance",
       "affectedPackage": "resolve-from",
       "affectedVersion": "4.0.0",
@@ -8442,7 +8463,7 @@
       }
     },
     {
-      "id": "SMELL-218",
+      "id": "SMELL-219",
       "type": "No Provenance",
       "affectedPackage": "scheduler",
       "affectedVersion": "0.27.0",
@@ -8459,7 +8480,7 @@
       }
     },
     {
-      "id": "SMELL-219",
+      "id": "SMELL-220",
       "type": "No Provenance",
       "affectedPackage": "semver",
       "affectedVersion": "6.3.1",
@@ -8476,7 +8497,7 @@
       }
     },
     {
-      "id": "SMELL-220",
+      "id": "SMELL-221",
       "type": "No Provenance",
       "affectedPackage": "shebang-command",
       "affectedVersion": "2.0.0",
@@ -8493,7 +8514,7 @@
       }
     },
     {
-      "id": "SMELL-221",
+      "id": "SMELL-222",
       "type": "No Provenance",
       "affectedPackage": "shebang-regex",
       "affectedVersion": "3.0.0",
@@ -8510,7 +8531,7 @@
       }
     },
     {
-      "id": "SMELL-222",
+      "id": "SMELL-223",
       "type": "Fork",
       "affectedPackage": "source-map-js",
       "affectedVersion": "1.2.1",
@@ -8520,14 +8541,14 @@
         "S": 0.5,
         "P": 0.85,
         "V": 0,
-        "R": 0.5,
-        "finalScore": 43.75,
+        "R": 0.75,
+        "finalScore": 47.5,
         "finalRating": "Medium",
         "baselineSeverity": "Medium"
       }
     },
     {
-      "id": "SMELL-223",
+      "id": "SMELL-224",
       "type": "No Provenance",
       "affectedPackage": "source-map-js",
       "affectedVersion": "1.2.1",
@@ -8537,14 +8558,14 @@
         "S": 0.25,
         "P": 0.85,
         "V": 0,
-        "R": 0.5,
-        "finalScore": 36.25,
-        "finalRating": "Low",
+        "R": 0.75,
+        "finalScore": 40,
+        "finalRating": "Medium",
         "baselineSeverity": "Low"
       }
     },
     {
-      "id": "SMELL-224",
+      "id": "SMELL-225",
       "type": "No Provenance",
       "affectedPackage": "strip-json-comments",
       "affectedVersion": "3.1.1",
@@ -8561,7 +8582,7 @@
       }
     },
     {
-      "id": "SMELL-225",
+      "id": "SMELL-226",
       "type": "No Provenance",
       "affectedPackage": "supports-color",
       "affectedVersion": "7.2.0",
@@ -8578,7 +8599,7 @@
       }
     },
     {
-      "id": "SMELL-226",
+      "id": "SMELL-227",
       "type": "No Provenance",
       "affectedPackage": "tapable",
       "affectedVersion": "2.3.0",
@@ -8595,7 +8616,7 @@
       }
     },
     {
-      "id": "SMELL-227",
+      "id": "SMELL-228",
       "type": "No Provenance",
       "affectedPackage": "type-check",
       "affectedVersion": "0.4.0",
@@ -8612,7 +8633,7 @@
       }
     },
     {
-      "id": "SMELL-228",
+      "id": "SMELL-229",
       "type": "No Provenance",
       "affectedPackage": "update-browserslist-db",
       "affectedVersion": "1.1.4",
@@ -8629,7 +8650,7 @@
       }
     },
     {
-      "id": "SMELL-229",
+      "id": "SMELL-230",
       "type": "No Provenance",
       "affectedPackage": "uri-js",
       "affectedVersion": "4.4.1",
@@ -8646,7 +8667,7 @@
       }
     },
     {
-      "id": "SMELL-230",
+      "id": "SMELL-231",
       "type": "No Provenance",
       "affectedPackage": "which",
       "affectedVersion": "2.0.2",
@@ -8663,7 +8684,7 @@
       }
     },
     {
-      "id": "SMELL-231",
+      "id": "SMELL-232",
       "type": "No Provenance",
       "affectedPackage": "word-wrap",
       "affectedVersion": "1.2.5",
@@ -8680,7 +8701,7 @@
       }
     },
     {
-      "id": "SMELL-232",
+      "id": "SMELL-233",
       "type": "No Provenance",
       "affectedPackage": "ws",
       "affectedVersion": "8.18.3",
@@ -8697,7 +8718,7 @@
       }
     },
     {
-      "id": "SMELL-233",
+      "id": "SMELL-234",
       "type": "Fork",
       "affectedPackage": "xmlhttprequest-ssl",
       "affectedVersion": "2.1.2",
@@ -8714,7 +8735,7 @@
       }
     },
     {
-      "id": "SMELL-234",
+      "id": "SMELL-235",
       "type": "No Provenance",
       "affectedPackage": "xmlhttprequest-ssl",
       "affectedVersion": "2.1.2",
@@ -8731,7 +8752,7 @@
       }
     },
     {
-      "id": "SMELL-235",
+      "id": "SMELL-236",
       "type": "No Provenance",
       "affectedPackage": "yallist",
       "affectedVersion": "3.1.1",
@@ -8748,7 +8769,7 @@
       }
     },
     {
-      "id": "SMELL-236",
+      "id": "SMELL-237",
       "type": "No Provenance",
       "affectedPackage": "yocto-queue",
       "affectedVersion": "0.1.0",
@@ -8765,7 +8786,7 @@
       }
     },
     {
-      "id": "SMELL-237",
+      "id": "SMELL-238",
       "type": "No Provenance",
       "affectedPackage": "zod-validation-error",
       "affectedVersion": "4.0.2",
@@ -8782,7 +8803,7 @@
       }
     },
     {
-      "id": "SMELL-238",
+      "id": "SMELL-239",
       "type": "Permissive Constraint",
       "affectedPackage": "eslint-plugin-react-refresh",
       "affectedVersion": "0.4.24",
@@ -8799,7 +8820,7 @@
       }
     },
     {
-      "id": "SMELL-239",
+      "id": "SMELL-240",
       "type": "Permissive Constraint",
       "affectedPackage": "lucide-react",
       "affectedVersion": "0.554.0",
@@ -8816,7 +8837,7 @@
       }
     },
     {
-      "id": "SMELL-240",
+      "id": "SMELL-241",
       "type": "Too Many Contributors",
       "affectedPackage": "autoprefixer",
       "affectedVersion": "10.4.22",
@@ -8833,7 +8854,7 @@
       }
     },
     {
-      "id": "SMELL-241",
+      "id": "SMELL-242",
       "type": "Install Script Execution",
       "affectedPackage": "esbuild",
       "affectedVersion": "0.25.12",
@@ -8850,7 +8871,7 @@
       }
     },
     {
-      "id": "SMELL-242",
+      "id": "SMELL-243",
       "type": "Install Script Execution",
       "affectedPackage": "fsevents",
       "affectedVersion": "2.3.3",
@@ -8867,7 +8888,7 @@
       }
     },
     {
-      "id": "SMELL-243",
+      "id": "SMELL-244",
       "type": "Too Many Maintainers",
       "affectedPackage": "ms",
       "affectedVersion": "2.1.3",
@@ -8884,7 +8905,7 @@
       }
     },
     {
-      "id": "SMELL-244",
+      "id": "SMELL-245",
       "type": "Unused Dependency",
       "affectedPackage": "clsx",
       "affectedVersion": "2.1.1",
@@ -8901,7 +8922,7 @@
       }
     },
     {
-      "id": "SMELL-245",
+      "id": "SMELL-246",
       "type": "Unused Dependency",
       "affectedPackage": "tailwind-merge",
       "affectedVersion": "3.4.0",
@@ -8920,10 +8941,10 @@
   ],
   "summary": {
     "dependenciesAnalysed": 282,
-    "smellsDetected": 245,
+    "smellsDetected": 246,
     "severityCounts": {
-      "Low": 215,
-      "Medium": 30,
+      "Low": 214,
+      "Medium": 32,
       "High": 0,
       "Critical": 0
     }
