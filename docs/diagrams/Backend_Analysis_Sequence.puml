@@ -1,0 +1,92 @@
+@startuml SolutionArchitectureSequenceDiagram
+title Prototype Sequence Diagram
+
+hide footbox
+
+actor Developer
+
+participant "Command Line" as CLI
+participant "Configuration Loader" as ConfigurationLoader
+participant "Composition Root" as CompositionRoot
+participant "AnalysisService" as AnalysisService
+participant "Project Inspector" as ProjectInspector
+participant "Detector Registry" as DetectorRegistry
+participant "External Detector Adapter\nDirty-Waters" as DirtyWatersAdapter
+participant "Custom Smell Detector" as CustomDetector
+participant "Package Governance Detector" as GovernanceDetector
+participant "PeerSpin Detector" as PeerSpinDetector
+participant "Source-Usage Detector\nKnip" as SourceUsageDetector
+participant "Vulnerability Analyzer\nnpm audit + GHSA metadata" as VulnerabilityAnalyzer
+participant "Responsiveness Analyzer\nnpm + GitHub activity" as ResponsivenessAnalyzer
+participant "Score Engine\nSSSS" as ScoreEngine
+participant "Report Generator" as ReportGenerator
+participant "JSON Analysis Result" as JsonResult
+participant "Markdown Report" as MarkdownReport
+
+Developer -> CLI: run npm analysis command
+activate CLI
+
+CLI -> ConfigurationLoader: resolve configuration and credentials
+activate ConfigurationLoader
+ConfigurationLoader --> CLI: validated immutable configuration
+deactivate ConfigurationLoader
+
+CLI -> CompositionRoot: assemble configured pipeline
+activate CompositionRoot
+CompositionRoot --> CLI: AnalysisService
+deactivate CompositionRoot
+
+CLI -> AnalysisService: analyze repository and selected ref
+activate AnalysisService
+
+AnalysisService -> ProjectInspector: inspect repository
+activate ProjectInspector
+ProjectInspector --> AnalysisService: project, manifests and full graph
+deactivate ProjectInspector
+
+par Modular smell detection
+  AnalysisService -> DetectorRegistry: detect(context)
+  activate DetectorRegistry
+  DetectorRegistry -> DirtyWatersAdapter: detect external smells
+  DirtyWatersAdapter --> DetectorRegistry: findings
+  DetectorRegistry -> CustomDetector: detect manifest and lockfile smells
+  CustomDetector --> DetectorRegistry: findings
+  DetectorRegistry -> GovernanceDetector: detect governance smells
+  GovernanceDetector --> DetectorRegistry: findings
+  DetectorRegistry -> PeerSpinDetector: detect peer-resolution loops
+  PeerSpinDetector --> DetectorRegistry: findings
+  DetectorRegistry -> SourceUsageDetector: detect unused and missing dependencies
+  SourceUsageDetector --> DetectorRegistry: findings
+  DetectorRegistry --> AnalysisService: aggregated findings, metadata and warnings
+  deactivate DetectorRegistry
+else Vulnerability evidence
+  AnalysisService -> VulnerabilityAnalyzer: run npm audit and enrich advisory persistence
+  activate VulnerabilityAnalyzer
+  VulnerabilityAnalyzer --> AnalysisService: package-level V evidence and warnings
+  deactivate VulnerabilityAnalyzer
+end
+
+AnalysisService -> AnalysisService: enrich detected findings with V evidence
+AnalysisService -> ResponsivenessAnalyzer: calculate package-level R evidence
+activate ResponsivenessAnalyzer
+ResponsivenessAnalyzer --> AnalysisService: R evidence and warnings
+deactivate ResponsivenessAnalyzer
+AnalysisService -> AnalysisService: enrich findings with R evidence
+
+AnalysisService -> ScoreEngine: score enriched findings using full graph
+activate ScoreEngine
+ScoreEngine --> AnalysisService: scored smells and severity ratings
+deactivate ScoreEngine
+
+AnalysisService -> ReportGenerator: generate outputs
+activate ReportGenerator
+ReportGenerator -> JsonResult: write analysis-results.json
+ReportGenerator -> MarkdownReport: write analysis-report.md
+ReportGenerator --> AnalysisService: output paths and JSON document
+deactivate ReportGenerator
+
+AnalysisService --> CLI: analysis summary and report paths
+deactivate AnalysisService
+CLI --> Developer: show generated output paths
+deactivate CLI
+@enduml

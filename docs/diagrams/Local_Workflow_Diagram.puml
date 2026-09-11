@@ -1,0 +1,46 @@
+@startuml
+title Local Developer Workflow
+hide footbox
+
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam sequence {
+  ArrowColor #475569
+  LifeLineBorderColor #64748B
+  LifeLineBackgroundColor #F8FAFC
+  ParticipantBorderColor #334155
+  ParticipantBackgroundColor #F8FAFC
+  ParticipantFontColor #0F172A
+}
+
+actor Developer
+participant "Backend CLI" as CLI
+participant "Analysis and\nScoring Layer" as Backend
+participant "GitHub and External\nMetadata Sources" as Sources
+database "Report Directory" as Reports
+participant "React Web\nApplication" as Frontend
+participant "Cytoscape.js" as Cytoscape
+
+Developer -> CLI: analyze target: owner/repository [optional ref]
+activate CLI
+CLI -> Backend: analyze(target, ref, output directory)
+activate Backend
+Backend -> Sources: fetch manifests, source snapshot,\nand package metadata
+Sources --> Backend: repository and package evidence
+Backend -> Backend: extract graph and run detectors
+Backend -> Backend: enrich findings and calculate SSSS
+Backend -> Reports: write analysis-results.json
+Backend -> Reports: write analysis-report.md
+Reports --> Backend: output paths
+Backend --> CLI: summary, warnings, and output paths
+deactivate Backend
+CLI --> Developer: print execution result
+deactivate CLI
+
+Developer -> Frontend: open local application
+Developer -> Frontend: choose analysis-results.json
+Frontend -> Frontend: validate and map the JSON contract
+Frontend -> Cytoscape: render projected graph
+Cytoscape --> Frontend: node selection events
+Frontend --> Developer: filters, summary, graph,\nand dependency details
+@enduml

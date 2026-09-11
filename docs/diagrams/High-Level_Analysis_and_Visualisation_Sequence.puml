@@ -1,0 +1,57 @@
+@startuml
+title High-Level Analysis and Visualisation Sequence
+
+hide footbox
+
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam sequence {
+  ArrowColor #475569
+  LifeLineBorderColor #64748B
+  LifeLineBackgroundColor #F8FAFC
+  ParticipantBorderColor #334155
+  ParticipantBackgroundColor #F8FAFC
+  ParticipantFontColor #0F172A
+}
+
+actor Developer
+participant "Backend\nInput Handler" as Backend
+participant "External Detector\nAdapter" as ExternalDetector
+participant "Custom Detection\nModules" as CustomDetectors
+participant "SSSS Scoring\nModule" as ScoringModule
+participant "Report\nGenerator" as ReportGenerator
+participant "Web Application\nReact + Cytoscape" as WebApplication
+
+Developer -> Backend: request repository analysis
+activate Backend
+Backend -> Backend: inspect project and extract dependency graph
+
+Backend -> ExternalDetector: detect externally supported smells
+activate ExternalDetector
+ExternalDetector --> Backend: normalized findings
+deactivate ExternalDetector
+
+Backend -> CustomDetectors: detect additional smells
+activate CustomDetectors
+CustomDetectors --> Backend: normalized findings
+deactivate CustomDetectors
+
+Backend -> ScoringModule: score findings using full dependency graph
+activate ScoringModule
+ScoringModule --> Backend: scored smells and ratings
+deactivate ScoringModule
+
+Backend -> ReportGenerator: generate analysis outputs
+activate ReportGenerator
+ReportGenerator --> Backend: analysis-results.json and analysis-report.md
+deactivate ReportGenerator
+
+Backend --> Developer: present analysis summary and output paths
+deactivate Backend
+
+Developer -> WebApplication: load analysis-results.json
+activate WebApplication
+WebApplication --> Developer: visualise, filter, and inspect findings
+deactivate WebApplication
+
+@enduml

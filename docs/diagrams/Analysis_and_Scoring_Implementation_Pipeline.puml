@@ -1,0 +1,57 @@
+@startuml
+title Analysis and Scoring Implementation Pipeline
+
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam activity {
+  BackgroundColor #F8FAFC
+  BorderColor #334155
+  DiamondBackgroundColor #E2E8F0
+  DiamondBorderColor #334155
+  FontColor #0F172A
+}
+skinparam arrowColor #475569
+
+start
+:CLI validates the GitHub target,
+loads configuration, and resolves the ref;
+:Project Inspector fetches repository metadata,
+package.json, and the npm lockfile;
+:Build the complete internal dependency graph;
+
+fork
+  :Dirty-Waters Adapter;
+  :Parse external static-analysis output;
+fork again
+  :Custom manifest rules;
+  :Classify npm dependency declarations;
+fork again
+  :Package Governance Detector;
+  :Query npm, DNS, and RDAP metadata;
+fork again
+  :PeerSpin Detector;
+  :Model and verify peer conflicts;
+fork again
+  :Source-Usage Detector;
+  :Run Knip on an isolated source snapshot;
+fork again
+  :npm Audit Vulnerability Analyzer;
+  :Normalize vulnerability and advisory evidence;
+end fork
+
+:Collect detector findings, package metadata,
+and vulnerability results;
+:Enrich findings with vulnerability evidence;
+:Evaluate package responsiveness and update strategy;
+:Enrich findings with responsiveness evidence;
+:Aggregate pipeline warnings;
+:Apply SSSS scoring to every finding;
+
+fork
+  :Generate the analysis-results.json with smell dependencies and immediate parents;
+fork again
+  :Generate the textual analysis-report.md with smell dependencies;
+end fork
+
+stop
+@enduml
