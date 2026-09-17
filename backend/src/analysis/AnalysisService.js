@@ -114,7 +114,8 @@ export class AnalysisService {
         json: jsonResult.outputPath,
         markdown: markdownResult.outputPath
       },
-      warnings
+      warnings,
+      runtimeDiagnostics: detectionResult.runtimeDiagnostics ?? []
     };
   }
 }

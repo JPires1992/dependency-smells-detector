@@ -1,5 +1,7 @@
 import { readFile, rm } from "node:fs/promises";
 import path from "node:path";
+import { stripVTControlCharacters } from "node:util";
+import { ExternalToolExecutionError } from "../../errors/ExternalToolExecutionError.js";
 import { runCommand } from "../../utils/ChildProcess.js";
 import { findFilesByPredicate } from "../../utils/FileSearch.js";
 import { normalizeGithubRepository } from "../../utils/GithubRepository.js";
@@ -92,7 +94,7 @@ export class DirtyWatersAdapter {
       });
 
       if (result.exitCode !== 0) {
-        throw new Error(formatDirtyWatersFailure(result, packageManager));
+        throw createDirtyWatersFailure(result, packageManager);
       }
 
       const staticResultsPath = await this.#findStaticResultsPath(resultRoot, startedAt);
@@ -154,13 +156,19 @@ function newestSince(files, timestampMs) {
   return files.find((file) => file.mtimeMs >= timestampMs - 1000) ?? null;
 }
 
-/** Builds a concise failure message and highlights common dependency extraction failures. */
-function formatDirtyWatersFailure(result, packageManager) {
-  const output = `${result.stderr || ""}\n${result.stdout || ""}`.trim();
+/** Builds a report-safe failure while retaining command output for runtime diagnostics. */
+function createDirtyWatersFailure(result, packageManager) {
+  const output = stripVTControlCharacters(
+    `${result.stderr || ""}\n${result.stdout || ""}`.trim()
+  );
   const dependencyExtractionHint =
     output.includes("extract_deps_from_npm") || output.includes("WinError 2")
-      ? ` Dirty-Waters could not extract ${packageManager} dependencies; verify the required package-manager command is installed and reachable from PATH.`
+      ? `Dirty-Waters could not extract ${packageManager} dependencies; verify the required package-manager command is installed and reachable from PATH.`
       : "";
+  const diagnostic = [dependencyExtractionHint, output].filter(Boolean).join("\n");
 
-  return `Dirty-Waters failed with exit code ${result.exitCode}.${dependencyExtractionHint}\n${output}`;
+  return new ExternalToolExecutionError(
+    `Dirty-Waters failed with exit code ${result.exitCode}.`,
+    diagnostic
+  );
 }

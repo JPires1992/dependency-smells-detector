@@ -80,6 +80,12 @@ async function main() {
   if (result.warnings.length > 0) {
     console.log(`Warnings: ${result.warnings.length}`);
   }
+  if (result.runtimeDiagnostics.length > 0) {
+    console.error("Runtime diagnostics:");
+    for (const diagnostic of result.runtimeDiagnostics) {
+      console.error(diagnostic);
+    }
+  }
 }
 
 /** Translates explicitly supplied CLI flags into highest-precedence configuration overrides. */
@@ -249,5 +255,9 @@ Configuration precedence:
 
 main().catch((error) => {
   console.error(error.message);
+  if (error.diagnostic) {
+    console.error("Runtime diagnostic:");
+    console.error(error.diagnostic);
+  }
   process.exitCode = 1;
 });

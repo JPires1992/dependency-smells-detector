@@ -14,6 +14,7 @@ export class DetectorRegistry {
   async detect(context) {
     const findings = [];
     const warnings = [];
+    const runtimeDiagnostics = [];
     const packageMetadata = {};
 
     for (const detector of this.detectors) {
@@ -21,17 +22,22 @@ export class DetectorRegistry {
         const result = await detector.detect(context);
         findings.push(...(result.findings ?? []));
         warnings.push(...(result.warnings ?? []));
+        runtimeDiagnostics.push(...(result.runtimeDiagnostics ?? []));
         mergePackageMetadata(packageMetadata, result.packageMetadata);
       } catch (error) {
         if (detector.required) {
           throw error;
         }
 
-        warnings.push(`${detector.name ?? "Detector"} skipped: ${error.message}`);
+        const detectorName = detector.name ?? "Detector";
+        warnings.push(`${detectorName} skipped: ${error.message}`);
+        if (error.diagnostic) {
+          runtimeDiagnostics.push(`${detectorName} diagnostic:\n${error.diagnostic}`);
+        }
       }
     }
 
-    return { findings, warnings, packageMetadata };
+    return { findings, warnings, runtimeDiagnostics, packageMetadata };
   }
 }
 

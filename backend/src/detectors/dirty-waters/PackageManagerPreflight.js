@@ -118,7 +118,8 @@ class _PatchedPopen(_ORIGINAL_POPEN):
             parts = args.split(" ", 1)
             replacement = _COMMAND_MAP.get(parts[0])
             if replacement:
-                args = replacement if len(parts) == 1 else replacement + " " + parts[1]
+                quoted_replacement = subprocess.list2cmdline([replacement])
+                args = quoted_replacement if len(parts) == 1 else quoted_replacement + " " + parts[1]
         super().__init__(args, *popenargs, **kwargs)
 
 subprocess.Popen = _PatchedPopen
