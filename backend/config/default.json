@@ -5,7 +5,7 @@
     "timeoutMs": 1800000,
     "executable": "dirty-waters",
     "pipCommand": "pip",
-    "installSource": "git+https://github.com/JPires1992/dirty-waters.git@improvements",
+    "installSource": "git+https://github.com/JPires1992/dirty-waters.git@1d131e3633c0b702c169f2f5eba2dc82d58c34ce",
     "autoInstall": true
   },
   "npmRegistry": {
