@@ -29,11 +29,12 @@ The normal best-effort policy is `"enabled": true` with `"required": false`: the
     "timeoutMs": 1800000,
     "executable": "dirty-waters",
     "pipCommand": "pip",
-    "installSource": "git+https://github.com/chains-project/dirty-waters",
+    "installSource": "git+https://github.com/JPires1992/dirty-waters.git@1d131e3633c0b702c169f2f5eba2dc82d58c34ce",
     "autoInstall": true
   }
 }
 ```
+The backend uses a fork of Dirty-Waters pinned to commit `1d131e3633c0b702c169f2f5eba2dc82d58c34ce`. The fork contains compatibility adjustments required by the prototype, including Windows-compatible subprocess execution and improved GitHub authentication handling. The smell definitions and detection rules from Dirty-Waters are unchanged.
 
 The `dirtyWaters` section controls the external Dirty-Waters adapter and its automatic installer.
 
@@ -42,7 +43,7 @@ The `dirtyWaters` section controls the external Dirty-Waters adapter and its aut
 - `timeoutMs`: maximum duration, in milliseconds, of one Dirty-Waters analysis command.
 - `executable`: preferred Dirty-Waters executable name or path. The installer also probes the known platform-specific executable names.
 - `pipCommand`: Python package installer command or path used when automatic installation is required.
-- `installSource`: Dirty-Waters package source passed to `pip install` when no usable executable is found. It can identify the tool through a Git repository and optional branch, tag, or commit, or through a supported Python package specification. The concrete installation source is defined in `config/default.json`. An executable already available on `PATH` is reused without validating its installed source or revision against this setting.
+- `installSource`: Dirty-Waters package source passed to `pip install` when automatic installation is required. The default configuration uses the project fork pinned to a specific commit for reproducibility. Alternative Git repository revisions or supported Python package specifications can be configured if required.
 - `autoInstall`: installs Dirty-Waters automatically when no usable executable is found. When `false`, a missing executable is reported as a detector failure.
 
 ## `npmRegistry`
