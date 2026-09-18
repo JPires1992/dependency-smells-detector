@@ -49,7 +49,7 @@ The catalogue consolidates terminology from the literature review and adopts fin
 
 - Dependency configuration smells are mainly derived from Jafari et al. [4].
 - Peer dependency resolution behaviour is represented by Peer Dependency Resolving Loop (PeerSpin), derived from Wang et al. [8].
-- Hardcoded URL evidence is aligned with both Jafari et al. [4] and Wyss et al. [15].
+- URL Dependency evidence is aligned with both Jafari et al. [4].
 - Dirty-Waters smells initially introduced by Liu et al. [2] are refined using the more recent and fine-grained terminology proposed by Schmid et al. [19].
 - Governance and maintainer-related smells are derived from Zahan et al. [1].
 - Baseline severity captures the intrinsic severity of each smell type before applying context such as production reachability, dependency depth, known vulnerabilities, or package responsiveness.
@@ -67,20 +67,21 @@ The catalogue consolidates terminology from the literature review and adopts fin
 Smells retained in the literature-derived catalogue but excluded from prototype operationalisation are identified without a baseline severity, since they do not participate in the SSSS computation.
 
 
-| Smell mentioned in the review | Main source(s) | Final designation adopted | Baseline severity | Rationale |
+| Smell mentioned in the review | Main source(s) | Final designation adopted | Baseline severity | Rationale / Obs. |
 | --- | --- | --- | --- | --- |
 | Pinned Dependency | Jafari et al. [4] | Pinned Dependency | Medium | Fixed versions can delay adoption of bug fixes or security patches and require manual updates. |
-| URL Dependency / Hardcoded URLs | Jafari et al. [4]; Wyss et al. [15] | Hardcoded URL | High | URL-based dependencies and hardcoded external references increase traceability, integrity, link decay, unencrypted communication, and expired-domain takeover concerns. |
+| URL Dependency | Jafari et al. [4]| URL Dependency | High | Direct URL dependencies can reduce the benefits provided by the npm ecosystem, complicate SemVer-based dependency management, and increase exposure to instability, security issues, and link inaccessibility. |
 | Restrictive Constraint | Jafari et al. [4] | Restrictive Constraint | High | Restrictive update strategies can delay vulnerability remediation and block adoption of available fixes. |
 | Permissive Constraint | Jafari et al. [4] | Permissive Constraint | Medium | Overly permissive constraints can admit breaking changes by allowing broad or major version updates. |
 | No Package-Lock | Jafari et al. [4] | No Package-Lock | Medium | Missing lockfiles reduce installation reproducibility across environments. |
 | Unused/Bloated Dependency | Jafari et al. [4] | Unused Dependency | Low | Unused dependencies increase dependency footprint and maintenance burden, but usually have indirect impact. |
 | Missing Dependency | Jafari et al. [4] | Missing Dependency | Medium | Omitted required dependencies can lead to code breakage or ambiguous dependency reliance. |
 | Peer Dependency Resolving Loop (PeerSpin) | Wang et al. [8] | Peer Dependency Resolving Loop (PeerSpin) | High | Peer conflicts can trigger repeated node replacement, non-termination, resource exhaustion, or installation failure. |
+| Hardcoded URLs | Wyss et al. [15] | Hardcoded URLs | -- | Retained as a literature-derived smell but excluded from prototype operationalisation.|
 | Inaccessible Source Code Link | Liu et al. [2]; Schmid et al. [19] | No Source Code URL | High | Absence of a source repository URL prevents inspection and weakens transparency; practitioners rated this class frequently as high or critical. |
 | Inaccessible Source Code Link | Liu et al. [2]; Schmid et al. [19] | Invalid Source Code URL | High | Invalid or inaccessible source URLs prevent source-level inspection and may indicate misleading or stale package metadata. |
 | Inaccessible Release Tag | Liu et al. [2]; Schmid et al. [19] | Inaccessible Commit SHA/Release Tag | High | Lack of traceability from a released package to the exact source state weakens reproducibility and incident investigation. |
-| Using Deprecated Package / Unmaintained Packages | Liu et al. [2]; Schmid et al. [19]; Zahan et al. [1] | Deprecated | High | Deprecated or unmaintained packages may stop receiving fixes and increase exposure to unresolved vulnerabilities. |
+| Using Deprecated Package | Liu et al. [2]; Schmid et al. [19] | Deprecated | High | Deprecated packages may stop receiving fixes and increase exposure to unresolved vulnerabilities. |
 | Using Forked Package | Liu et al. [2]; Schmid et al. [19] | Fork | Medium | Forks may be legitimate, but introduce uncertainty about divergence from upstream and maintenance responsibility. |
 | Missing Provenance Information | Liu et al. [2]; Schmid et al. [19] | No Code Signature | High | Absence of code signing reduces assurance about package artefact authenticity and integrity. |
 | Missing Provenance Information | Liu et al. [2]; Schmid et al. [19] | Invalid Code Signature | Critical | Invalid signatures make artefact authenticity or integrity unreliable and were rated with the highest criticality among practitioner-assessed smells. |
@@ -88,11 +89,16 @@ Smells retained in the literature-derived catalogue but excluded from prototype 
 | Aliased | Schmid et al. [19] | Aliased | Low | Aliasing can obscure dependency identity, but received lower severity and several no-rating responses in practitioner assessment. |
 | Expired Maintainer Domain | Zahan et al. [1] | Expired Maintainer Domain | Critical | Expired maintainer domains can enable account hijacking or package takeover. |
 | Packages with Install Scripts | Zahan et al. [1] | Install Script Execution | Critical | Install scripts can execute code during dependency installation, creating direct abuse potential. |
+| Unmaintained Packages | Zahan et al. [1] | Unmaintained Packages | -- | Retained as a literature-derived smell but excluded from prototype operationalisation. |
 | Too many Maintainers | Zahan et al. [1] | Too Many Maintainers | Medium | A large maintainer set expands the attack surface for compromise or social engineering, depending on governance controls. |
 | Too many Contributors | Zahan et al. [1] | Too Many Contributors | Low | Many contributors can increase review and oversight difficulty, but the signal is indirect. |
-| Overloaded Maintainers | Zahan et al. [1] | Overloaded Maintainer | — | Retained in the literature-derived catalogue, but excluded from prototype operationalisation because the available evidence does not provide a sufficiently validated detection threshold. |
+| Overloaded Maintainers | Zahan et al. [1] | Overloaded Maintainer | -- | Retained in the literature-derived catalogue, but excluded from prototype operationalisation because the available evidence does not provide a sufficiently validated detection threshold. |
 
-For the governance-related smells, the operational thresholds adopted in the prototype follow the empirical observations reported by Zahan et al. [1]. Too Many Maintainers is identified when a package has more than 20 maintainers, while Too Many Contributors is identified when the ratio reaches at least 40 contributors per maintainer.
+Three smells derived from the literature are retained in the catalogue but are not operationalised in the current prototype. Hardcoded URLs, as described by Wyss et al. [15], are distinct from URL Dependency because they refer to URLs embedded directly in package source code rather than dependencies declared through URL-based specifiers. Similarly, Unmaintained Packages, as described by Zahan et al. [1], are distinct from Deprecated, since lack of maintenance and explicit package deprecation represent different conditions. Both smells are therefore retained for traceability to the literature but excluded from the implemented subset.
+
+For the governance-related smells, Overloaded Maintainer is also retained in the catalogue but excluded from prototype operationalisation for a different reason. Zahan et al. [1] characterise overloaded maintainers through several ecosystem-level factors, including maintainer reach, number of owned packages, downstream dependents, dependency chains, and inactive packages, but do not establish a validated threshold that clearly determines when a maintainer should be considered overloaded. 
+
+The operational thresholds adopted for the other governance-related smells follow the empirical observations reported by Zahan et al. [1]. Too Many Maintainers is identified when a package has more than 20 maintainers, while Too Many Contributors is identified when the ratio reaches at least 40 contributors per maintainer.
 
 ## Bibliography
 

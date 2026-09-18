@@ -36,9 +36,12 @@ Backend commands must be executed from `backend/`:
 
 ```powershell
 cd backend
-npm.cmd ci
-npm.cmd run analyze -- --target owner/repository --output reports
+npm ci
+npm run analyze -- --target owner/repository --output reports
 ```
+The optional `--ref` argument can be used to analyse a specific branch, tag, or commit. If omitted, the repository's default branch is used.
+
+On Windows PowerShell, `npm.cmd` can be used instead of `npm` when required by the local npm installation or execution policy.
 
 See the [README](backend/README.md) for architecture, detector coverage, configuration, CLI usage, and output details.
 
@@ -52,7 +55,7 @@ npm ci
 npm run dev
 ```
 
-The React application loads backend JSON output files and renders the smell graph with Cytoscape. See [README](frontend/README.md) for feature and command details.
+The React application loads backend JSON output files and renders the smell-focuse dependency graph with Cytoscape.js. See [README](frontend/README.md) for feature and command details.
 
 
 ## Additional Documentation

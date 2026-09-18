@@ -27,7 +27,7 @@ The backend composes independent detector components that return a common findin
 
 | Detector | Smells |
 | --- | --- |
-| `CustomSmellDetector` | Pinned Dependency; Hardcoded URL; Restrictive Constraint; Permissive Constraint; No Package-Lock |
+| `CustomSmellDetector` | Pinned Dependency; URL Dependency; Restrictive Constraint; Permissive Constraint; No Package-Lock |
 | `SourceUsageSmellDetector` + `KnipAdapter` | Unused Dependency; Missing Dependency |
 | `PeerSpinDetector` | Peer Dependency Resolving Loop (PeerSpin) |
 | `DirtyWatersAdapter` | No Source Code URL; Invalid Source Code URL; Inaccessible Commit SHA/Release Tag; Deprecated; Fork; No Code Signature; Invalid Code Signature; No Provenance; Aliased |
@@ -66,7 +66,7 @@ Credentials are supplied only through environment variables and are not written 
 A custom configuration file can be supplied with:
 
 ```powershell
-npm.cmd run analyze -- --target owner/repository --config config/analysis.json --output reports
+npm run analyze -- --target owner/repository --config config/analysis.json --output reports
 ```
 
 See [`Backend-Configuration-Reference.md`](../docs/Backend-Configuration-Reference.md) for the complete list of configuration properties, defaults, environment overrides, timeouts, retry settings, concurrency limits, and credential requirements.
@@ -75,20 +75,18 @@ See [`Backend-Configuration-Reference.md`](../docs/Backend-Configuration-Referen
 
 Run commands from the backend folder:
 
-The examples below use `npm.cmd`, which is the reliable command variant for Windows PowerShell. On Linux and macOS, replace `npm.cmd` with `npm`.
-
 ```powershell
 cd backend
-npm.cmd ci
+npm ci
 ```
 
 Analyse a GitHub repository and generate the JSON and Markdown reports:
 
 ```powershell
-npm.cmd run analyze -- --target owner/repository --output reports
+npm run analyze -- --target owner/repository --output reports
 ```
 
-The CLI can also be invoked directly with Node.js on any supported platform. The same analysis options are accepted:
+The CLI can also be invoked directly with Node.js:
 
 ```bash
 node src/cli.js analyze --target owner/repository --output reports
@@ -97,7 +95,7 @@ node src/cli.js analyze --target owner/repository --output reports
 Analyse a specific branch, tag, or commit SHA:
 
 ```powershell
-npm.cmd run analyze -- --target owner/repository --ref main --output reports
+npm run analyze -- --target owner/repository --ref main --output reports
 ```
 
 When `--ref` is omitted, the backend attempts to resolve the repository default branch and records the analysed reference in the generated JSON output.
@@ -105,7 +103,7 @@ When `--ref` is omitted, the backend attempts to resolve the repository default 
 List all supported CLI options through the npm script:
 
 ```powershell
-npm.cmd run analyze -- --help
+npm run analyze -- --help
 ```
 
 Or invoke the CLI help directly with Node.js:
@@ -113,6 +111,8 @@ Or invoke the CLI help directly with Node.js:
 ```bash
 node src/cli.js --help
 ```
+
+On Windows PowerShell, `npm.cmd` can be used instead of `npm` when required by the local npm installation or execution policy.
 
 Generated files:
 
