@@ -137,7 +137,7 @@ test("CustomSmellDetector detects manifest constraints and a confirmed missing n
     [
       SmellTypes.PERMISSIVE_CONSTRAINT,
       SmellTypes.PINNED_DEPENDENCY,
-      SmellTypes.HARDCODED_URL,
+      SmellTypes.URL_DEPENDENCY,
       SmellTypes.RESTRICTIVE_CONSTRAINT,
       SmellTypes.NO_PACKAGE_LOCK
     ]
@@ -146,6 +146,7 @@ test("CustomSmellDetector detects manifest constraints and a confirmed missing n
     result.findings.slice(0, 4).map((finding) => finding.affectedVersion),
     ["4.0.0", "1.2.3", "2.0.0", "3.4.5"]
   );
+  assert.equal(SmellTypes.URL_DEPENDENCY, "URL Dependency");
   assert.ok(result.findings.every((finding) => finding.detectionSource === "CustomSmellDetector"));
   assert.equal(result.findings[0].evidenceData.dependencySection, "devDependencies");
   assert.equal(result.findings.at(-1).affectedPackage, "sample-app");

@@ -1,7 +1,7 @@
 /** Canonical smell names used across detectors, scoring, and exporters. */
 export const SmellTypes = Object.freeze({
   PINNED_DEPENDENCY: "Pinned Dependency",
-  HARDCODED_URL: "Hardcoded URL",
+  URL_DEPENDENCY: "URL Dependency",
   RESTRICTIVE_CONSTRAINT: "Restrictive Constraint",
   PERMISSIVE_CONSTRAINT: "Permissive Constraint",
   NO_PACKAGE_LOCK: "No Package-Lock",
@@ -34,7 +34,7 @@ export const BaselineSeverity = Object.freeze({
 /** Maps each smell type to the baseline severity defined in the dissertation catalogue. */
 export const BASELINE_SEVERITY_BY_SMELL = Object.freeze({
   [SmellTypes.PINNED_DEPENDENCY]: BaselineSeverity.MEDIUM,
-  [SmellTypes.HARDCODED_URL]: BaselineSeverity.HIGH,
+  [SmellTypes.URL_DEPENDENCY]: BaselineSeverity.HIGH,
   [SmellTypes.RESTRICTIVE_CONSTRAINT]: BaselineSeverity.HIGH,
   [SmellTypes.PERMISSIVE_CONSTRAINT]: BaselineSeverity.MEDIUM,
   [SmellTypes.NO_PACKAGE_LOCK]: BaselineSeverity.MEDIUM,

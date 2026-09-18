@@ -91,8 +91,8 @@ export function createDefaultDependencySpecifierRules() {
         `Dependency '${dependency.name}' is pinned to exact version '${dependency.constraint}', so updates require a manifest change.`
     }),
     new DependencySpecifierRule({
-      name: "HardcodedUrlRule",
-      smellType: SmellTypes.HARDCODED_URL,
+      name: "UrlDependencyRule",
+      smellType: SmellTypes.URL_DEPENDENCY,
       matches: (specifier) => specifier.source === SpecifierSource.URL,
       describe: (dependency) =>
         `Dependency '${dependency.name}' is fetched directly from '${dependency.constraint}' instead of a registry version.`
