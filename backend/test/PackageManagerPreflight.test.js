@@ -33,6 +33,7 @@ test("PackageManagerPreflight creates a Windows-compatible npm shim when running
     assert.match(env.PYTHONPATH, /dirty-waters-bin/);
     assert.match(shim, /call ".+npm\.cmd" %\*/i);
     assert.match(patch, /subprocess\.Popen = _PatchedPopen/);
+    assert.match(patch, /subprocess\.list2cmdline\(\[replacement\]\)/);
   } finally {
     await rm(directory, { recursive: true, force: true });
   }

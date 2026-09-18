@@ -37,3 +37,27 @@ test("DetectorRegistry aggregates package-level metadata by exact package id", a
     metadataSource: "second"
   });
 });
+
+/** Verifies optional detector diagnostics do not leak into report-facing warnings. */
+test("DetectorRegistry separates optional detector warnings from runtime diagnostics", async () => {
+  const registry = new DetectorRegistry([
+    {
+      name: "ExternalDetector",
+      required: false,
+      async detect() {
+        const error = new Error("External tool failed with exit code 1.");
+        error.diagnostic = "Detailed stack trace";
+        throw error;
+      }
+    }
+  ]);
+
+  const result = await registry.detect({});
+
+  assert.deepEqual(result.warnings, [
+    "ExternalDetector skipped: External tool failed with exit code 1."
+  ]);
+  assert.deepEqual(result.runtimeDiagnostics, [
+    "ExternalDetector diagnostic:\nDetailed stack trace"
+  ]);
+});

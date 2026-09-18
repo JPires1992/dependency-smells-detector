@@ -144,3 +144,45 @@ test("DirtyWatersAdapter rejects stale result artefacts", async () => {
     await rm(workspaceDirectory, { recursive: true, force: true });
   }
 });
+
+/** Verifies command output is retained diagnostically but excluded from the public failure message. */
+test("DirtyWatersAdapter separates report warnings from command diagnostics", async () => {
+  const workspaceDirectory = await mkdtemp(path.join(os.tmpdir(), "dirty-waters-failure-test-"));
+  const adapter = new DirtyWatersAdapter({
+    required: TEST_CONFIGURATION.dirtyWaters.required,
+    timeoutMs: TEST_CONFIGURATION.dirtyWaters.timeoutMs,
+    installer: {
+      async ensureInstalled() {
+        return "dirty-waters";
+      }
+    },
+    packageManagerPreflight: {
+      async prepareEnvironment({ env }) {
+        return env;
+      }
+    },
+    commandRunner: async () => ({
+      exitCode: 1,
+      stdout: "Traceback: detailed external failure",
+      stderr: "extract_deps_from_npm failed with WinError 2"
+    })
+  });
+
+  try {
+    await assert.rejects(
+      () => adapter.detect({
+        project: { repository: "owner/repo", packageManager: "npm" },
+        githubToken: "token",
+        workspaceDirectory
+      }),
+      (error) => {
+        assert.equal(error.message, "Dirty-Waters failed with exit code 1.");
+        assert.match(error.diagnostic, /could not extract npm dependencies/i);
+        assert.match(error.diagnostic, /Traceback: detailed external failure/);
+        return true;
+      }
+    );
+  } finally {
+    await rm(workspaceDirectory, { recursive: true, force: true });
+  }
+});
