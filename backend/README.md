@@ -100,6 +100,7 @@ npm run analyze -- --target owner/repository --ref main --output reports
 
 When `--ref` is omitted, the backend attempts to resolve the repository default branch and records the analysed reference in the generated JSON output.
 
+
 List all supported CLI options through the npm script:
 
 ```powershell
@@ -125,10 +126,17 @@ An example GitHub Actions workflow is available in the `examples` directory. It 
 
 The workflow exposes the optional `API_TOKEN` repository secret as `GITHUB_API_TOKEN` and falls back to the workflow-provided `github.token` when the secret is absent. Configure `API_TOKEN` with a suitable personal access token when the automatic token cannot access the target, particularly for private repositories outside the workflow repository.
 
+
 ## Testing
 
 Run the backend test suite with:
 
 ```powershell
 npm test
+```
+
+To collect test coverage using the Node.js test runner:
+
+```powershell
+node --test --experimental-test-coverage
 ```

@@ -46,12 +46,12 @@ The S dimension represents the intrinsic severity associated with the detected s
 
 | Condition | P value | Interpretation |
 | --- | ---: | --- |
-| Direct production dependency, declared in `dependencies` or confirmed as bundled/imported in production code. | 1.00 | Highest priority because the smell affects a dependency directly used by the application at runtime. |
-| Transitive production-reachable dependency at depth 2. | 0.85 | High priority because the dependency can still influence production behaviour through a short dependency path. |
-| Transitive production-reachable dependency at depth 3 or higher. | 0.70 | Relevant priority, but lower because the dependency is further from the root project. |
-| Direct dependency with production reachability not confirmed. | 0.50 | Moderate default when the dependency is declared by the project but production impact is uncertain. |
-| Development-only, testing, or build-time dependency not expected to be shipped to production. | 0.30 | Lower priority because the smell is less likely to affect runtime behaviour directly. |
-| Unused or non-reachable dependency according to available analysis. | 0.10 | Lowest priority because there is no evidence that the dependency affects execution. |
+|Direct dependency classified as production with depth 1. | 1.00 | Highest priority because the dependency is directly declared for production use. |
+| Transitive dependency classified as production with depth 2. | 0.85 | High priority because the dependency is close to the root through a production dependency path. |
+| Transitive dependency classified as production with depth 3 or higher. | 0.70 | Relevant priority, but lower because the dependency is further from the root project. |
+| Production context cannot be determined, including a direct or transitive dependency whose dependency type is unresolved. | 0.50 | Moderate default used when the available graph information does not provide sufficient evidence to classify production relevance. |
+| Development dependency. | 0.30 | Lower priority because it is declared for development use, although this does not guarantee absence from production. |
+| Unused or non-reachable dependency according to available analysis. | 0.10 | Lowest priority because available analysis provides evidence that the dependency is not used. |
 
 When exact production or bundle reachability is unavailable, dependency declaration type and graph depth are used as practical proxies. If a dependency is reachable through multiple paths, the highest applicable P value is used.
 
