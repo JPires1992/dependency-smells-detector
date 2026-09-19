@@ -29,6 +29,20 @@ Run the development server:
 npm run dev
 ```
 
+Run the frontend logic and component test suite:
+
+```powershell
+npm run test
+```
+
+Run the test suite with coverage:
+
+```powershell
+npm run test:coverage
+```
+
+This command prints statement, branch, function, and line coverage in the terminal and generates an interactive HTML report at `coverage/index.html`.
+
 Build the production bundle:
 
 ```powershell
