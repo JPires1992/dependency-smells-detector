@@ -110,7 +110,7 @@ The operational thresholds adopted for the other governance-related smells follo
 
 [4] A. J. Jafari, D. E. Costa, R. Abdalkareem, E. Shihab, and N. Tsantalis, "Dependency Smells in JavaScript Projects", IEEE Transactions on Software Engineering, vol. 48, no. 10, pp. 3790-3807, Oct. 2022. doi: 10.1109/TSE.2021.3106247.
 
-[5] S. H. B. I. Kumar, L. R. Sampaio, A. Martin, A. Brito, and C. Fetzer, "A Comprehensive Study on the Impact of Vulnerable Dependencies on Open-Source Software", Dec. 2025. doi: 10.1109/ISSRE62328.2024.00020.
+[5] S. H. B. I. Kumar, L. R. Sampaio, A. Martin, A. Brito, and C. Fetzer, ‘A Comprehensive Study on the Impact of Vulnerable Dependencies on Open-Source Software’, in Proceedings - International Symposium on Software Reliability Engineering, ISSRE, IEEE Computer Society, 2024, pp. 96–107. doi: 10.1109/ISSRE62328.2024.00020.
 
 [6] M. M. A. Kabir, Y. Wang, D. Yao, and N. Meng, "How Do Developers Follow Security-Relevant Best Practices When Using NPM Packages?", in Proceedings - 2022 IEEE Secure Development Conference, SecDev 2022, Institute of Electrical and Electronics Engineers Inc., 2022, pp. 77-83. doi: 10.1109/SecDev53368.2022.00027.
 
@@ -132,7 +132,7 @@ The operational thresholds adopted for the other governance-related smells follo
 
 [15] E. Wyss, D. Davidson, and L. De Carli, "What's in a URL? An Analysis of Hardcoded URLs in npm Packages", in SCORED 2024 - Proceedings of the 2024 Workshop on Software Supply Chain Offensive Research and Ecosystem Defenses, Co-Located with: CCS 2024, Association for Computing Machinery, Inc., Nov. 2024, pp. 26-32. doi: 10.1145/3689944.3696168.
 
-[16] A. J. Jafari, "Dependency Management Practices for the npm Software Ecosystem", 2023.
+[16] A. J. Jafari, ‘Dependency Management Practices for the npm Software Ecosystem’, Ph.D. dissertation, Concordia University, Montreal, QC, Canada, 2024.
 
 [17] J. Rack and C. A. Staicu, "Jack-in-the-box: An Empirical Study of JavaScript Bundling on the Web and its Security Implications", in CCS 2023 - Proceedings of the 2023 ACM SIGSAC Conference on Computer and Communications Security, Association for Computing Machinery, Inc., Nov. 2023, pp. 3198-3212. doi: 10.1145/3576915.3623140.
 

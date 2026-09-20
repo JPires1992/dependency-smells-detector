@@ -63,3 +63,7 @@ The React application loads backend JSON output files and renders the smell-focu
 - [`Literature-Review-and-Smell-Catalogue.md`](/docs/Literature-Review-and-Smell-Catalogue.md) - literature-review basis, adopted smell terminology, and baseline severity catalogue.
 - [`Smell-Severity-Scoring-System.md`](/docs/Smell-Severity-Scoring-System.md) - SSSS dimensions, normalisation rules, scoring formula, and final rating mapping.
 - [`Backend-Configuration-Reference.md`](/docs/Backend-Configuration-Reference.md) - complete backend configuration and credential reference.
+
+### Evaluation artefacts
+
+The analysis outputs used in the dissertation evaluation are available in [`docs/evaluation-results`](docs/evaluation-results).
