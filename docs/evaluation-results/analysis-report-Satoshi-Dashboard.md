@@ -1,6 +1,6 @@
 # Software Supply Chain Smell Report - satoshi-dashboard
 
-- Analysis date: 2026-09-18 17:23:47
+- Analysis date: 2026-09-27 22:20:21
 - Repository: Satoshi-Dashboard/main
 - Package manager: npm
 - Analysed ref: main
@@ -10,6 +10,8 @@
 ## Warnings
 
 - Too Many Contributors was not evaluated for 610 package versions because latest npm metadata did not declare contributors.
+- ms@2.0.0: maintainer domain bbi.io could not be conclusively verified.
+- ms@2.1.3: maintainer domain bbi.io could not be conclusively verified.
 
 ## Detected Smells
 
@@ -19,8 +21,8 @@
 | --- | ---: |
 | Critical | 0 |
 | High | 0 |
-| Medium | 97 |
-| Low | 575 |
+| Medium | 98 |
+| Low | 574 |
 
 ### Summary by Smell Type
 
@@ -34,7 +36,7 @@
 | No Code Signature | 1 |
 | No Provenance | 579 |
 | No Source Code URL | 4 |
-| Permissive Constraint | 3 |
+| Restrictive Constraint | 3 |
 | Too Many Maintainers | 13 |
 | Unused Dependency | 15 |
 
@@ -79,7 +81,7 @@
 | SMELL-035 | No Provenance | @jridgewell/resolve-uri@3.1.2 | 36.25 | Low | Dirty-Waters | Package version does not expose build provenance or attestation metadata. |
 | SMELL-036 | No Provenance | @jridgewell/sourcemap-codec@1.5.5 | 28.75 | Low | Dirty-Waters | Package version does not expose build provenance or attestation metadata. |
 | SMELL-037 | No Provenance | @jridgewell/trace-mapping@0.3.31 | 32.50 | Low | Dirty-Waters | Package version does not expose build provenance or attestation metadata. |
-| SMELL-038 | No Provenance | @lhci/cli@0.15.1 | 46.50 | Medium | Dirty-Waters | Package version does not expose build provenance or attestation metadata. |
+| SMELL-038 | No Provenance | @lhci/cli@0.15.1 | 50.25 | Medium | Dirty-Waters | Package version does not expose build provenance or attestation metadata. |
 | SMELL-039 | No Provenance | @lhci/utils@0.15.1 | 46.50 | Medium | Dirty-Waters | Package version does not expose build provenance or attestation metadata. |
 | SMELL-040 | Fork | @mapbox/jsonlint-lines-primitives@2.0.2 | 40.00 | Medium | Dirty-Waters | Package source repository is detected as a fork. |
 | SMELL-041 | No Provenance | @mapbox/jsonlint-lines-primitives@2.0.2 | 32.50 | Low | Dirty-Waters | Package version does not expose build provenance or attestation metadata. |
@@ -172,7 +174,7 @@
 | SMELL-128 | No Provenance | ansi-styles@6.2.3 | 18.75 | Low | Dirty-Waters | Package version does not expose build provenance or attestation metadata. |
 | SMELL-129 | No Provenance | argparse@1.0.10 | 18.75 | Low | Dirty-Waters | Package version does not expose build provenance or attestation metadata. |
 | SMELL-130 | No Provenance | argparse@2.0.1 | 18.75 | Low | Dirty-Waters | Package version does not expose build provenance or attestation metadata. |
-| SMELL-131 | No Provenance | aria-query@5.3.0 | 22.50 | Low | Dirty-Waters | Package version does not expose build provenance or attestation metadata. |
+| SMELL-131 | No Provenance | aria-query@5.3.0 | 26.25 | Low | Dirty-Waters | Package version does not expose build provenance or attestation metadata. |
 | SMELL-132 | No Provenance | array-flatten@1.1.1 | 40.00 | Medium | Dirty-Waters | Package version does not expose build provenance or attestation metadata. |
 | SMELL-133 | No Provenance | asap@2.0.6 | 26.25 | Low | Dirty-Waters | Package version does not expose build provenance or attestation metadata. |
 | SMELL-134 | No Provenance | assertion-error@2.0.1 | 26.25 | Low | Dirty-Waters | Package version does not expose build provenance or attestation metadata. |
@@ -204,8 +206,8 @@
 | SMELL-160 | No Provenance | chalk@2.4.2 | 18.75 | Low | Dirty-Waters | Package version does not expose build provenance or attestation metadata. |
 | SMELL-161 | No Provenance | chalk@4.1.2 | 18.75 | Low | Dirty-Waters | Package version does not expose build provenance or attestation metadata. |
 | SMELL-162 | No Provenance | chardet@0.7.0 | 18.75 | Low | Dirty-Waters | Package version does not expose build provenance or attestation metadata. |
-| SMELL-163 | No Provenance | chrome-launcher@0.13.4 | 18.75 | Low | Dirty-Waters | Package version does not expose build provenance or attestation metadata. |
-| SMELL-164 | No Provenance | chrome-launcher@1.2.1 | 18.75 | Low | Dirty-Waters | Package version does not expose build provenance or attestation metadata. |
+| SMELL-163 | No Provenance | chrome-launcher@0.13.4 | 22.50 | Low | Dirty-Waters | Package version does not expose build provenance or attestation metadata. |
+| SMELL-164 | No Provenance | chrome-launcher@1.2.1 | 22.50 | Low | Dirty-Waters | Package version does not expose build provenance or attestation metadata. |
 | SMELL-165 | No Provenance | cli-cursor@2.1.0 | 26.25 | Low | Dirty-Waters | Package version does not expose build provenance or attestation metadata. |
 | SMELL-166 | No Provenance | cli-width@2.2.1 | 26.25 | Low | Dirty-Waters | Package version does not expose build provenance or attestation metadata. |
 | SMELL-167 | No Provenance | cliui@6.0.0 | 32.50 | Low | Dirty-Waters | Package version does not expose build provenance or attestation metadata. |
@@ -300,7 +302,7 @@
 | SMELL-256 | No Provenance | esutils@2.0.3 | 26.25 | Low | Dirty-Waters | Package version does not expose build provenance or attestation metadata. |
 | SMELL-257 | No Provenance | etag@1.8.1 | 40.00 | Medium | Dirty-Waters | Package version does not expose build provenance or attestation metadata. |
 | SMELL-258 | No Provenance | eventemitter3@5.0.4 | 32.50 | Low | Dirty-Waters | Package version does not expose build provenance or attestation metadata. |
-| SMELL-259 | No Provenance | events-universal@1.0.1 | 18.75 | Low | Dirty-Waters | Package version does not expose build provenance or attestation metadata. |
+| SMELL-259 | No Provenance | events-universal@1.0.1 | 22.50 | Low | Dirty-Waters | Package version does not expose build provenance or attestation metadata. |
 | SMELL-260 | No Provenance | expect-type@1.3.0 | 18.75 | Low | Dirty-Waters | Package version does not expose build provenance or attestation metadata. |
 | SMELL-261 | No Provenance | express@4.22.2 | 52.00 | Medium | Dirty-Waters | Package version does not expose build provenance or attestation metadata. |
 | SMELL-262 | No Provenance | extend@3.0.2 | 26.25 | Low | Dirty-Waters | Package version does not expose build provenance or attestation metadata. |
@@ -509,7 +511,7 @@
 | SMELL-465 | No Provenance | p-try@2.2.0 | 36.25 | Low | Dirty-Waters | Package version does not expose build provenance or attestation metadata. |
 | SMELL-466 | No Provenance | pac-proxy-agent@7.2.0 | 16.50 | Low | Dirty-Waters | Package version does not expose build provenance or attestation metadata. |
 | SMELL-467 | No Provenance | pac-resolver@7.0.1 | 18.75 | Low | Dirty-Waters | Package version does not expose build provenance or attestation metadata. |
-| SMELL-468 | No Provenance | package-json-from-dist@1.0.1 | 22.50 | Low | Dirty-Waters | Package version does not expose build provenance or attestation metadata. |
+| SMELL-468 | No Provenance | package-json-from-dist@1.0.1 | 26.25 | Low | Dirty-Waters | Package version does not expose build provenance or attestation metadata. |
 | SMELL-469 | No Provenance | parent-module@1.0.1 | 22.50 | Low | Dirty-Waters | Package version does not expose build provenance or attestation metadata. |
 | SMELL-470 | No Provenance | parse-cache-control@1.0.1 | 26.25 | Low | Dirty-Waters | Package version does not expose build provenance or attestation metadata. |
 | SMELL-471 | No Provenance | parse5@8.0.0 | 18.75 | Low | Dirty-Waters | Package version does not expose build provenance or attestation metadata. |
@@ -612,7 +614,7 @@
 | SMELL-568 | No Provenance | strip-json-comments@3.1.1 | 22.50 | Low | Dirty-Waters | Package version does not expose build provenance or attestation metadata. |
 | SMELL-569 | No Provenance | superagent@10.3.0 | 18.75 | Low | Dirty-Waters | Package version does not expose build provenance or attestation metadata. |
 | SMELL-570 | No Provenance | supercluster@8.0.1 | 28.75 | Low | Dirty-Waters | Package version does not expose build provenance or attestation metadata. |
-| SMELL-571 | No Provenance | supertest@7.2.2 | 18.75 | Low | Dirty-Waters | Package version does not expose build provenance or attestation metadata. |
+| SMELL-571 | No Provenance | supertest@7.2.2 | 16.50 | Low | Dirty-Waters | Package version does not expose build provenance or attestation metadata. |
 | SMELL-572 | No Provenance | supports-color@5.5.0 | 18.75 | Low | Dirty-Waters | Package version does not expose build provenance or attestation metadata. |
 | SMELL-573 | No Provenance | supports-color@7.2.0 | 18.75 | Low | Dirty-Waters | Package version does not expose build provenance or attestation metadata. |
 | SMELL-574 | No Provenance | supports-color@8.1.1 | 18.75 | Low | Dirty-Waters | Package version does not expose build provenance or attestation metadata. |
@@ -648,7 +650,7 @@
 | SMELL-604 | No Provenance | use-sync-external-store@1.6.0 | 30.25 | Low | Dirty-Waters | Package version does not expose build provenance or attestation metadata. |
 | SMELL-605 | No Provenance | utils-merge@1.0.1 | 40.00 | Medium | Dirty-Waters | Package version does not expose build provenance or attestation metadata. |
 | SMELL-606 | No Provenance | vary@1.1.2 | 40.00 | Medium | Dirty-Waters | Package version does not expose build provenance or attestation metadata. |
-| SMELL-607 | No Provenance | w3c-xmlserializer@5.0.0 | 26.25 | Low | Dirty-Waters | Package version does not expose build provenance or attestation metadata. |
+| SMELL-607 | No Provenance | w3c-xmlserializer@5.0.0 | 18.75 | Low | Dirty-Waters | Package version does not expose build provenance or attestation metadata. |
 | SMELL-608 | No Provenance | webdriver-bidi-protocol@0.4.1 | 16.50 | Low | Dirty-Waters | Package version does not expose build provenance or attestation metadata. |
 | SMELL-609 | No Provenance | webidl-conversions@3.0.1 | 18.75 | Low | Dirty-Waters | Package version does not expose build provenance or attestation metadata. |
 | SMELL-610 | No Provenance | whatwg-fetch@3.6.20 | 26.25 | Low | Dirty-Waters | Package version does not expose build provenance or attestation metadata. |
@@ -680,9 +682,9 @@
 | SMELL-636 | No Provenance | yauzl@2.10.0 | 16.50 | Low | Dirty-Waters | Package version does not expose build provenance or attestation metadata. |
 | SMELL-637 | No Provenance | yocto-queue@0.1.0 | 18.75 | Low | Dirty-Waters | Package version does not expose build provenance or attestation metadata. |
 | SMELL-638 | No Provenance | zod-validation-error@4.0.2 | 18.75 | Low | Dirty-Waters | Package version does not expose build provenance or attestation metadata. |
-| SMELL-639 | Permissive Constraint | @lhci/cli@0.15.1 | 54.00 | Medium | CustomSmellDetector | Dependency '@lhci/cli' uses permissive constraint '^0.15.1', allowing potentially incompatible updates. |
-| SMELL-640 | Permissive Constraint | eslint-plugin-react-refresh@0.4.26 | 24.00 | Low | CustomSmellDetector | Dependency 'eslint-plugin-react-refresh' uses permissive constraint '^0.4.24', allowing potentially incompatible updates. |
-| SMELL-641 | Permissive Constraint | lucide-react@0.576.0 | 41.50 | Medium | CustomSmellDetector | Dependency 'lucide-react' uses permissive constraint '^0.576.0', allowing potentially incompatible updates. |
+| SMELL-639 | Restrictive Constraint | @lhci/cli@0.15.1 | 65.25 | Medium | CustomSmellDetector | Dependency '@lhci/cli' uses restrictive constraint '^0.15.1', excluding SemVer-compatible updates. |
+| SMELL-640 | Restrictive Constraint | eslint-plugin-react-refresh@0.4.26 | 37.50 | Low | CustomSmellDetector | Dependency 'eslint-plugin-react-refresh' uses restrictive constraint '^0.4.24', excluding SemVer-compatible updates. |
+| SMELL-641 | Restrictive Constraint | lucide-react@0.576.0 | 55.00 | Medium | CustomSmellDetector | Dependency 'lucide-react' uses restrictive constraint '^0.576.0', excluding SemVer-compatible updates. |
 | SMELL-642 | Too Many Maintainers | @adobe/css-tools@4.4.4 | 26.25 | Low | PackageGovernanceDetector | @adobe/css-tools declares 31 npm maintainers, exceeding the threshold of 20. |
 | SMELL-643 | Too Many Maintainers | @mapbox/jsonlint-lines-primitives@2.0.2 | 40.00 | Medium | PackageGovernanceDetector | @mapbox/jsonlint-lines-primitives declares 28 npm maintainers, exceeding the threshold of 20. |
 | SMELL-644 | Too Many Maintainers | @mapbox/point-geometry@1.1.0 | 47.50 | Medium | PackageGovernanceDetector | @mapbox/point-geometry declares 28 npm maintainers, exceeding the threshold of 20. |
@@ -703,14 +705,14 @@
 | SMELL-659 | Unused Dependency | @vercel/speed-insights@1.2.0 | 34.00 | Low | KnipAdapter | Dependency '@vercel/speed-insights' is declared in dependencies but Knip found no usage. |
 | SMELL-660 | Unused Dependency | leaflet@1.9.4 | 43.75 | Medium | KnipAdapter | Dependency 'leaflet' is declared in dependencies but Knip found no usage. |
 | SMELL-661 | Unused Dependency | lightweight-charts@5.1.0 | 34.00 | Low | KnipAdapter | Dependency 'lightweight-charts' is declared in dependencies but Knip found no usage. |
-| SMELL-662 | Unused Dependency | lucide-react@0.576.0 | 34.00 | Low | KnipAdapter | Dependency 'lucide-react' is declared in dependencies but Knip found no usage. |
+| SMELL-662 | Unused Dependency | lucide-react@0.576.0 | 40.00 | Medium | KnipAdapter | Dependency 'lucide-react' is declared in dependencies but Knip found no usage. |
 | SMELL-663 | Unused Dependency | maplibre-gl@5.24.0 | 64.00 | Medium | KnipAdapter | Dependency 'maplibre-gl' is declared in dependencies but Knip found no usage. |
 | SMELL-664 | Unused Dependency | qrcode@1.5.4 | 43.75 | Medium | KnipAdapter | Dependency 'qrcode' is declared in dependencies but Knip found no usage. |
 | SMELL-665 | Unused Dependency | react-animated-counter@1.8.4 | 34.00 | Low | KnipAdapter | Dependency 'react-animated-counter' is declared in dependencies but Knip found no usage. |
 | SMELL-666 | Unused Dependency | react-leaflet@5.0.0 | 40.00 | Medium | KnipAdapter | Dependency 'react-leaflet' is declared in dependencies but Knip found no usage. |
 | SMELL-667 | Unused Dependency | recharts@3.7.0 | 34.00 | Low | KnipAdapter | Dependency 'recharts' is declared in dependencies but Knip found no usage. |
 | SMELL-668 | Unused Dependency | tailwind-merge@3.5.0 | 34.00 | Low | KnipAdapter | Dependency 'tailwind-merge' is declared in dependencies but Knip found no usage. |
-| SMELL-669 | Unused Dependency | @lhci/cli@0.15.1 | 46.50 | Medium | KnipAdapter | Dependency '@lhci/cli' is declared in devDependencies but Knip found no usage. |
+| SMELL-669 | Unused Dependency | @lhci/cli@0.15.1 | 50.25 | Medium | KnipAdapter | Dependency '@lhci/cli' is declared in devDependencies but Knip found no usage. |
 | SMELL-670 | Unused Dependency | @testing-library/jest-dom@6.9.1 | 16.50 | Low | KnipAdapter | Dependency '@testing-library/jest-dom' is declared in devDependencies but Knip found no usage. |
 | SMELL-671 | Unused Dependency | concurrently@9.2.4 | 16.50 | Low | KnipAdapter | Dependency 'concurrently' is declared in devDependencies but Knip found no usage. |
 | SMELL-672 | Unused Dependency | jsdom@27.4.0 | 16.50 | Low | KnipAdapter | Dependency 'jsdom' is declared in devDependencies but Knip found no usage. |

@@ -1,6 +1,6 @@
 # Software Supply Chain Smell Report - portfolio
 
-- Analysis date: 2026-09-18 15:31:39
+- Analysis date: 2026-09-27 22:25:41
 - Repository: joaopauloaramuni/joaopauloaramuni-portfolio
 - Package manager: npm
 - Analysed ref: main
@@ -10,6 +10,7 @@
 ## Warnings
 
 - Too Many Contributors was not evaluated for 268 package versions because latest npm metadata did not declare contributors.
+- ms@2.1.3: maintainer domain bbi.io could not be conclusively verified.
 
 ## Detected Smells
 
@@ -34,7 +35,7 @@
 | No Code Signature | 1 |
 | No Provenance | 274 |
 | No Source Code URL | 1 |
-| Permissive Constraint | 1 |
+| Restrictive Constraint | 1 |
 | Too Many Maintainers | 2 |
 | Unused Dependency | 2 |
 
@@ -174,7 +175,7 @@
 | SMELL-130 | No Provenance | are-we-there-yet@2.0.0 | 40.00 | Medium | Dirty-Waters | Package version does not expose build provenance or attestation metadata. |
 | SMELL-131 | No Provenance | argparse@2.0.1 | 18.75 | Low | Dirty-Waters | Package version does not expose build provenance or attestation metadata. |
 | SMELL-132 | No Provenance | balanced-match@1.0.2 | 28.75 | Low | Dirty-Waters | Package version does not expose build provenance or attestation metadata. |
-| SMELL-133 | No Provenance | brace-expansion@1.1.12 | 50.50 | Medium | Dirty-Waters | Package version does not expose build provenance or attestation metadata. |
+| SMELL-133 | No Provenance | brace-expansion@1.1.12 | 56.50 | Medium | Dirty-Waters | Package version does not expose build provenance or attestation metadata. |
 | SMELL-134 | No Provenance | browserslist@4.25.3 | 40.50 | Medium | Dirty-Waters | Package version does not expose build provenance or attestation metadata. |
 | SMELL-135 | No Provenance | callsites@3.1.0 | 26.25 | Low | Dirty-Waters | Package version does not expose build provenance or attestation metadata. |
 | SMELL-136 | No Provenance | caniuse-lite@1.0.30001737 | 16.50 | Low | Dirty-Waters | Package version does not expose build provenance or attestation metadata. |
@@ -205,7 +206,7 @@
 | SMELL-161 | No Provenance | escalade@3.2.0 | 26.25 | Low | Dirty-Waters | Package version does not expose build provenance or attestation metadata. |
 | SMELL-162 | No Provenance | escape-string-regexp@4.0.0 | 26.25 | Low | Dirty-Waters | Package version does not expose build provenance or attestation metadata. |
 | SMELL-163 | No Provenance | eslint-plugin-react-hooks@5.2.0 | 16.50 | Low | Dirty-Waters | Package version does not expose build provenance or attestation metadata. |
-| SMELL-164 | No Provenance | eslint-plugin-react-refresh@0.4.20 | 16.50 | Low | Dirty-Waters | Package version does not expose build provenance or attestation metadata. |
+| SMELL-164 | No Provenance | eslint-plugin-react-refresh@0.4.20 | 22.50 | Low | Dirty-Waters | Package version does not expose build provenance or attestation metadata. |
 | SMELL-165 | Deprecated | eslint@9.34.0 | 45.00 | Medium | Dirty-Waters | Package version is marked as deprecated in registry metadata. |
 | SMELL-166 | No Provenance | eslint@9.34.0 | 30.00 | Low | Dirty-Waters | Package version does not expose build provenance or attestation metadata. |
 | SMELL-167 | No Provenance | esquery@1.6.0 | 18.75 | Low | Dirty-Waters | Package version does not expose build provenance or attestation metadata. |
@@ -271,7 +272,7 @@
 | SMELL-227 | No Provenance | minimatch@3.1.2 | 56.50 | Medium | Dirty-Waters | Package version does not expose build provenance or attestation metadata. |
 | SMELL-228 | No Provenance | minipass@3.3.6 | 28.75 | Low | Dirty-Waters | Package version does not expose build provenance or attestation metadata. |
 | SMELL-229 | No Provenance | minipass@5.0.0 | 28.75 | Low | Dirty-Waters | Package version does not expose build provenance or attestation metadata. |
-| SMELL-230 | No Provenance | minizlib@2.1.2 | 28.75 | Low | Dirty-Waters | Package version does not expose build provenance or attestation metadata. |
+| SMELL-230 | No Provenance | minizlib@2.1.2 | 32.50 | Low | Dirty-Waters | Package version does not expose build provenance or attestation metadata. |
 | SMELL-231 | Fork | mkdirp@1.0.4 | 43.75 | Medium | Dirty-Waters | Package source repository is detected as a fork. |
 | SMELL-232 | No Provenance | mkdirp@1.0.4 | 36.25 | Low | Dirty-Waters | Package version does not expose build provenance or attestation metadata. |
 | SMELL-233 | No Provenance | ms@2.1.3 | 36.25 | Low | Dirty-Waters | Package version does not expose build provenance or attestation metadata. |
@@ -296,7 +297,7 @@
 | SMELL-252 | Inaccessible Commit SHA/Release Tag | pdfjs-dist@3.11.174 | 92.50 | Critical | Dirty-Waters | The package release could not be traced to an accessible commit SHA or release tag. |
 | SMELL-253 | No Provenance | pdfjs-dist@3.11.174 | 77.50 | High | Dirty-Waters | Package version does not expose build provenance or attestation metadata. |
 | SMELL-254 | No Provenance | picocolors@1.1.1 | 22.50 | Low | Dirty-Waters | Package version does not expose build provenance or attestation metadata. |
-| SMELL-255 | No Provenance | picomatch@4.0.3 | 40.50 | Medium | Dirty-Waters | Package version does not expose build provenance or attestation metadata. |
+| SMELL-255 | No Provenance | picomatch@4.0.3 | 46.50 | Medium | Dirty-Waters | Package version does not expose build provenance or attestation metadata. |
 | SMELL-256 | No Source Code URL | portfolio@0.0.0 | 38.75 | Low | Dirty-Waters | Package metadata does not expose a source code repository URL. |
 | SMELL-257 | No Provenance | portfolio@0.0.0 | 23.75 | Low | Dirty-Waters | Package version does not expose build provenance or attestation metadata. |
 | SMELL-258 | No Code Signature | portfolio@0.0.0 | 38.75 | Low | Dirty-Waters | Package does not expose a code signature. |
@@ -352,7 +353,7 @@
 | SMELL-308 | No Provenance | yallist@3.1.1 | 26.25 | Low | Dirty-Waters | Package version does not expose build provenance or attestation metadata. |
 | SMELL-309 | No Provenance | yallist@4.0.0 | 36.25 | Low | Dirty-Waters | Package version does not expose build provenance or attestation metadata. |
 | SMELL-310 | No Provenance | yocto-queue@0.1.0 | 18.75 | Low | Dirty-Waters | Package version does not expose build provenance or attestation metadata. |
-| SMELL-311 | Permissive Constraint | eslint-plugin-react-refresh@0.4.20 | 24.00 | Low | CustomSmellDetector | Dependency 'eslint-plugin-react-refresh' uses permissive constraint '^0.4.20', allowing potentially incompatible updates. |
+| SMELL-311 | Restrictive Constraint | eslint-plugin-react-refresh@0.4.20 | 37.50 | Low | CustomSmellDetector | Dependency 'eslint-plugin-react-refresh' uses restrictive constraint '^0.4.20', excluding SemVer-compatible updates. |
 | SMELL-312 | Too Many Maintainers | @mapbox/node-pre-gyp@1.0.11 | 58.00 | Medium | PackageGovernanceDetector | @mapbox/node-pre-gyp declares 28 npm maintainers, exceeding the threshold of 20. |
 | SMELL-313 | Install Script Execution | canvas@2.11.2 | 52.75 | Medium | PackageGovernanceDetector | canvas@2.11.2 declares install lifecycle scripts: install. |
 | SMELL-314 | Install Script Execution | esbuild@0.25.9 | 39.00 | Low | PackageGovernanceDetector | esbuild@0.25.9 declares install lifecycle scripts: postinstall. |

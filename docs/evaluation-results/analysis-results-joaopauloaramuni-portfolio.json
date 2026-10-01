@@ -1,10 +1,11 @@
 {
   "metadata": {
     "schemaVersion": "1.0",
-    "generatedAt": "2026-09-19T14:31:39.817Z",
+    "generatedAt": "2026-09-27T21:25:41.237Z",
     "toolVersion": "0.1.0",
     "warnings": [
-      "Too Many Contributors was not evaluated for 268 package versions because latest npm metadata did not declare contributors."
+      "Too Many Contributors was not evaluated for 268 package versions because latest npm metadata did not declare contributors.",
+      "ms@2.1.3: maintainer domain bbi.io could not be conclusively verified."
     ]
   },
   "project": {
@@ -8375,9 +8376,9 @@
       "score": {
         "S": 0.25,
         "P": 0.7,
-        "V": 0.8,
+        "V": 1,
         "R": 0.1,
-        "finalScore": 50.5,
+        "finalScore": 56.5,
         "finalRating": "Medium",
         "baselineSeverity": "Low"
       }
@@ -8903,8 +8904,8 @@
         "S": 0.25,
         "P": 0.3,
         "V": 0,
-        "R": 0.1,
-        "finalScore": 16.5,
+        "R": 0.5,
+        "finalScore": 22.5,
         "finalRating": "Low",
         "baselineSeverity": "Low"
       }
@@ -10025,8 +10026,8 @@
         "S": 0.25,
         "P": 0.7,
         "V": 0,
-        "R": 0.25,
-        "finalScore": 28.75,
+        "R": 0.5,
+        "finalScore": 32.5,
         "finalRating": "Low",
         "baselineSeverity": "Low"
       }
@@ -10449,9 +10450,9 @@
       "score": {
         "S": 0.25,
         "P": 0.3,
-        "V": 0.8,
+        "V": 1,
         "R": 0.1,
-        "finalScore": 40.5,
+        "finalScore": 46.5,
         "finalRating": "Medium",
         "baselineSeverity": "Low"
       }
@@ -11393,19 +11394,19 @@
     },
     {
       "id": "SMELL-311",
-      "type": "Permissive Constraint",
+      "type": "Restrictive Constraint",
       "affectedPackage": "eslint-plugin-react-refresh",
       "affectedVersion": "0.4.20",
       "detectionSource": "CustomSmellDetector",
-      "evidence": "Dependency 'eslint-plugin-react-refresh' uses permissive constraint '^0.4.20', allowing potentially incompatible updates.",
+      "evidence": "Dependency 'eslint-plugin-react-refresh' uses restrictive constraint '^0.4.20', excluding SemVer-compatible updates.",
       "score": {
-        "S": 0.5,
+        "S": 0.75,
         "P": 0.3,
         "V": 0,
-        "R": 0.1,
-        "finalScore": 24,
+        "R": 0.5,
+        "finalScore": 37.5,
         "finalRating": "Low",
-        "baselineSeverity": "Medium"
+        "baselineSeverity": "High"
       }
     },
     {

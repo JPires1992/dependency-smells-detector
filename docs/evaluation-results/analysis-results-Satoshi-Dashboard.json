@@ -1,10 +1,12 @@
 {
   "metadata": {
     "schemaVersion": "1.0",
-    "generatedAt": "2026-09-19T16:23:47.316Z",
+    "generatedAt": "2026-09-27T21:20:21.658Z",
     "toolVersion": "0.1.0",
     "warnings": [
-      "Too Many Contributors was not evaluated for 610 package versions because latest npm metadata did not declare contributors."
+      "Too Many Contributors was not evaluated for 610 package versions because latest npm metadata did not declare contributors.",
+      "ms@2.0.0: maintainer domain bbi.io could not be conclusively verified.",
+      "ms@2.1.3: maintainer domain bbi.io could not be conclusively verified."
     ]
   },
   "project": {
@@ -14021,8 +14023,8 @@
         "S": 0.25,
         "P": 0.3,
         "V": 0.8,
-        "R": 0.5,
-        "finalScore": 46.5,
+        "R": 0.75,
+        "finalScore": 50.25,
         "finalRating": "Medium",
         "baselineSeverity": "Low"
       }
@@ -15602,8 +15604,8 @@
         "S": 0.25,
         "P": 0.3,
         "V": 0,
-        "R": 0.5,
-        "finalScore": 22.5,
+        "R": 0.75,
+        "finalScore": 26.25,
         "finalRating": "Low",
         "baselineSeverity": "Low"
       }
@@ -16146,8 +16148,8 @@
         "S": 0.25,
         "P": 0.3,
         "V": 0,
-        "R": 0.25,
-        "finalScore": 18.75,
+        "R": 0.5,
+        "finalScore": 22.5,
         "finalRating": "Low",
         "baselineSeverity": "Low"
       }
@@ -16163,8 +16165,8 @@
         "S": 0.25,
         "P": 0.3,
         "V": 0,
-        "R": 0.25,
-        "finalScore": 18.75,
+        "R": 0.5,
+        "finalScore": 22.5,
         "finalRating": "Low",
         "baselineSeverity": "Low"
       }
@@ -17778,8 +17780,8 @@
         "S": 0.25,
         "P": 0.3,
         "V": 0,
-        "R": 0.25,
-        "finalScore": 18.75,
+        "R": 0.5,
+        "finalScore": 22.5,
         "finalRating": "Low",
         "baselineSeverity": "Low"
       }
@@ -21331,8 +21333,8 @@
         "S": 0.25,
         "P": 0.3,
         "V": 0,
-        "R": 0.5,
-        "finalScore": 22.5,
+        "R": 0.75,
+        "finalScore": 26.25,
         "finalRating": "Low",
         "baselineSeverity": "Low"
       }
@@ -23082,8 +23084,8 @@
         "S": 0.25,
         "P": 0.3,
         "V": 0,
-        "R": 0.25,
-        "finalScore": 18.75,
+        "R": 0.1,
+        "finalScore": 16.5,
         "finalRating": "Low",
         "baselineSeverity": "Low"
       }
@@ -23694,8 +23696,8 @@
         "S": 0.25,
         "P": 0.3,
         "V": 0,
-        "R": 0.75,
-        "finalScore": 26.25,
+        "R": 0.25,
+        "finalScore": 18.75,
         "finalRating": "Low",
         "baselineSeverity": "Low"
       }
@@ -24229,53 +24231,53 @@
     },
     {
       "id": "SMELL-639",
-      "type": "Permissive Constraint",
+      "type": "Restrictive Constraint",
       "affectedPackage": "@lhci/cli",
       "affectedVersion": "0.15.1",
       "detectionSource": "CustomSmellDetector",
-      "evidence": "Dependency '@lhci/cli' uses permissive constraint '^0.15.1', allowing potentially incompatible updates.",
+      "evidence": "Dependency '@lhci/cli' uses restrictive constraint '^0.15.1', excluding SemVer-compatible updates.",
       "score": {
-        "S": 0.5,
+        "S": 0.75,
         "P": 0.3,
         "V": 0.8,
-        "R": 0.5,
-        "finalScore": 54,
+        "R": 0.75,
+        "finalScore": 65.25,
         "finalRating": "Medium",
-        "baselineSeverity": "Medium"
+        "baselineSeverity": "High"
       }
     },
     {
       "id": "SMELL-640",
-      "type": "Permissive Constraint",
+      "type": "Restrictive Constraint",
       "affectedPackage": "eslint-plugin-react-refresh",
       "affectedVersion": "0.4.26",
       "detectionSource": "CustomSmellDetector",
-      "evidence": "Dependency 'eslint-plugin-react-refresh' uses permissive constraint '^0.4.24', allowing potentially incompatible updates.",
+      "evidence": "Dependency 'eslint-plugin-react-refresh' uses restrictive constraint '^0.4.24', excluding SemVer-compatible updates.",
       "score": {
-        "S": 0.5,
+        "S": 0.75,
         "P": 0.3,
         "V": 0,
-        "R": 0.1,
-        "finalScore": 24,
+        "R": 0.5,
+        "finalScore": 37.5,
         "finalRating": "Low",
-        "baselineSeverity": "Medium"
+        "baselineSeverity": "High"
       }
     },
     {
       "id": "SMELL-641",
-      "type": "Permissive Constraint",
+      "type": "Restrictive Constraint",
       "affectedPackage": "lucide-react",
       "affectedVersion": "0.576.0",
       "detectionSource": "CustomSmellDetector",
-      "evidence": "Dependency 'lucide-react' uses permissive constraint '^0.576.0', allowing potentially incompatible updates.",
+      "evidence": "Dependency 'lucide-react' uses restrictive constraint '^0.576.0', excluding SemVer-compatible updates.",
       "score": {
-        "S": 0.5,
+        "S": 0.75,
         "P": 1,
         "V": 0,
-        "R": 0.1,
-        "finalScore": 41.5,
+        "R": 0.5,
+        "finalScore": 55,
         "finalRating": "Medium",
-        "baselineSeverity": "Medium"
+        "baselineSeverity": "High"
       }
     },
     {
@@ -24629,9 +24631,9 @@
         "S": 0.25,
         "P": 1,
         "V": 0,
-        "R": 0.1,
-        "finalScore": 34,
-        "finalRating": "Low",
+        "R": 0.5,
+        "finalScore": 40,
+        "finalRating": "Medium",
         "baselineSeverity": "Low"
       }
     },
@@ -24748,8 +24750,8 @@
         "S": 0.25,
         "P": 0.3,
         "V": 0.8,
-        "R": 0.5,
-        "finalScore": 46.5,
+        "R": 0.75,
+        "finalScore": 50.25,
         "finalRating": "Medium",
         "baselineSeverity": "Low"
       }
@@ -24810,8 +24812,8 @@
     "dependenciesAnalysed": 749,
     "smellsDetected": 672,
     "severityCounts": {
-      "Low": 575,
-      "Medium": 97,
+      "Low": 574,
+      "Medium": 98,
       "High": 0,
       "Critical": 0
     }

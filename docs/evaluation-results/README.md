@@ -2,7 +2,7 @@
 
 This directory contains the artefacts used in the prototype evaluation described in Section 5.7 of the dissertation.
 
-The evaluation was performed on 19 September 2026 using version 0.1.0 of the prototype and the `main` branch of both repositories.
+The evaluation was performed on 27 September 2026 using version 0.1.0 of the prototype and the `main` branch of both repositories.
 
 ## Evaluation cases
 
