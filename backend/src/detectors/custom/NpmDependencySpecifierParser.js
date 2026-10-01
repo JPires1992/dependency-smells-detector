@@ -86,7 +86,7 @@ export class NpmDependencySpecifierParser {
   }
 }
 
-/** Classifies registry versions and ranges using the compatibility interval recommended by npm SemVer. */
+/** Classifies registry versions and ranges using the same-major compatibility interval. */
 function classifyRegistryConstraint(parsed) {
   const normalizedRange = semver.validRange(parsed.fetchSpec);
   const minimumVersion = normalizedRange ? semver.minVersion(normalizedRange) : null;
@@ -101,10 +101,7 @@ function classifyRegistryConstraint(parsed) {
 
   if (parsed.type === "version") {
     return {
-      constraintKind:
-        minimumVersion.major === 0
-          ? ConstraintKind.COMPATIBLE
-          : ConstraintKind.PINNED,
+      constraintKind: ConstraintKind.PINNED,
       normalizedRange,
       minimumVersion: minimumVersion.version,
       recommendedRange: null
@@ -120,16 +117,7 @@ function classifyRegistryConstraint(parsed) {
     };
   }
 
-  if (minimumVersion.major === 0) {
-    return {
-      constraintKind: ConstraintKind.PERMISSIVE,
-      normalizedRange,
-      minimumVersion: minimumVersion.version,
-      recommendedRange: `^${minimumVersion.version}`
-    };
-  }
-
-  const recommendedRange = `^${minimumVersion.version}`;
+  const recommendedRange = sameMajorRangeFor(minimumVersion);
   const declaredIsSubset = semver.subset(normalizedRange, recommendedRange);
   const recommendedIsSubset = semver.subset(recommendedRange, normalizedRange);
   let constraintKind = ConstraintKind.PERMISSIVE;
@@ -146,6 +134,11 @@ function classifyRegistryConstraint(parsed) {
     minimumVersion: minimumVersion.version,
     recommendedRange
   };
+}
+
+/** Returns the broadest range that stays within the minimum version's major line. */
+function sameMajorRangeFor(version) {
+  return `>=${version.version} <${version.major + 1}.0.0-0`;
 }
 
 /** Detects range alternatives that impose an upper bound without declaring a lower bound. */
