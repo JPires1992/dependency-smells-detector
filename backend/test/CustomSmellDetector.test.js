@@ -14,10 +14,13 @@ test("NpmDependencySpecifierParser classifies version constraints", () => {
   const parser = new NpmDependencySpecifierParser();
 
   assert.equal(parser.parse("pkg", "1.2.3").constraintKind, ConstraintKind.PINNED);
-  assert.equal(parser.parse("pkg", "0.2.3").constraintKind, ConstraintKind.COMPATIBLE);
+  assert.equal(parser.parse("pkg", "0.2.3").constraintKind, ConstraintKind.PINNED);
   assert.equal(parser.parse("pkg", "^1.2.3").constraintKind, ConstraintKind.COMPATIBLE);
   assert.equal(parser.parse("pkg", "~1.2.3").constraintKind, ConstraintKind.RESTRICTIVE);
   assert.equal(parser.parse("pkg", "1.2.x").constraintKind, ConstraintKind.RESTRICTIVE);
+  assert.equal(parser.parse("pkg", "^0.2.3").constraintKind, ConstraintKind.RESTRICTIVE);
+  assert.equal(parser.parse("pkg", "~0.2.3").constraintKind, ConstraintKind.RESTRICTIVE);
+  assert.equal(parser.parse("pkg", "0.2.x").constraintKind, ConstraintKind.RESTRICTIVE);
   assert.equal(parser.parse("pkg", "<2.0.0").constraintKind, ConstraintKind.RESTRICTIVE);
   assert.equal(parser.parse("pkg", "<=25.0.0").constraintKind, ConstraintKind.RESTRICTIVE);
   assert.equal(parser.parse("pkg", "<=0.5.0").constraintKind, ConstraintKind.RESTRICTIVE);
@@ -26,9 +29,9 @@ test("NpmDependencySpecifierParser classifies version constraints", () => {
     ConstraintKind.COMPATIBLE
   );
   assert.equal(parser.parse("pkg", ">=1.2.3").constraintKind, ConstraintKind.PERMISSIVE);
+  assert.equal(parser.parse("pkg", ">=0.2.3").constraintKind, ConstraintKind.PERMISSIVE);
   assert.equal(parser.parse("pkg", "*").constraintKind, ConstraintKind.PERMISSIVE);
   assert.equal(parser.parse("pkg", "latest").constraintKind, ConstraintKind.PERMISSIVE);
-  assert.equal(parser.parse("pkg", "^0.2.3").constraintKind, ConstraintKind.PERMISSIVE);
 });
 
 /** Verifies that URL, local, workspace, and alias specs remain distinct detection inputs. */
